@@ -7,8 +7,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-brand-green-light selection:text-brand-green-dark">
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-brand-green-light selection:text-brand-green-dark"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

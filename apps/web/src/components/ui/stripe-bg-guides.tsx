@@ -56,9 +56,13 @@ export function StripeBgGuides({
   darkMode = false,
   contained = false,
 }: AnimatedBackgroundGuidesProps) {
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 0
-  )
+  const [mounted, setMounted] = useState(false)
+  const [windowWidth, setWindowWidth] = useState(0)
+
+  useEffect(() => {
+    setMounted(true)
+    setWindowWidth(window.innerWidth)
+  }, [])
 
   const columns = useMemo(() => {
     const count = responsive
@@ -143,6 +147,10 @@ export function StripeBgGuides({
       dashed: darkMode ? "hsl(233 14% 20%)" : "hsl(233 14% 93%)",
     }
   }, [darkMode])
+
+  if (!mounted) {
+    return null
+  }
 
   return (
     <div

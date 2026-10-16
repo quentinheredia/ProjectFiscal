@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import { Locale, getDictionary } from '@/lib/i18n';
-import { StripeBgGuides } from '@/components/ui/stripe-bg-guides';
+import BackgroundGuides from '@/components/BackgroundGuides';
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'fr' }];
@@ -51,13 +51,7 @@ export default async function LocaleLayout({
 
   return (
     <>
-      <StripeBgGuides
-        columnCount={5}
-        glowColor="rgba(27, 122, 67, 0.25)"
-        glowOpacity={0.3}
-        animationDuration={50}
-        responsive={true}
-      />
+      <BackgroundGuides />
       <Navbar locale={locale} />
       <main className="relative z-10 grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         {children}
