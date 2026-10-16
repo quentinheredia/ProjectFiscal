@@ -7,9 +7,10 @@ export default function BackgroundGuides() {
   return (
     <StripeBgGuides
       columnCount={5}
-      glowColor="rgba(27, 122, 67, 0.25)"
-      glowOpacity={0.3}
-      animationDuration={50}
+      darkMode={true}
+      glowColor="rgba(16, 185, 129, 0.4)"
+      glowOpacity={0.4}
+      animationDuration={45}
       responsive={true}
     />
   );
