@@ -1,3 +1,4 @@
+import '../globals.css';
 import React from 'react';
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
@@ -38,6 +39,7 @@ export async function generateMetadata({
   };
 }
 
+// This is the root layout (there is no app/layout.tsx) so that <html lang> follows the locale.
 export default async function LocaleLayout({
   children,
   params,
@@ -49,11 +51,13 @@ export default async function LocaleLayout({
   const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
 
   return (
-    <>
-      <Navbar locale={locale} />
-      <main className="grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        {children}
-      </main>
-    </>
+    <html lang={locale === 'fr' ? 'fr-CA' : 'en-CA'}>
+      <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-brand-green-light selection:text-brand-green-dark">
+        <Navbar locale={locale} />
+        <main className="grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+          {children}
+        </main>
+      </body>
+    </html>
   );
 }

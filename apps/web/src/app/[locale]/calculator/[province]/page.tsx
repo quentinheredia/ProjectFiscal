@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Calculator from '@/components/Calculator';
-import { Locale, getDictionary } from '@/lib/i18n';
+import { Locale } from '@/lib/i18n';
 import { ontario2026 } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
@@ -68,8 +68,6 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
   const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
   const province = resolved.province;
   if (province.toLowerCase() !== 'ontario') notFound();
-
-  const dict = getDictionary(locale);
 
   // Structured Data (JSON-LD)
   const jsonLd = {

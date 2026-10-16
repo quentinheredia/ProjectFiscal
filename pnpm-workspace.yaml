@@ -3,3 +3,5 @@ packages:
   - 'packages/*'
 allowBuilds:
   esbuild: true
+  # eslint-config-next resolver; its prebuilt binding ships as an optional dependency
+  unrs-resolver: false
