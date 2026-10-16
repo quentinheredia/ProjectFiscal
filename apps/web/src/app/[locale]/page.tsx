@@ -2,6 +2,7 @@ import React from 'react';
 import Calculator from '@/components/Calculator';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { CheckCircle2, Shield, Sparkles, BookOpen } from 'lucide-react';
+import { ShadowCard, ShadowCardBevel } from '@/components/ui/shadow-card';
 
 export default async function HomePage({
   params,
@@ -52,10 +53,11 @@ export default async function HomePage({
       {/* Calculator Core */}
       <Calculator locale={locale} initialProvince="ON" initialSalaryDollars={80000} />
 
-      {/* Trust & Architecture Features Grid */}
+      {/* Trust & Architecture Features Grid using Cult UI ShadowCard */}
       <section className="max-w-7xl mx-auto pt-8 border-t border-slate-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+          <ShadowCard className="bg-white p-6 rounded-xl border border-slate-200/90 shadow-xs space-y-3">
+            <ShadowCardBevel barClassName="bg-brand-green/25" />
             <div className="w-10 h-10 rounded-xl bg-brand-green-light flex items-center justify-center text-brand-green-dark font-bold">
               <CheckCircle2 className="w-5 h-5 text-brand-green" />
             </div>
@@ -67,9 +69,10 @@ export default async function HomePage({
                 ? 'Plus de 40 scénarios validés directement contre les formulaires d’impôt officiels de l’ARC et Revenu Québec.'
                 : 'Every rate, threshold, and credit is backed by official CRA and provincial form citations with automated CI test vectors.'}
             </p>
-          </div>
+          </ShadowCard>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+          <ShadowCard className="bg-white p-6 rounded-xl border border-slate-200/90 shadow-xs space-y-3">
+            <ShadowCardBevel barClassName="bg-brand-blue/25" />
             <div className="w-10 h-10 rounded-xl bg-brand-blue-light flex items-center justify-center text-brand-blue-dark font-bold">
               <Shield className="w-5 h-5 text-brand-blue" />
             </div>
@@ -81,9 +84,10 @@ export default async function HomePage({
                 ? 'Aucune donnée financière ne quitte votre appareil. Vos revenus ne sont jamais enregistrés ni envoyés à des serveurs tiers.'
                 : 'Zero network calls during calculation. Your income never leaves your device and is never sent to analytics or logging.'}
             </p>
-          </div>
+          </ShadowCard>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+          <ShadowCard className="bg-white p-6 rounded-xl border border-slate-200/90 shadow-xs space-y-3">
+            <ShadowCardBevel barClassName="bg-purple-500/25" />
             <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-700 font-bold">
               <BookOpen className="w-5 h-5 text-purple-600" />
             </div>
@@ -95,7 +99,7 @@ export default async function HomePage({
                 ? 'Voyez exactement comment vos impôts fédéraux financent la santé, les aînés, la défense et les programmes sociaux.'
                 : 'Connect your tax dollars directly to the Public Accounts of Canada to see how public funds are invested in healthcare and social programs.'}
             </p>
-          </div>
+          </ShadowCard>
         </div>
       </section>
     </div>

@@ -12,6 +12,7 @@ import {
 } from '@fiscal-insights/tax-data';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { FEDERAL_SPENDING_CATEGORIES } from '@/lib/spending';
+import { HaloButton } from '@/components/ui/halo-button';
 import {
   ChevronDown,
   ChevronUp,
@@ -584,12 +585,13 @@ export default function Calculator({
               className="grow px-4 py-3 rounded-lg bg-slate-800/90 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-brand-green-accent"
               required
             />
-            <button
+            <HaloButton
               type="submit"
-              className="px-6 py-3 rounded-lg bg-brand-green-accent hover:bg-brand-green text-white font-semibold text-sm transition-colors shrink-0"
+              className="shrink-0"
+              staggerLabel={false}
             >
               {dict.newsletter.button}
-            </button>
+            </HaloButton>
           </div>
           <div className="flex items-start gap-2 text-xs text-slate-400">
             <input type="checkbox" id="consent-check" className="mt-0.5 rounded border-slate-700 bg-slate-800 text-brand-green-accent" defaultChecked />
