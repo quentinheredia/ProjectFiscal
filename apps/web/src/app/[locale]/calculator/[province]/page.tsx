@@ -129,8 +129,8 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
             <tbody className="divide-y divide-slate-100">
               {ontario2026.brackets.map((b, idx) => {
                 const prevBracket = idx > 0 ? ontario2026.brackets[idx - 1] : null;
-                const prevUpTo = prevBracket?.upToCents.value ? formatCentsToDollars(prevBracket.upToCents.value) : '$0';
-                const currentUpTo = b.upToCents.value ? formatCentsToDollars(b.upToCents.value) : 'Any amount above';
+                const prevUpTo = prevBracket?.upToCents ? formatCentsToDollars(prevBracket.upToCents.value) : '$0';
+                const currentUpTo = b.upToCents ? formatCentsToDollars(b.upToCents.value) : 'Any amount above';
                 return (
                   <tr key={idx} className="hover:bg-slate-50/50">
                     <td className="py-3 px-4 font-medium text-slate-900 tabular-nums">

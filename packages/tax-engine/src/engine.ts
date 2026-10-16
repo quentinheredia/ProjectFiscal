@@ -1,564 +1,538 @@
 import {
   FederalRuleSet,
+  OntarioHealthPremiumTier,
+  PensionPlan,
   ProvincialRuleSet,
   TaxBracket,
 } from '@fiscal-insights/tax-data';
 import {
+  CalculationLimitation,
+  ExplanationTraceItem,
+  PensionContributions,
   TaxCalculationInput,
   TaxCalculationResult,
-  ExplanationTraceItem,
 } from './types';
 
+const MICROS = 1_000_000;
+const MARGINAL_RATE_STEP_CENTS = 10000; // $100 of extra employment income
+
+const CRA_LINE_URLS = {
+  totalIncome: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-15000-total-income.html',
+  taxableIncome: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-26000-taxable-income.html',
+  netFederalTax: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/deductions-credits-expenses/line-42000-net-federal-tax.html',
+};
+
 export function formatCentsToDollars(cents: number): string {
-  const dollars = cents / 100;
   return new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(dollars);
+  }).format(cents / 100);
 }
 
-function calculateBracketTax(
-  taxableIncomeCents: number,
-  brackets: TaxBracket[]
-): { totalCents: number; breakdown: { thresholdCents: number | null; rate: number; taxableCents: number; taxCents: number }[] } {
-  let remainingIncome = taxableIncomeCents;
-  let previousThresholdCents = 0;
-  let totalCents = 0;
-  const breakdown: { thresholdCents: number | null; rate: number; taxableCents: number; taxCents: number }[] = [];
+const formatRate = (rate: number) => `${Number((rate * 100).toFixed(4))}%`;
 
+// Rounds numerator / denominator half-up; both are non-negative integers.
+function divideRoundHalfUp(numerator: number, denominator: number): number {
+  return Math.floor((2 * numerator + denominator) / (2 * denominator));
+}
+
+const toMicros = (rate: number) => Math.round(rate * MICROS);
+
+// cents x rate, exact in integer micros and rounded half-up once, like the forms.
+function applyRate(cents: number, rate: number): number {
+  return divideRoundHalfUp(cents * toMicros(rate), MICROS);
+}
+
+interface BracketPortion {
+  fromCents: number;
+  taxableCents: number;
+  rate: number;
+  taxCents: number;
+}
+
+// Sums every bracket exactly and rounds once, matching the "(income - threshold) x rate +
+// constant" layout of the T1 and provincial forms.
+function calculateBracketTax(taxableIncomeCents: number, brackets: TaxBracket[]) {
+  const portions: BracketPortion[] = [];
+  let lowerCents = 0;
+  let exactTotal = 0;
   for (const bracket of brackets) {
-    if (remainingIncome <= 0) break;
-    const upTo = bracket.upToCents.value;
-    const rate = bracket.rate.value;
-
-    let taxableInBracket = 0;
-    if (upTo === null) {
-      taxableInBracket = remainingIncome;
-    } else {
-      const bracketSpan = upTo - previousThresholdCents;
-      taxableInBracket = Math.min(remainingIncome, bracketSpan);
-      previousThresholdCents = upTo;
-    }
-
-    const taxCents = Math.round(taxableInBracket * rate);
-    totalCents += taxCents;
-    remainingIncome -= taxableInBracket;
-
-    breakdown.push({
-      thresholdCents: upTo,
-      rate,
-      taxableCents: taxableInBracket,
-      taxCents,
+    if (taxableIncomeCents <= lowerCents) break;
+    const upperCents = bracket.upToCents?.value ?? taxableIncomeCents;
+    const taxableCents = Math.min(taxableIncomeCents, upperCents) - lowerCents;
+    const exactTax = taxableCents * toMicros(bracket.rate.value);
+    exactTotal += exactTax;
+    portions.push({
+      fromCents: lowerCents,
+      taxableCents,
+      rate: bracket.rate.value,
+      taxCents: divideRoundHalfUp(exactTax, MICROS),
     });
+    lowerCents = upperCents;
   }
+  return { totalCents: divideRoundHalfUp(exactTotal, MICROS), portions };
+}
 
-  return { totalCents, breakdown };
+// CPP (or QPP) on employment and self-employment income. The base part of the employee share
+// is credited; the first and second additional parts are deducted from income.
+function calculatePensionContributions(
+  employmentCents: number,
+  selfEmploymentCents: number,
+  plan: PensionPlan,
+  planName: 'CPP' | 'QPP'
+): PensionContributions {
+  const exemption = plan.basicExemptionCents.value;
+  const ympe = plan.maxPensionableEarningsCents.value;
+  const yampe = plan.additionalMaxPensionableEarningsCents.value;
+  const baseMicros = toMicros(plan.baseEmployeeRate.value);
+  const firstTierMicros = baseMicros + toMicros(plan.firstAdditionalEmployeeRate.value);
+
+  const employeeFirstTierEarnings = Math.max(0, Math.min(employmentCents, ympe) - exemption);
+  const employeeFirstTierCents = divideRoundHalfUp(employeeFirstTierEarnings * firstTierMicros, MICROS);
+  const employeeSecondTierCents = applyRate(
+    Math.max(0, Math.min(employmentCents, yampe) - ympe),
+    plan.secondAdditionalEmployeeRate.value
+  );
+  const employeeBaseCents = divideRoundHalfUp(employeeFirstTierCents * baseMicros, firstTierMicros);
+
+  // Self-employment earnings use whatever exemption and ceilings employment left unused.
+  const combinedCents = employmentCents + selfEmploymentCents;
+  const selfEmployedFirstTierEarnings =
+    Math.max(0, Math.min(combinedCents, ympe) - exemption) - employeeFirstTierEarnings;
+  const selfEmployedSecondTierEarnings = Math.max(0, Math.min(combinedCents, yampe) - Math.max(employmentCents, ympe));
+  const selfEmployedFirstTierCents = applyRate(selfEmployedFirstTierEarnings, plan.selfEmployedFirstTierRate.value);
+  const selfEmployedSecondTierCents = applyRate(selfEmployedSecondTierEarnings, plan.selfEmployedSecondTierRate.value);
+  // Only the base part of the employee half is credited (line 31000); the employer half and
+  // every additional contribution are deducted (line 22200).
+  const selfEmployedBaseCents = divideRoundHalfUp(selfEmployedFirstTierCents * baseMicros, 2 * firstTierMicros);
+
+  return {
+    plan: planName,
+    employeeFirstTierCents,
+    employeeSecondTierCents,
+    selfEmployedFirstTierCents,
+    selfEmployedSecondTierCents,
+    totalCents: employeeFirstTierCents + employeeSecondTierCents + selfEmployedFirstTierCents + selfEmployedSecondTierCents,
+    baseCreditableCents: employeeBaseCents + selfEmployedBaseCents,
+    enhancedEmploymentDeductionCents: employeeFirstTierCents - employeeBaseCents + employeeSecondTierCents,
+    selfEmployedDeductionCents: selfEmployedFirstTierCents - selfEmployedBaseCents + selfEmployedSecondTierCents,
+  };
+}
+
+function calculateFederalBpa(netIncomeCents: number, bpa: FederalRuleSet['bpa']): number {
+  const start = bpa.phaseOutStartCents.value;
+  const end = bpa.phaseOutEndCents.value;
+  if (netIncomeCents <= start) return bpa.maxCents.value;
+  if (netIncomeCents >= end) return bpa.minCents.value;
+  const reducible = bpa.maxCents.value - bpa.minCents.value;
+  return bpa.maxCents.value - divideRoundHalfUp(reducible * (netIncomeCents - start), end - start);
+}
+
+function calculateOntarioHealthPremium(taxableIncomeCents: number, tiers: OntarioHealthPremiumTier[]): number {
+  let premiumCents = 0;
+  for (const tier of tiers) {
+    if (taxableIncomeCents > tier.overCents) {
+      premiumCents = Math.min(tier.capCents, tier.baseCents + applyRate(taxableIncomeCents - tier.overCents, tier.rate));
+    }
+  }
+  return premiumCents;
 }
 
 export function calculateTax(
   input: TaxCalculationInput,
   fedRules: FederalRuleSet,
   provRules: ProvincialRuleSet,
-  options: { computeMarginalRate?: boolean; includeTraces?: boolean } = { computeMarginalRate: true, includeTraces: true }
+  options: { computeMarginalRate?: boolean; includeTraces?: boolean } = {}
 ): TaxCalculationResult {
+  const { computeMarginalRate = true, includeTraces = true } = options;
   const traces: ExplanationTraceItem[] = [];
-  const empIncomeCents = Math.max(0, input.employmentIncomeCents);
-  const selfEmpIncomeCents = Math.max(0, input.selfEmploymentIncomeCents ?? 0);
-  const rrspDeductionCents = Math.max(0, input.rrspDeductionCents ?? 0);
-  const fhsaDeductionCents = Math.max(0, input.fhsaDeductionCents ?? 0);
-  const totalIncomeCents = empIncomeCents + selfEmpIncomeCents;
+  const trace = (item: ExplanationTraceItem) => {
+    if (includeTraces) traces.push(item);
+  };
+  const limitations: CalculationLimitation[] = [];
 
-  if (options.includeTraces) {
-    traces.push({
-      id: 'total_income',
-      category: 'income',
-      titleEn: 'Total Income',
-      titleFr: 'Revenu total',
-      formReference: 'Line 15000',
-      formula: `${formatCentsToDollars(empIncomeCents)} (employment) + ${formatCentsToDollars(selfEmpIncomeCents)} (self-employment)`,
-      amountCents: totalIncomeCents,
-      sourceUrl: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-15000-total-income.html',
-    });
-  }
+  const employmentCents = Math.max(0, input.employmentIncomeCents);
+  const selfEmploymentCents = Math.max(0, input.selfEmploymentIncomeCents ?? 0);
+  const rrspCents = Math.max(0, input.rrspDeductionCents ?? 0);
+  const fhsaCents = Math.max(0, input.fhsaDeductionCents ?? 0);
+  const totalIncomeCents = employmentCents + selfEmploymentCents;
+  const quebec = provRules.quebec;
+  if (quebec && selfEmploymentCents > 0) limitations.push('QC_SELF_EMPLOYMENT_NOT_MODELLED');
 
-  // --- CPP / QPP Calculations ---
-  const isQuebec = input.province === 'QC';
-  let cppBaseEmployeeCents = 0;
-  let cppEnhancedEmployeeCents = 0;
-  let cppBaseSelfEmployedCents = 0;
-  let cppEnhancedSelfEmployedCents = 0;
-  let cppDeductiblePortionCents = 0;
+  trace({
+    id: 'total_income',
+    category: 'income',
+    titleEn: 'Total Income',
+    titleFr: 'Revenu total',
+    formReference: 'Line 15000',
+    formula: `${formatCentsToDollars(employmentCents)} (employment) + ${formatCentsToDollars(selfEmploymentCents)} (self-employment)`,
+    amountCents: totalIncomeCents,
+    sourceUrl: CRA_LINE_URLS.totalIncome,
+  });
 
-  if (isQuebec && provRules.qpp) {
-    const qpp = provRules.qpp;
-    const exemption = qpp.basicExemptionCents.value;
-    const yme = qpp.firstCeilingCents.value;
-    const yampe = qpp.secondCeilingCents.value;
+  // --- CPP / QPP ---
+  const plan = quebec ? quebec.qpp : fedRules.cpp;
+  const planName = quebec ? 'QPP' : 'CPP';
+  const pension = calculatePensionContributions(employmentCents, selfEmploymentCents, plan, planName);
+  const firstTierRate = plan.baseEmployeeRate.value + plan.firstAdditionalEmployeeRate.value;
 
-    if (empIncomeCents > exemption) {
-      const basePensionable = Math.min(empIncomeCents, yme) - exemption;
-      cppBaseEmployeeCents = Math.round(basePensionable * qpp.employeeRate.value);
-
-      if (empIncomeCents > yme) {
-        const additionalPensionable = Math.min(empIncomeCents, yampe) - yme;
-        cppEnhancedEmployeeCents = Math.round(additionalPensionable * qpp.secondEmployeeRate.value);
-      }
-    }
-
-    if (selfEmpIncomeCents > 0) {
-      const remainingExemption = Math.max(0, exemption - empIncomeCents);
-      const remainingYme = Math.max(0, yme - empIncomeCents);
-      const basePensionableSE = Math.min(selfEmpIncomeCents, remainingYme) - remainingExemption;
-      if (basePensionableSE > 0) {
-        cppBaseSelfEmployedCents = Math.round(basePensionableSE * qpp.selfEmployedRate.value);
-      }
-      if (empIncomeCents + selfEmpIncomeCents > yme) {
-        const remainingYampe = Math.max(0, yampe - Math.max(empIncomeCents, yme));
-        const additionalSE = Math.min(selfEmpIncomeCents, remainingYampe);
-        if (additionalSE > 0) {
-          cppEnhancedSelfEmployedCents = Math.round(additionalSE * qpp.secondSelfEmployedRate.value);
-        }
-      }
-    }
-  } else {
-    const cpp = fedRules.cpp;
-    const exemption = cpp.basicExemptionCents.value;
-    const yme = cpp.firstCeilingCents.value;
-    const yampe = cpp.secondCeilingCents.value;
-
-    if (empIncomeCents > exemption) {
-      const basePensionable = Math.min(empIncomeCents, yme) - exemption;
-      cppBaseEmployeeCents = Math.round(basePensionable * cpp.employeeRate.value);
-
-      if (empIncomeCents > yme) {
-        const additionalPensionable = Math.min(empIncomeCents, yampe) - yme;
-        cppEnhancedEmployeeCents = Math.round(additionalPensionable * cpp.secondEmployeeRate.value);
-      }
-    }
-
-    if (selfEmpIncomeCents > 0) {
-      const remainingExemption = Math.max(0, exemption - empIncomeCents);
-      const remainingYme = Math.max(0, yme - empIncomeCents);
-      const basePensionableSE = Math.min(selfEmpIncomeCents, remainingYme) - remainingExemption;
-      if (basePensionableSE > 0) {
-        cppBaseSelfEmployedCents = Math.round(basePensionableSE * cpp.selfEmployedRate.value);
-      }
-      if (empIncomeCents + selfEmpIncomeCents > yme) {
-        const remainingYampe = Math.max(0, yampe - Math.max(empIncomeCents, yme));
-        const additionalSE = Math.min(selfEmpIncomeCents, remainingYampe);
-        if (additionalSE > 0) {
-          cppEnhancedSelfEmployedCents = Math.round(additionalSE * cpp.secondSelfEmployedRate.value);
-        }
-      }
-    }
-  }
-
-  // Enhanced CPP is 100% tax deductible on Line 22215; half of self-employed base is deductible on Line 22200
-  cppDeductiblePortionCents =
-    cppEnhancedEmployeeCents +
-    cppEnhancedSelfEmployedCents +
-    Math.round(cppBaseSelfEmployedCents / 2);
-
-  const totalCppCents =
-    cppBaseEmployeeCents +
-    cppEnhancedEmployeeCents +
-    cppBaseSelfEmployedCents +
-    cppEnhancedSelfEmployedCents;
-
-  if (options.includeTraces) {
-    traces.push({
-      id: 'cpp_base',
+  trace({
+    id: 'cpp_base',
+    category: 'cpp_ei',
+    titleEn: quebec ? 'QPP Contributions' : 'CPP Contributions',
+    titleFr: quebec ? 'Cotisations au RRQ' : 'Cotisations au RPC',
+    formReference: 'Schedule 8 / Lines 30800, 31000',
+    formula: `${formatRate(firstTierRate)} on employment earnings between ${formatCentsToDollars(plan.basicExemptionCents.value)} and ${formatCentsToDollars(plan.maxPensionableEarningsCents.value)} (${formatRate(plan.selfEmployedFirstTierRate.value)} if self-employed); base part credited: ${formatCentsToDollars(pension.baseCreditableCents)}`,
+    amountCents: pension.employeeFirstTierCents + pension.selfEmployedFirstTierCents,
+    sourceUrl: plan.baseEmployeeRate.source,
+  });
+  if (pension.employeeSecondTierCents + pension.selfEmployedSecondTierCents > 0) {
+    trace({
+      id: 'cpp_enhanced',
       category: 'cpp_ei',
-      titleEn: isQuebec ? 'QPP Base Contribution' : 'CPP Base Contribution',
-      titleFr: isQuebec ? 'Cotisation de base au RRQ' : 'Cotisation de base au RPC',
-      formReference: 'Schedule 8 / Line 30800',
-      formula: `${isQuebec ? '6.40%' : '5.95%'} on earnings up to ceiling minus $3,500 exemption`,
-      amountCents: cppBaseEmployeeCents + cppBaseSelfEmployedCents,
-      sourceUrl: fedRules.cpp.firstCeilingCents.source,
-    });
-
-    if (cppEnhancedEmployeeCents > 0 || cppEnhancedSelfEmployedCents > 0) {
-      traces.push({
-        id: 'cpp_enhanced',
-        category: 'cpp_ei',
-        titleEn: isQuebec ? 'QPP2 Enhanced Contribution' : 'CPP2 Enhanced Contribution',
-        titleFr: isQuebec ? 'Deuxième cotisation supplémentaire au RRQ' : 'Cotisation supplémentaire au RPC (RPC2)',
-        formReference: 'Line 22215',
-        formula: `4.0% on earnings between first ceiling and second ceiling`,
-        amountCents: cppEnhancedEmployeeCents + cppEnhancedSelfEmployedCents,
-        sourceUrl: fedRules.cpp.secondCeilingCents.source,
-      });
-    }
-  }
-
-  // --- EI & QPIP Calculations ---
-  const eiMaxInsurable = fedRules.ei.maxInsurableEarningsCents.value;
-  const eiRate = isQuebec ? fedRules.ei.quebecRate.value : fedRules.ei.rate.value;
-  const eiInsurableIncome = Math.min(empIncomeCents, eiMaxInsurable);
-  const eiEmployeeCents = Math.round(eiInsurableIncome * eiRate);
-
-  if (options.includeTraces) {
-    traces.push({
-      id: 'ei_contribution',
-      category: 'cpp_ei',
-      titleEn: 'Employment Insurance (EI)',
-      titleFr: "Assurance-emploi (AE)",
-      formReference: 'Line 31200',
-      formula: `${(eiRate * 100).toFixed(2)}% on insurable earnings up to ${formatCentsToDollars(eiMaxInsurable)}`,
-      amountCents: eiEmployeeCents,
-      sourceUrl: fedRules.ei.rate.source,
+      titleEn: quebec ? 'QPP Second Additional Contribution' : 'CPP2 Second Additional Contribution',
+      titleFr: quebec ? 'Deuxième cotisation supplémentaire au RRQ' : 'Deuxième cotisation supplémentaire au RPC (RPC2)',
+      formReference: 'Line 22215',
+      formula: `${formatRate(plan.secondAdditionalEmployeeRate.value)} on earnings between ${formatCentsToDollars(plan.maxPensionableEarningsCents.value)} and ${formatCentsToDollars(plan.additionalMaxPensionableEarningsCents.value)}`,
+      amountCents: pension.employeeSecondTierCents + pension.selfEmployedSecondTierCents,
+      sourceUrl: plan.secondAdditionalEmployeeRate.source,
     });
   }
+
+  // --- EI & QPIP ---
+  const ei = fedRules.ei;
+  const eiRate = quebec ? ei.quebecRate.value : ei.rate.value;
+  const eiInsurableCents = Math.min(employmentCents, ei.maxInsurableEarningsCents.value);
+  const eiEmployeeCents = applyRate(eiInsurableCents, eiRate);
+  trace({
+    id: 'ei_contribution',
+    category: 'cpp_ei',
+    titleEn: 'Employment Insurance (EI)',
+    titleFr: 'Assurance-emploi (AE)',
+    formReference: 'Line 31200',
+    formula: `${formatCentsToDollars(eiInsurableCents)} x ${formatRate(eiRate)}`,
+    amountCents: eiEmployeeCents,
+    sourceUrl: quebec ? ei.quebecRate.source : ei.rate.source,
+  });
 
   let qpipEmployeeCents = 0;
   let qpipSelfEmployedCents = 0;
-  if (isQuebec && provRules.qpip) {
-    const qpip = provRules.qpip;
-    const qpipInsurableEmp = Math.min(empIncomeCents, qpip.maxInsurableEarningsCents.value);
-    qpipEmployeeCents = Math.round(qpipInsurableEmp * qpip.employeeRate.value);
-
-    if (selfEmpIncomeCents > 0) {
-      const remainingQpipInsurable = Math.max(0, qpip.maxInsurableEarningsCents.value - empIncomeCents);
-      const qpipInsurableSE = Math.min(selfEmpIncomeCents, remainingQpipInsurable);
-      qpipSelfEmployedCents = Math.round(qpipInsurableSE * qpip.selfEmployedRate.value);
-    }
-
-    if (options.includeTraces) {
-      traces.push({
-        id: 'qpip_contribution',
-        category: 'cpp_ei',
-        titleEn: 'Quebec Parental Insurance Plan (QPIP)',
-        titleFr: 'Régime québécois d’assurance parentale (RQAP)',
-        formReference: 'Schedule R (TP-1)',
-        formula: `${(qpip.employeeRate.value * 100).toFixed(3)}% on insurable earnings up to ${formatCentsToDollars(qpip.maxInsurableEarningsCents.value)}`,
-        amountCents: qpipEmployeeCents + qpipSelfEmployedCents,
-        sourceUrl: qpip.maxInsurableEarningsCents.source,
-      });
-    }
-  }
-
-  // --- Net Income & Taxable Income ---
-  const totalDeductionsFromIncome = cppDeductiblePortionCents + rrspDeductionCents + fhsaDeductionCents;
-  const netIncomeCents = Math.max(0, totalIncomeCents - totalDeductionsFromIncome);
-  const taxableIncomeCents = netIncomeCents; // Standard taxable income
-
-  if (options.includeTraces) {
-    traces.push({
-      id: 'taxable_income',
-      category: 'income',
-      titleEn: 'Taxable Income',
-      titleFr: 'Revenu imposable',
-      formReference: 'Line 26000',
-      formula: `${formatCentsToDollars(totalIncomeCents)} - deductions of ${formatCentsToDollars(totalDeductionsFromIncome)}`,
-      amountCents: taxableIncomeCents,
-      sourceUrl: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-26000-taxable-income.html',
+  if (quebec) {
+    const qpip = quebec.qpip;
+    const maxInsurable = qpip.maxInsurableEarningsCents.value;
+    const employeeInsurable = Math.min(employmentCents, maxInsurable);
+    qpipEmployeeCents = applyRate(employeeInsurable, qpip.employeeRate.value);
+    qpipSelfEmployedCents = applyRate(
+      Math.min(selfEmploymentCents, maxInsurable - employeeInsurable),
+      qpip.selfEmployedRate.value
+    );
+    trace({
+      id: 'qpip_contribution',
+      category: 'cpp_ei',
+      titleEn: 'Quebec Parental Insurance Plan (QPIP)',
+      titleFr: 'Régime québécois d’assurance parentale (RQAP)',
+      formReference: 'Line 31205',
+      formula: `${formatCentsToDollars(employeeInsurable)} x ${formatRate(qpip.employeeRate.value)}`,
+      amountCents: qpipEmployeeCents + qpipSelfEmployedCents,
+      sourceUrl: qpip.employeeRate.source,
     });
   }
 
-  // --- Federal Tax Calculation ---
-  const fedBracketCalc = calculateBracketTax(taxableIncomeCents, fedRules.brackets);
-  const federalGrossTaxCents = fedBracketCalc.totalCents;
+  // --- Net and taxable income (T1 lines 20800, 20805, 22200, 22215) ---
+  const federalDeductionsCents =
+    pension.enhancedEmploymentDeductionCents + pension.selfEmployedDeductionCents + rrspCents + fhsaCents;
+  const netIncomeCents = Math.max(0, totalIncomeCents - federalDeductionsCents);
+  const taxableIncomeCents = netIncomeCents;
+  trace({
+    id: 'taxable_income',
+    category: 'income',
+    titleEn: 'Taxable Income',
+    titleFr: 'Revenu imposable',
+    formReference: 'Line 26000',
+    formula: `${formatCentsToDollars(totalIncomeCents)} - ${formatCentsToDollars(pension.enhancedEmploymentDeductionCents + pension.selfEmployedDeductionCents)} ${planName} deductions - ${formatCentsToDollars(rrspCents + fhsaCents)} RRSP/FHSA`,
+    amountCents: taxableIncomeCents,
+    sourceUrl: CRA_LINE_URLS.taxableIncome,
+  });
 
-  if (options.includeTraces) {
-    fedBracketCalc.breakdown.forEach((b, idx) => {
-      traces.push({
-        id: `federal_bracket_${idx + 1}`,
-        category: 'federal',
-        titleEn: `Federal Bracket ${idx + 1} (${(b.rate * 100).toFixed(1)}%)`,
-        titleFr: `Palier fédéral ${idx + 1} (${(b.rate * 100).toFixed(1)} %)`,
-        formReference: 'Schedule 1, Part A',
-        formula: `${formatCentsToDollars(b.taxableCents)} × ${(b.rate * 100).toFixed(1)}% = ${formatCentsToDollars(b.taxCents)}`,
-        amountCents: b.taxCents,
-        sourceUrl: fedRules.brackets[idx]?.rate.source ?? fedRules.brackets[0]!.rate.source,
-      });
-    });
-  }
-
-  // Federal BPA clawback calculation
-  const bpaCfg = fedRules.bpa;
-  let federalBpaAmountCents = bpaCfg.maxCents.value;
-  if (taxableIncomeCents > bpaCfg.thresholdLowCents.value) {
-    if (taxableIncomeCents >= bpaCfg.thresholdHighCents.value) {
-      federalBpaAmountCents = bpaCfg.minCents.value;
-    } else {
-      const excess = taxableIncomeCents - bpaCfg.thresholdLowCents.value;
-      const span = bpaCfg.thresholdHighCents.value - bpaCfg.thresholdLowCents.value;
-      const clawback = Math.round((bpaCfg.maxCents.value - bpaCfg.minCents.value) * (excess / span));
-      federalBpaAmountCents = bpaCfg.maxCents.value - clawback;
-    }
-  }
-  const federalBpaCreditCents = Math.round(federalBpaAmountCents * bpaCfg.creditRate.value);
-
-  if (options.includeTraces) {
-    traces.push({
-      id: 'federal_bpa_credit',
+  // --- Federal tax ---
+  const federalBrackets = calculateBracketTax(taxableIncomeCents, fedRules.brackets);
+  federalBrackets.portions.forEach((portion, index) => {
+    trace({
+      id: `federal_bracket_${index + 1}`,
       category: 'federal',
-      titleEn: 'Federal Basic Personal Amount Credit',
-      titleFr: 'Crédit fédéral pour montant personnel de base',
-      formReference: 'Line 30000',
-      formula: `${formatCentsToDollars(federalBpaAmountCents)} × ${(bpaCfg.creditRate.value * 100).toFixed(1)}%`,
-      amountCents: federalBpaCreditCents,
-      sourceUrl: bpaCfg.maxCents.source,
+      titleEn: `Federal Bracket ${index + 1} (${formatRate(portion.rate)})`,
+      titleFr: `Palier fédéral ${index + 1} (${formatRate(portion.rate)})`,
+      formReference: 'Step 5, Part A',
+      formula: `${formatCentsToDollars(portion.taxableCents)} x ${formatRate(portion.rate)} = ${formatCentsToDollars(portion.taxCents)}`,
+      amountCents: portion.taxCents,
+      sourceUrl: fedRules.brackets[index]!.rate.source,
     });
-  }
+  });
 
-  // Canada Employment Amount
-  const ceaCents = Math.min(empIncomeCents, fedRules.canadaEmploymentAmount.maxCents.value);
-  const federalCeaCreditCents = Math.round(ceaCents * fedRules.canadaEmploymentAmount.rate.value);
+  const creditRate = fedRules.nonRefundableCreditRate.value;
+  const bpaAmountCents = calculateFederalBpa(netIncomeCents, fedRules.bpa);
+  const ceaCents = Math.min(employmentCents, fedRules.canadaEmploymentAmountMaxCents.value);
+  const federalCreditAmountsCents = bpaAmountCents + ceaCents + pension.baseCreditableCents + eiEmployeeCents + qpipEmployeeCents;
+  const federalCreditsCents = applyRate(federalCreditAmountsCents, creditRate);
+  trace({
+    id: 'federal_credits',
+    category: 'federal',
+    titleEn: 'Federal Non-Refundable Credits',
+    titleFr: 'Crédits d’impôt non remboursables fédéraux',
+    formReference: 'Lines 30000-33800',
+    formula: `(${formatCentsToDollars(bpaAmountCents)} BPA + ${formatCentsToDollars(ceaCents)} Canada employment + ${formatCentsToDollars(pension.baseCreditableCents)} base ${planName} + ${formatCentsToDollars(eiEmployeeCents)} EI${quebec ? ` + ${formatCentsToDollars(qpipEmployeeCents)} QPIP` : ''}) x ${formatRate(creditRate)}`,
+    amountCents: federalCreditsCents,
+    sourceUrl: fedRules.bpa.maxCents.source,
+  });
 
-  if (options.includeTraces && federalCeaCreditCents > 0) {
-    traces.push({
-      id: 'federal_cea_credit',
+  const basicFederalTaxCents = Math.max(0, federalBrackets.totalCents - federalCreditsCents);
+  const quebecAbatementCents = quebec ? applyRate(basicFederalTaxCents, quebec.federalAbatementRate.value) : 0;
+  if (quebec) {
+    trace({
+      id: 'quebec_abatement',
       category: 'federal',
-      titleEn: 'Canada Employment Amount Credit',
-      titleFr: 'Montant canadien pour emploi',
-      formReference: 'Line 31260',
-      formula: `${formatCentsToDollars(ceaCents)} × ${(fedRules.canadaEmploymentAmount.rate.value * 100).toFixed(1)}%`,
-      amountCents: federalCeaCreditCents,
-      sourceUrl: fedRules.canadaEmploymentAmount.maxCents.source,
+      titleEn: 'Refundable Quebec Abatement',
+      titleFr: 'Abattement remboursable du Québec',
+      formReference: 'Line 44000',
+      formula: `${formatCentsToDollars(basicFederalTaxCents)} x ${formatRate(quebec.federalAbatementRate.value)}`,
+      amountCents: quebecAbatementCents,
+      sourceUrl: quebec.federalAbatementRate.source,
+    });
+  }
+  const netFederalTaxCents = basicFederalTaxCents - quebecAbatementCents;
+  trace({
+    id: 'net_federal_tax',
+    category: 'federal',
+    titleEn: 'Net Federal Tax',
+    titleFr: 'Impôt fédéral net',
+    formReference: 'Line 42000',
+    formula: `${formatCentsToDollars(federalBrackets.totalCents)} - ${formatCentsToDollars(federalCreditsCents)} credits${quebec ? ` - ${formatCentsToDollars(quebecAbatementCents)} abatement` : ''}`,
+    amountCents: netFederalTaxCents,
+    sourceUrl: CRA_LINE_URLS.netFederalTax,
+  });
+
+  // --- Provincial tax ---
+  const jurisdiction = provRules.jurisdiction;
+  let provincialTaxableCents = taxableIncomeCents;
+  if (quebec) {
+    // TP-1015.F-V: I = gross - RRSP/FHSA - deduction for workers - additional QPP contributions.
+    const workers = quebec.deductionForWorkers;
+    const workersDeductionCents = Math.min(applyRate(employmentCents, workers.rate.value), workers.maxCents.value);
+    provincialTaxableCents = Math.max(
+      0,
+      totalIncomeCents - workersDeductionCents - pension.enhancedEmploymentDeductionCents - rrspCents - fhsaCents
+    );
+    trace({
+      id: 'quebec_taxable_income',
+      category: 'provincial',
+      titleEn: 'Quebec Taxable Income',
+      titleFr: 'Revenu imposable du Québec',
+      formReference: 'TP-1 lines 201, 248, 299',
+      formula: `${formatCentsToDollars(totalIncomeCents)} - ${formatCentsToDollars(workersDeductionCents)} deduction for workers - ${formatCentsToDollars(pension.enhancedEmploymentDeductionCents)} additional QPP - ${formatCentsToDollars(rrspCents + fhsaCents)} RRSP/FHSA`,
+      amountCents: provincialTaxableCents,
+      sourceUrl: workers.rate.source,
     });
   }
 
-  // Federal CPP / EI credits (using lowest federal rate)
-  const federalCppCreditCents = Math.round(cppBaseEmployeeCents * bpaCfg.creditRate.value);
-  const federalEiCreditCents = Math.round(eiEmployeeCents * bpaCfg.creditRate.value);
-
-  const federalTotalCreditsCents =
-    federalBpaCreditCents +
-    federalCeaCreditCents +
-    federalCppCreditCents +
-    federalEiCreditCents;
-
-  const basicFederalTaxCents = Math.max(0, federalGrossTaxCents - federalTotalCreditsCents);
-
-  // Quebec Abatement (Line 44000: 16.5% reduction)
-  let quebecAbatementCents = 0;
-  if (isQuebec && provRules.quebecAbatementRate) {
-    quebecAbatementCents = Math.round(basicFederalTaxCents * provRules.quebecAbatementRate.value);
-    if (options.includeTraces) {
-      traces.push({
-        id: 'quebec_abatement',
-        category: 'federal',
-        titleEn: 'Refundable Quebec Abatement',
-        titleFr: 'Abattement remboursable du Québec',
-        formReference: 'Line 44000',
-        formula: `${formatCentsToDollars(basicFederalTaxCents)} × 16.5%`,
-        amountCents: quebecAbatementCents,
-        sourceUrl: provRules.quebecAbatementRate.source,
-      });
-    }
-  }
-
-  const netFederalTaxCents = Math.max(0, basicFederalTaxCents - quebecAbatementCents);
-
-  if (options.includeTraces) {
-    traces.push({
-      id: 'net_federal_tax',
-      category: 'federal',
-      titleEn: 'Net Federal Tax',
-      titleFr: 'Impôt fédéral net',
-      formReference: 'Line 42000',
-      formula: `${formatCentsToDollars(federalGrossTaxCents)} gross - ${formatCentsToDollars(federalTotalCreditsCents)} credits ${quebecAbatementCents > 0 ? `- ${formatCentsToDollars(quebecAbatementCents)} abatement` : ''}`,
-      amountCents: netFederalTaxCents,
-      sourceUrl: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/deductions-credits-expenses/line-42000-net-federal-tax.html',
+  const provincialBrackets = calculateBracketTax(provincialTaxableCents, provRules.brackets);
+  provincialBrackets.portions.forEach((portion, index) => {
+    trace({
+      id: `provincial_bracket_${index + 1}`,
+      category: 'provincial',
+      titleEn: `${jurisdiction} Bracket ${index + 1} (${formatRate(portion.rate)})`,
+      titleFr: `${jurisdiction} Palier ${index + 1} (${formatRate(portion.rate)})`,
+      formReference: quebec ? 'TP-1 line 401' : `Form ${jurisdiction}428`,
+      formula: `${formatCentsToDollars(portion.taxableCents)} x ${formatRate(portion.rate)} = ${formatCentsToDollars(portion.taxCents)}`,
+      amountCents: portion.taxCents,
+      sourceUrl: provRules.brackets[index]!.rate.source,
     });
-  }
+  });
 
-  // --- Provincial Tax Calculation ---
-  const provBracketCalc = calculateBracketTax(taxableIncomeCents, provRules.brackets);
-  const provGrossTaxCents = provBracketCalc.totalCents;
+  // Quebec credits only the personal amounts; elsewhere base CPP and EI are credited too.
+  const provincialCreditAmountsCents =
+    provRules.basicPersonalAmountCents.value + (quebec ? 0 : pension.baseCreditableCents + eiEmployeeCents);
+  const provincialCreditRate = provRules.nonRefundableCreditRate.value;
+  const provincialCreditsCents = applyRate(provincialCreditAmountsCents, provincialCreditRate);
+  trace({
+    id: 'provincial_credits',
+    category: 'provincial',
+    titleEn: `${jurisdiction} Non-Refundable Credits`,
+    titleFr: `Crédits d’impôt non remboursables (${jurisdiction})`,
+    formReference: quebec ? 'TP-1 line 350' : `Form ${jurisdiction}428, Part B`,
+    formula: quebec
+      ? `${formatCentsToDollars(provRules.basicPersonalAmountCents.value)} basic personal amount x ${formatRate(provincialCreditRate)}`
+      : `(${formatCentsToDollars(provRules.basicPersonalAmountCents.value)} BPA + ${formatCentsToDollars(pension.baseCreditableCents)} base CPP + ${formatCentsToDollars(eiEmployeeCents)} EI) x ${formatRate(provincialCreditRate)}`,
+    amountCents: provincialCreditsCents,
+    sourceUrl: provRules.basicPersonalAmountCents.source,
+  });
 
-  if (options.includeTraces) {
-    provBracketCalc.breakdown.forEach((b, idx) => {
-      traces.push({
-        id: `provincial_bracket_${idx + 1}`,
-        category: 'provincial',
-        titleEn: `${provRules.jurisdiction} Bracket ${idx + 1} (${(b.rate * 100).toFixed(2)}%)`,
-        titleFr: `${provRules.jurisdiction} Palier ${idx + 1} (${(b.rate * 100).toFixed(2)} %)`,
-        formReference: `Form ${provRules.jurisdiction}428`,
-        formula: `${formatCentsToDollars(b.taxableCents)} × ${(b.rate * 100).toFixed(2)}% = ${formatCentsToDollars(b.taxCents)}`,
-        amountCents: b.taxCents,
-        sourceUrl: provRules.brackets[idx]?.rate.source ?? provRules.brackets[0]!.rate.source,
-      });
-    });
-  }
-
-  // Provincial BPA credit
-  const provBpaCreditCents = Math.round(provRules.bpa.amountCents.value * provRules.bpa.creditRate.value);
-  const provCppCreditCents = isQuebec ? 0 : Math.round(cppBaseEmployeeCents * provRules.bpa.creditRate.value);
-  const provEiCreditCents = isQuebec ? 0 : Math.round(eiEmployeeCents * provRules.bpa.creditRate.value);
-  const provTotalCreditsCents = provBpaCreditCents + provCppCreditCents + provEiCreditCents;
-  const basicProvTaxCents = Math.max(0, provGrossTaxCents - provTotalCreditsCents);
-
+  const basicProvincialTaxCents = Math.max(0, provincialBrackets.totalCents - provincialCreditsCents);
+  let provincialTaxCents = basicProvincialTaxCents;
   let surtaxCents = 0;
+  let taxReductionCents = 0;
+  let liftCreditCents = 0;
   let healthPremiumCents = 0;
-  let lowIncomeReductionCents = 0;
 
-  // Ontario Surtax and Health Premium
-  if (provRules.jurisdiction === 'ON') {
-    if (provRules.ontarioSurtax) {
-      const t1 = provRules.ontarioSurtax.tier1ThresholdCents.value;
-      const r1 = provRules.ontarioSurtax.tier1Rate.value;
-      const t2 = provRules.ontarioSurtax.tier2ThresholdCents.value;
-      const r2 = provRules.ontarioSurtax.tier2Rate.value;
-
-      if (basicProvTaxCents > t1) {
-        surtaxCents += Math.round((basicProvTaxCents - t1) * r1);
-      }
-      if (basicProvTaxCents > t2) {
-        surtaxCents += Math.round((basicProvTaxCents - t2) * r2);
-      }
-
-      if (options.includeTraces && surtaxCents > 0) {
-        traces.push({
-          id: 'ontario_surtax',
-          category: 'provincial',
-          titleEn: 'Ontario Surtax',
-          titleFr: 'Surtaxe de l’Ontario',
-          formReference: 'Form ON428, Line 56000',
-          formula: `20% on basic tax > ${formatCentsToDollars(t1)} + 36% on basic tax > ${formatCentsToDollars(t2)}`,
-          amountCents: surtaxCents,
-          sourceUrl: provRules.ontarioSurtax.tier1ThresholdCents.source,
-        });
-      }
-    }
-
-    if (provRules.ontarioHealthPremium) {
-      for (const tier of provRules.ontarioHealthPremium.tiers) {
-        if (taxableIncomeCents > tier.thresholdCents) {
-          const excess = taxableIncomeCents - tier.thresholdCents;
-          const calculated = tier.baseAmountCents + Math.round(excess * tier.rateOnExcess);
-          healthPremiumCents = Math.min(calculated, tier.capCents);
-        }
-      }
-
-      if (options.includeTraces && healthPremiumCents > 0) {
-        traces.push({
-          id: 'ontario_health_premium',
-          category: 'provincial',
-          titleEn: 'Ontario Health Premium',
-          titleFr: 'Contribution-santé de l’Ontario',
-          formReference: 'Form ON428, Line 58000',
-          formula: `Calculated from graduated taxable income schedule (max $900)`,
-          amountCents: healthPremiumCents,
-          sourceUrl: provRules.ontarioHealthPremium.source.source,
-        });
-      }
+  if (provRules.ontarioSurtax) {
+    const surtax = provRules.ontarioSurtax;
+    const tier1 = surtax.tier1ThresholdCents.value;
+    const tier2 = surtax.tier2ThresholdCents.value;
+    surtaxCents =
+      applyRate(Math.max(0, basicProvincialTaxCents - tier1), surtax.tier1Rate.value) +
+      applyRate(Math.max(0, basicProvincialTaxCents - tier2), surtax.tier2Rate.value);
+    provincialTaxCents += surtaxCents;
+    if (surtaxCents > 0) {
+      trace({
+        id: 'ontario_surtax',
+        category: 'provincial',
+        titleEn: 'Ontario Surtax',
+        titleFr: 'Surtaxe de l’Ontario',
+        formReference: 'Form ON428, lines 63-68',
+        formula: `${formatRate(surtax.tier1Rate.value)} of basic tax over ${formatCentsToDollars(tier1)} + ${formatRate(surtax.tier2Rate.value)} over ${formatCentsToDollars(tier2)}`,
+        amountCents: surtaxCents,
+        sourceUrl: surtax.tier1ThresholdCents.source,
+      });
     }
   }
 
-  // BC Tax Reduction
-  if (provRules.jurisdiction === 'BC' && provRules.bcTaxReduction) {
-    const bcr = provRules.bcTaxReduction;
-    const initialReduction = bcr.initialAmountCents.value;
-    const thresh = bcr.thresholdCents.value;
-    const phaseOutRate = bcr.phaseOutRate.value;
-
-    if (taxableIncomeCents <= thresh) {
-      lowIncomeReductionCents = Math.min(basicProvTaxCents, initialReduction);
-    } else {
-      const reduction = Math.max(0, initialReduction - Math.round((taxableIncomeCents - thresh) * phaseOutRate));
-      lowIncomeReductionCents = Math.min(basicProvTaxCents, reduction);
+  if (provRules.ontarioTaxReduction) {
+    const basicReduction = provRules.ontarioTaxReduction.basicReductionCents;
+    taxReductionCents = Math.min(provincialTaxCents, Math.max(0, 2 * basicReduction.value - provincialTaxCents));
+    provincialTaxCents -= taxReductionCents;
+    if (taxReductionCents > 0) {
+      trace({
+        id: 'ontario_tax_reduction',
+        category: 'provincial',
+        titleEn: 'Ontario Tax Reduction',
+        titleFr: 'Réduction d’impôt de l’Ontario',
+        formReference: 'Form ON428, lines 74-80',
+        formula: `2 x ${formatCentsToDollars(basicReduction.value)} - Ontario tax before reduction`,
+        amountCents: taxReductionCents,
+        sourceUrl: basicReduction.source,
+      });
     }
+  }
 
-    if (options.includeTraces && lowIncomeReductionCents > 0) {
-      traces.push({
+  if (provRules.ontarioLift) {
+    const lift = provRules.ontarioLift;
+    const maximumCents = Math.min(lift.maxCreditCents.value, applyRate(employmentCents, lift.employmentIncomeRate.value));
+    const clawbackCents = applyRate(Math.max(0, netIncomeCents - lift.incomeThresholdCents.value), lift.phaseOutRate.value);
+    liftCreditCents = Math.min(provincialTaxCents, Math.max(0, maximumCents - clawbackCents));
+    provincialTaxCents -= liftCreditCents;
+    if (liftCreditCents > 0) {
+      trace({
+        id: 'ontario_lift_credit',
+        category: 'provincial',
+        titleEn: 'Low-income Individuals and Families Tax (LIFT) Credit',
+        titleFr: 'Crédit d’impôt pour les personnes et les familles à faible revenu (CIPFR)',
+        formReference: 'Schedule ON428-A, line 62140',
+        formula: `${formatCentsToDollars(maximumCents)} - ${formatRate(lift.phaseOutRate.value)} of net income over ${formatCentsToDollars(lift.incomeThresholdCents.value)}`,
+        amountCents: liftCreditCents,
+        sourceUrl: lift.maxCreditCents.source,
+      });
+    }
+  }
+
+  if (provRules.ontarioHealthPremium) {
+    const tiers = provRules.ontarioHealthPremium.tiers;
+    healthPremiumCents = calculateOntarioHealthPremium(taxableIncomeCents, tiers.value);
+    provincialTaxCents += healthPremiumCents;
+    if (healthPremiumCents > 0) {
+      trace({
+        id: 'ontario_health_premium',
+        category: 'provincial',
+        titleEn: 'Ontario Health Premium',
+        titleFr: 'Contribution-santé de l’Ontario',
+        formReference: 'Form ON428, line 89',
+        formula: `Graduated premium on taxable income of ${formatCentsToDollars(taxableIncomeCents)}`,
+        amountCents: healthPremiumCents,
+        sourceUrl: tiers.source,
+      });
+    }
+  }
+
+  if (provRules.bcTaxReduction) {
+    const reduction = provRules.bcTaxReduction;
+    const phaseOutCents = applyRate(
+      Math.max(0, netIncomeCents - reduction.phaseOutStartCents.value),
+      reduction.phaseOutRate.value
+    );
+    taxReductionCents = Math.min(provincialTaxCents, Math.max(0, reduction.basicReductionCents.value - phaseOutCents));
+    provincialTaxCents -= taxReductionCents;
+    if (taxReductionCents > 0) {
+      trace({
         id: 'bc_tax_reduction',
         category: 'provincial',
         titleEn: 'BC Tax Reduction',
         titleFr: 'Réduction d’impôt de la Colombie-Britannique',
-        formReference: 'Form BC428, Line 59000',
-        formula: `Phased out based on net income`,
-        amountCents: lowIncomeReductionCents,
-        sourceUrl: bcr.initialAmountCents.source,
+        formReference: 'Form BC428',
+        formula: `${formatCentsToDollars(reduction.basicReductionCents.value)} - ${formatRate(reduction.phaseOutRate.value)} of net income over ${formatCentsToDollars(reduction.phaseOutStartCents.value)}`,
+        amountCents: taxReductionCents,
+        sourceUrl: reduction.basicReductionCents.source,
       });
     }
   }
 
-  const netProvincialTaxCents = Math.max(0, basicProvTaxCents + surtaxCents + healthPremiumCents - lowIncomeReductionCents);
-
-  if (options.includeTraces) {
-    traces.push({
-      id: 'net_provincial_tax',
-      category: 'provincial',
-      titleEn: `${provRules.jurisdiction} Net Provincial Tax`,
-      titleFr: `Impôt provincial net de ${provRules.jurisdiction}`,
-      formReference: `Form ${provRules.jurisdiction}428`,
-      formula: `${formatCentsToDollars(provGrossTaxCents)} gross - ${formatCentsToDollars(provTotalCreditsCents)} credits ${surtaxCents > 0 ? `+ ${formatCentsToDollars(surtaxCents)} surtax` : ''} ${healthPremiumCents > 0 ? `+ ${formatCentsToDollars(healthPremiumCents)} health premium` : ''}`,
-      amountCents: netProvincialTaxCents,
-      sourceUrl: provRules.brackets[0]!.rate.source,
-    });
-  }
+  const netProvincialTaxCents = provincialTaxCents;
+  trace({
+    id: 'net_provincial_tax',
+    category: 'provincial',
+    titleEn: `${jurisdiction} Net Provincial Tax`,
+    titleFr: `Impôt provincial net (${jurisdiction})`,
+    formReference: quebec ? 'TP-1 line 432' : `Form ${jurisdiction}428`,
+    formula: `${formatCentsToDollars(provincialBrackets.totalCents)} - ${formatCentsToDollars(provincialCreditsCents)} credits${surtaxCents ? ` + ${formatCentsToDollars(surtaxCents)} surtax` : ''}${taxReductionCents ? ` - ${formatCentsToDollars(taxReductionCents)} reduction` : ''}${liftCreditCents ? ` - ${formatCentsToDollars(liftCreditCents)} LIFT` : ''}${healthPremiumCents ? ` + ${formatCentsToDollars(healthPremiumCents)} health premium` : ''}`,
+    amountCents: netProvincialTaxCents,
+    sourceUrl: provRules.brackets[0]!.rate.source,
+  });
 
   const totalTaxCents = netFederalTaxCents + netProvincialTaxCents;
   const qpipTotalCents = qpipEmployeeCents + qpipSelfEmployedCents;
-  const totalDeductionsCents = totalTaxCents + totalCppCents + eiEmployeeCents + qpipTotalCents;
-  const takeHomePayCents = Math.max(0, totalIncomeCents - totalDeductionsCents);
-
+  const totalDeductionsCents = totalTaxCents + pension.totalCents + eiEmployeeCents + qpipTotalCents;
+  const takeHomePayCents = totalIncomeCents - totalDeductionsCents;
   const averageTaxRate = totalIncomeCents > 0 ? totalTaxCents / totalIncomeCents : 0;
 
-  // Marginal tax rate: test +$100.00 (10,000 cents) of employment income to avoid 1-cent discretization artifacts
   let marginalTaxRate = 0;
-  if (options.computeMarginalRate !== false) {
-    const deltaSpanCents = 10000; // $100 span
-    const testInput: TaxCalculationInput = {
-      ...input,
-      employmentIncomeCents: empIncomeCents + deltaSpanCents,
-    };
-    const testResult = calculateTax(testInput, fedRules, provRules, {
-      computeMarginalRate: false,
-      includeTraces: false,
-    });
-    const deltaTaxCents = testResult.totalTaxCents - totalTaxCents;
-    marginalTaxRate = Math.min(1, Math.max(0, deltaTaxCents / deltaSpanCents));
+  if (computeMarginalRate) {
+    const next = calculateTax(
+      { ...input, employmentIncomeCents: employmentCents + MARGINAL_RATE_STEP_CENTS },
+      fedRules,
+      provRules,
+      { computeMarginalRate: false, includeTraces: false }
+    );
+    marginalTaxRate = Math.min(1, Math.max(0, (next.totalTaxCents - totalTaxCents) / MARGINAL_RATE_STEP_CENTS));
   }
 
   return {
     inputs: input,
     totalIncomeCents,
-    cpp: {
-      baseEmployeeCents: cppBaseEmployeeCents,
-      enhancedEmployeeCents: cppEnhancedEmployeeCents,
-      baseSelfEmployedCents: cppBaseSelfEmployedCents,
-      enhancedSelfEmployedCents: cppEnhancedSelfEmployedCents,
-      totalCents: totalCppCents,
-      deductiblePortionCents: cppDeductiblePortionCents,
-    },
-    ei: {
-      employeeCents: eiEmployeeCents,
-      totalCents: eiEmployeeCents,
-    },
-    qpip: isQuebec ? {
-      employeeCents: qpipEmployeeCents,
-      selfEmployedCents: qpipSelfEmployedCents,
-      totalCents: qpipTotalCents,
-    } : undefined,
+    cpp: pension,
+    ei: { employeeCents: eiEmployeeCents, totalCents: eiEmployeeCents },
+    qpip: quebec
+      ? { employeeCents: qpipEmployeeCents, selfEmployedCents: qpipSelfEmployedCents, totalCents: qpipTotalCents }
+      : undefined,
     netIncomeCents,
     taxableIncomeCents,
     federal: {
-      grossTaxCents: federalGrossTaxCents,
-      bpaCreditCents: federalBpaCreditCents,
-      ceaCreditCents: federalCeaCreditCents,
-      cppCreditCents: federalCppCreditCents,
-      eiCreditCents: federalEiCreditCents,
-      totalCreditsCents: federalTotalCreditsCents,
+      taxOnTaxableIncomeCents: federalBrackets.totalCents,
+      bpaAmountCents,
+      creditAmountsCents: federalCreditAmountsCents,
+      nonRefundableCreditsCents: federalCreditsCents,
       basicFederalTaxCents,
       quebecAbatementCents,
       netFederalTaxCents,
     },
     provincial: {
-      jurisdiction: provRules.jurisdiction,
-      grossTaxCents: provGrossTaxCents,
-      bpaCreditCents: provBpaCreditCents,
-      cppCreditCents: provCppCreditCents,
-      eiCreditCents: provEiCreditCents,
-      totalCreditsCents: provTotalCreditsCents,
-      basicProvincialTaxCents: basicProvTaxCents,
-      surtaxCents: surtaxCents > 0 ? surtaxCents : undefined,
-      healthPremiumCents: healthPremiumCents > 0 ? healthPremiumCents : undefined,
-      lowIncomeReductionCents: lowIncomeReductionCents > 0 ? lowIncomeReductionCents : undefined,
+      jurisdiction,
+      taxableIncomeCents: provincialTaxableCents,
+      taxOnTaxableIncomeCents: provincialBrackets.totalCents,
+      nonRefundableCreditsCents: provincialCreditsCents,
+      basicProvincialTaxCents,
+      surtaxCents: surtaxCents || undefined,
+      taxReductionCents: taxReductionCents || undefined,
+      liftCreditCents: liftCreditCents || undefined,
+      healthPremiumCents: healthPremiumCents || undefined,
       netProvincialTaxCents,
     },
     totalTaxCents,
@@ -566,6 +540,7 @@ export function calculateTax(
     takeHomePayCents,
     averageTaxRate,
     marginalTaxRate,
+    limitations,
     traces,
   };
 }

@@ -1,193 +1,152 @@
 import { describe, it, expect } from 'vitest';
 import { calculateTax } from '../src/engine';
+import type { SupportedProvince, TaxCalculationResult } from '../src/types';
 import {
-  federal2026,
-  federal2025,
+  FEDERAL_RULE_SETS,
+  PROVINCIAL_RULE_SETS,
+  FederalRuleSetSchema,
+  ProvincialRuleSetSchema,
+  TestVector,
+  TestVectorSchema,
+  getFederalRules,
+  getProvincialRules,
   ontario2026,
-  ontario2025,
-  quebec2026,
-  britishColumbia2026,
-  alberta2026,
 } from '@fiscal-insights/tax-data';
+import { TEST_VECTORS } from './vectors';
 
-describe('Tax Engine v0 - Audit Test Cases', () => {
-  it('correctly calculates the pitch test case: Ontario 2025 at $80,000', () => {
-    const result = calculateTax(
-      {
-        year: 2025,
-        province: 'ON',
-        employmentIncomeCents: 8000000, // $80,000.00
-      },
-      federal2025,
-      ontario2025
-    );
+const PROVINCES_2026: SupportedProvince[] = ['ON', 'QC', 'BC', 'AB'];
 
-    // Expected values from PRD page 2:
-    // Federal tax: ~$9,552
-    // Ontario tax incl. health premium: ~$4,940
-    // CPP + CPP2: $4,382.10
-    // EI: $1,077.48
-    // Net income: ~$60,048
+const calculate = (year: number, province: SupportedProvince, employmentIncomeCents: number, extra = {}) =>
+  calculateTax(
+    { year, province, employmentIncomeCents, ...extra },
+    getFederalRules(year),
+    getProvincialRules(province, year)
+  );
 
-    expect(result.cpp.totalCents).toBe(438210); // $4,382.10 exact
-    expect(result.ei.totalCents).toBe(107748); // $1,077.48 exact
-    expect(result.provincial.healthPremiumCents).toBe(75000); // $750.00 exact
+function actualFor(result: TaxCalculationResult, expected: TestVector['expected']) {
+  const actual: Record<string, number | undefined> = {
+    totalIncomeCents: result.totalIncomeCents,
+    netIncomeCents: result.netIncomeCents,
+    taxableIncomeCents: result.taxableIncomeCents,
+    federalTaxCents: result.federal.netFederalTaxCents,
+    provincialTaxCents: result.provincial.netProvincialTaxCents,
+    cppCents: result.cpp.totalCents,
+    eiCents: result.ei.totalCents,
+    qpipCents: result.qpip?.totalCents,
+    totalDeductionsCents: result.totalDeductionsCents,
+    takeHomePayCents: result.takeHomePayCents,
+  };
+  return Object.fromEntries(Object.keys(expected).map((key) => [key, actual[key]]));
+}
 
-    // Federal tax within $150 of PRD author approximate hand-calculation estimate ~$9,552
-    expect(Math.abs(result.federal.netFederalTaxCents - 955200)).toBeLessThan(15000);
-
-    // Ontario tax incl health premium within $50 of estimate ~$4,940
-    expect(Math.abs(result.provincial.netProvincialTaxCents - 494000)).toBeLessThan(10000);
-
-    // Net take-home pay within $150 of estimate ~$60,048
-    expect(Math.abs(result.takeHomePayCents - 6004800)).toBeLessThan(15000);
+describe('rule sets', () => {
+  it.each(FEDERAL_RULE_SETS.map((rules) => [rules.year, rules] as const))('federal %i passes the schema', (_, rules) => {
+    expect(FederalRuleSetSchema.safeParse(rules).error?.issues).toBeUndefined();
   });
 
-  it('correctly calculates 2026 Ontario at $80,000 with 14% lowest federal bracket', () => {
-    const result = calculateTax(
-      {
-        year: 2026,
-        province: 'ON',
-        employmentIncomeCents: 8000000,
-      },
-      federal2026,
-      ontario2026
-    );
+  it.each(PROVINCIAL_RULE_SETS.map((rules) => [`${rules.jurisdiction} ${rules.year}`, rules] as const))(
+    '%s passes the schema',
+    (_, rules) => {
+      expect(ProvincialRuleSetSchema.safeParse(rules).error?.issues).toBeUndefined();
+    }
+  );
 
-    expect(result.totalIncomeCents).toBe(8000000);
-    expect(result.provincial.healthPremiumCents).toBe(75000); // $750 OHP
-    expect(result.takeHomePayCents).toBeGreaterThan(5800000);
-    expect(result.takeHomePayCents).toBeLessThan(6300000);
-    expect(result.marginalTaxRate).toBeGreaterThan(0.20);
-    expect(result.marginalTaxRate).toBeLessThan(0.40);
+  it('rejects an unknown (null) value', () => {
+    const draft = structuredClone(ontario2026) as unknown as { basicPersonalAmountCents: { value: number | null } };
+    draft.basicPersonalAmountCents.value = null;
+    expect(ProvincialRuleSetSchema.safeParse(draft).success).toBe(false);
+  });
+
+  it('rejects a rule block from another province', () => {
+    const misplaced = { ...ontario2026, jurisdiction: 'AB' };
+    expect(ProvincialRuleSetSchema.safeParse(misplaced).success).toBe(false);
   });
 });
 
-describe('40+ Test Vectors Across ON, QC, BC, AB (2026)', () => {
-  const provinces = [
-    { code: 'ON', rules: ontario2026 },
-    { code: 'QC', rules: quebec2026 },
-    { code: 'BC', rules: britishColumbia2026 },
-    { code: 'AB', rules: alberta2026 },
-  ] as const;
+describe('cited test vectors', () => {
+  const vectors = TEST_VECTORS.map((vector) => TestVectorSchema.parse(vector));
 
-  const salaryLevels = [
-    2500000,  // $25,000
-    3500000,  // $35,000
-    5000000,  // $50,000
-    6500000,  // $65,000
-    8000000,  // $80,000
-    10000000, // $100,000
-    12500000, // $125,000
-    15000000, // $150,000
-    20000000, // $200,000
-    30000000, // $300,000
-  ];
+  it.each(PROVINCES_2026)('has at least 10 vectors for %s in 2026', (province) => {
+    expect(vectors.filter((v) => v.province === province && v.year === 2026).length).toBeGreaterThanOrEqual(10);
+  });
 
-  for (const prov of provinces) {
-    describe(`Province: ${prov.code}`, () => {
-      for (const salary of salaryLevels) {
-        it(`calculates valid results for ${prov.code} at $${salary / 100}`, () => {
-          const result = calculateTax(
-            {
-              year: 2026,
-              province: prov.code,
-              employmentIncomeCents: salary,
-            },
-            federal2026,
-            prov.rules
-          );
+  it('has unique ids', () => {
+    expect(new Set(vectors.map((v) => v.id)).size).toBe(vectors.length);
+  });
 
-          // Invariant 1: Total deductions cannot exceed total income (for employment income)
-          expect(result.totalDeductionsCents).toBeLessThanOrEqual(result.totalIncomeCents);
-
-          // Invariant 2: Take-home pay + total deductions = total income
-          expect(result.takeHomePayCents + result.totalDeductionsCents).toBe(result.totalIncomeCents);
-
-          // Invariant 3: Average tax rate must be between 0 and 55%
-          expect(result.averageTaxRate).toBeGreaterThanOrEqual(0);
-          expect(result.averageTaxRate).toBeLessThan(0.55);
-
-          // Invariant 4: Traces must be non-empty and carry valid formulas and sources
-          expect(result.traces.length).toBeGreaterThan(5);
-          for (const trace of result.traces) {
-            expect(trace.formula).toBeTruthy();
-            expect(trace.sourceUrl).toMatch(/^https?:\/\//);
-          }
-
-          // Province-specific checks
-          if (prov.code === 'QC') {
-            expect(result.federal.quebecAbatementCents).toBeGreaterThanOrEqual(0);
-            expect(result.qpip).toBeDefined();
-          }
-          if (prov.code === 'ON') {
-            if (salary >= 2000000) {
-              expect(result.provincial.healthPremiumCents).toBeGreaterThan(0);
-            }
-          }
-        });
+  it.each(vectors.map((vector) => [vector.id, vector] as const))('%s', (_, vector) => {
+    const result = calculate(vector.year, vector.province, vector.inputs.employmentIncomeCents, vector.inputs);
+    const actual = actualFor(result, vector.expected);
+    if (vector.toleranceCents === 0) {
+      expect(actual).toEqual(vector.expected);
+    } else {
+      for (const [key, value] of Object.entries(vector.expected)) {
+        expect(Math.abs((actual[key] ?? NaN) - (value as number)), key).toBeLessThanOrEqual(vector.toleranceCents);
       }
-    });
-  }
+    }
+  });
 });
 
-describe('Engine Property & Invariant Tests', () => {
-  it('guarantees total tax never decreases as income increases (monotonicity)', () => {
-    let previousTax = 0;
-    for (let salary = 2000000; salary <= 20000000; salary += 1000000) {
-      const result = calculateTax(
-        {
-          year: 2026,
-          province: 'ON',
-          employmentIncomeCents: salary,
-        },
-        federal2026,
-        ontario2026
-      );
-      expect(result.totalTaxCents).toBeGreaterThanOrEqual(previousTax);
-      previousTax = result.totalTaxCents;
+describe('engine properties', () => {
+  const incomes = Array.from({ length: 81 }, (_, i) => i * 500000); // $0 to $400,000
+
+  it.each(PROVINCES_2026)('%s: deductions and take-home add up to income, net never exceeds gross', (province) => {
+    for (const income of incomes) {
+      const result = calculate(2026, province, income);
+      expect(result.takeHomePayCents + result.totalDeductionsCents).toBe(result.totalIncomeCents);
+      expect(result.netIncomeCents).toBeLessThanOrEqual(result.totalIncomeCents);
+      expect(result.takeHomePayCents).toBeGreaterThanOrEqual(0);
     }
   });
 
-  it('guarantees marginal tax rate is between 0 and 60% across all income brackets', () => {
-    for (let salary = 1500000; salary <= 30000000; salary += 2500000) {
-      const result = calculateTax(
-        {
-          year: 2026,
-          province: 'BC',
-          employmentIncomeCents: salary,
-        },
-        federal2026,
-        britishColumbia2026
-      );
-      expect(result.marginalTaxRate).toBeGreaterThanOrEqual(0);
-      expect(result.marginalTaxRate).toBeLessThanOrEqual(0.60);
+  it.each(PROVINCES_2026)('%s: total tax never falls as income rises', (province) => {
+    let previous = -1;
+    for (let income = 0; income <= 40000000; income += 100000) {
+      const { totalTaxCents } = calculate(2026, province, income);
+      expect(totalTaxCents).toBeGreaterThanOrEqual(previous);
+      previous = totalTaxCents;
     }
   });
 
-  it('applies RRSP and FHSA deductions directly reducing net income', () => {
-    const baseResult = calculateTax(
-      {
-        year: 2026,
-        province: 'AB',
-        employmentIncomeCents: 10000000, // $100,000
-      },
-      federal2026,
-      alberta2026
-    );
+  it.each(PROVINCES_2026)('%s: marginal rate stays between 0 and 60%%', (province) => {
+    // Not capped at the top combined rate: Ontario's health premium phases in at 25% over
+    // narrow bands, which briefly pushes the marginal rate above the top rate.
+    for (const income of incomes) {
+      const { marginalTaxRate } = calculate(2026, province, income);
+      expect(marginalTaxRate).toBeGreaterThanOrEqual(0);
+      expect(marginalTaxRate).toBeLessThan(0.6);
+    }
+  });
 
-    const rrspResult = calculateTax(
-      {
-        year: 2026,
-        province: 'AB',
-        employmentIncomeCents: 10000000,
-        rrspDeductionCents: 1000000, // $10,000 RRSP deduction
-      },
-      federal2026,
-      alberta2026
-    );
+  it.each([
+    ['ON', 0.33 + 0.1316 * (1 + 0.2 + 0.36)],
+    ['QC', 0.33 * (1 - 0.165) + 0.2575],
+    ['BC', 0.33 + 0.205],
+    ['AB', 0.33 + 0.15],
+  ] as const)('%s: marginal rate at $500,000 is the top combined rate', (province, topRate) => {
+    expect(calculate(2026, province, 50000000).marginalTaxRate).toBeCloseTo(topRate, 4);
+  });
 
-    expect(rrspResult.taxableIncomeCents).toBe(baseResult.taxableIncomeCents - 1000000);
-    expect(rrspResult.totalTaxCents).toBeLessThan(baseResult.totalTaxCents);
+  it.each(PROVINCES_2026)('%s: an RRSP deduction lowers taxable income by its amount and lowers tax', (province) => {
+    const base = calculate(2026, province, 10000000);
+    const withRrsp = calculate(2026, province, 10000000, { rrspDeductionCents: 1000000 });
+    expect(withRrsp.taxableIncomeCents).toBe(base.taxableIncomeCents - 1000000);
+    expect(withRrsp.totalTaxCents).toBeLessThan(base.totalTaxCents);
+  });
+
+  it('flags Quebec self-employment as not modelled', () => {
+    expect(calculate(2026, 'QC', 0, { selfEmploymentIncomeCents: 5000000 }).limitations).toContain(
+      'QC_SELF_EMPLOYMENT_NOT_MODELLED'
+    );
+    expect(calculate(2026, 'ON', 0, { selfEmploymentIncomeCents: 5000000 }).limitations).toEqual([]);
+  });
+
+  it('cites an http(s) source on every trace line', () => {
+    for (const province of PROVINCES_2026) {
+      for (const trace of calculate(2026, province, 8000000, { selfEmploymentIncomeCents: 1000000 }).traces) {
+        expect(trace.sourceUrl).toMatch(/^https:\/\//);
+        expect(trace.formula).toBeTruthy();
+      }
+    }
   });
 });
