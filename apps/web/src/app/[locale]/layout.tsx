@@ -1,10 +1,17 @@
 import '../globals.css';
 import React from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Navbar from '@/components/Navbar';
 import { Locale, getDictionary } from '@/lib/i18n';
 import BackgroundGuides from '@/components/BackgroundGuides';
 import { ProvinceProvider } from '@/context/ProvinceContext';
+
+// viewport-fit=cover lets the mobile tab bar pad itself clear of the home indicator.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'fr' }];
@@ -55,7 +62,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale === 'fr' ? 'fr-CA' : 'en-CA'} className="dark" suppressHydrationWarning>
       <body
-        className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300"
+        className="min-h-screen flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0 bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300"
         suppressHydrationWarning
       >
         <ProvinceProvider>
