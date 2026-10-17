@@ -31,8 +31,8 @@ export default function BackgroundGuides() {
     <StripeBgGuides
       columnCount={5}
       darkMode={true}
-      glowColor="rgba(16, 185, 129, 0.4)"
-      glowOpacity={0.4}
+      glowColor="rgba(16, 185, 129, 0.2)"
+      glowOpacity={0.2}
       animationDuration={45}
       responsive={true}
       animated={!reducedMotion}

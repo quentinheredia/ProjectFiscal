@@ -4,7 +4,7 @@ import React from 'react';
 import { Onboarding, TipsList } from '@/components/ui/onboarding';
 import { Locale } from '@/lib/i18n';
 import { FEDERAL_SPENDING_CATEGORIES } from '@/lib/spending';
-import { Shield, Compass, CheckCircle2, FileText, PieChart } from 'lucide-react';
+import { Shield, CheckCircle2, FileText, PieChart } from 'lucide-react';
 
 interface SiteTutorialProps {
   locale: Locale;
@@ -21,16 +21,6 @@ export default function SiteTutorial({ locale }: SiteTutorialProps) {
 
   return (
     <section className="max-w-4xl mx-auto bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 relative overflow-hidden">
-      {/* Decorative top glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-24 bg-emerald-500/10 blur-3xl pointer-events-none" />
-
-      <div className="flex items-center gap-2 mb-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
-          <Compass className="w-3.5 h-3.5 text-emerald-400" />
-          <span>{isFr ? 'Tutoriel interactif' : 'Interactive Walkthrough'}</span>
-        </div>
-      </div>
-
       <Onboarding totalSteps={3} defaultValue={1} className="space-y-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div>
@@ -67,8 +57,8 @@ export default function SiteTutorial({ locale }: SiteTutorialProps) {
                 </p>
                 <p className="text-slate-400 leading-relaxed">
                   {isFr
-                    ? 'Le moteur fiscal est une fonction mathématique pure TypeScript sans I/O, sans Date.now() et sans appels réseau. Vos données ne sont jamais envoyées à des bases de données ou traceurs analytiques.'
-                    : 'The tax engine is a pure, zero-I/O TypeScript function executed entirely inside your device. Your salary and deductions are never written to server logs, URLs, or external analytics.'}
+                    ? 'Le moteur fiscal s’exécute entièrement sur votre appareil. Vos données ne sont jamais envoyées à des bases de données ou traceurs analytiques.'
+                    : 'The tax engine runs entirely on your device. Your salary and deductions are never written to server logs, URLs, or external analytics.'}
                 </p>
               </div>
             </div>
