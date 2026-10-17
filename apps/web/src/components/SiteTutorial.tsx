@@ -3,7 +3,7 @@
 import React from 'react';
 import { Onboarding, TipsList } from '@/components/ui/onboarding';
 import { Locale } from '@/lib/i18n';
-import { Shield, Sparkles, Compass, CheckCircle2, FileText, PieChart } from 'lucide-react';
+import { Shield, Compass, CheckCircle2, FileText, PieChart } from 'lucide-react';
 
 interface SiteTutorialProps {
   locale: Locale;

@@ -1,5 +1,4 @@
 import * as React from "react"
-import Image from "next/image"
 
 import { cn } from "@/lib/utils"
 
@@ -37,6 +36,7 @@ const MinimalCardImage = React.forwardRef<
     )}
     {...props}
   >
+    {/* eslint-disable-next-line @next/next/no-img-element -- callers pass arbitrary image URLs */}
     <img
       src={src}
       alt={alt}

@@ -326,11 +326,10 @@ function OnboardingStep({
 // StepIndicator
 // ============================================================================
 
-export interface OnboardingStepIndicatorProps
-  extends Omit<
+export type OnboardingStepIndicatorProps = Omit<
     React.ComponentProps<typeof StepIndicator>,
     "currentStep" | "totalSteps"
-  > {}
+  >
 
 function OnboardingStepIndicator(props: OnboardingStepIndicatorProps) {
   const { currentStep, totalSteps } = useOnboarding()

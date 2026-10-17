@@ -3,4 +3,9 @@ packages:
   - 'packages/*'
 allowBuilds:
   esbuild: true
+<<<<<<< HEAD
   pnpm: set this to true or false
+=======
+  # eslint-config-next resolver; its prebuilt binding ships as an optional dependency
+  unrs-resolver: false
+>>>>>>> badd55b19e7b2fa07a3f0ebf8b72196638a9f252
