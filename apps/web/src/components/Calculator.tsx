@@ -211,7 +211,7 @@ export default function Calculator({
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 focus:outline-hidden transition-colors"
+                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 transition-colors"
               >
                 {showAdvanced ? dict.calculator.advancedToggleHide : dict.calculator.advancedToggleShow}
               </button>
@@ -347,7 +347,7 @@ export default function Calculator({
               {/* Legend with exact numbers */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 text-xs">
                 <div className="flex items-start gap-2 bg-[#070b12] p-2.5 rounded-xl border border-slate-800/80">
-                  <span className="w-3 h-3 rounded-sm bg-emerald-500 shadow-[0_0_6px_#10b981] mt-0.5 shrink-0" />
+                  <span className="w-3 h-3 rounded-xs bg-emerald-500 shadow-[0_0_6px_#10b981] mt-0.5 shrink-0" />
                   <div>
                     <span className="text-slate-400 block">{dict.results.breakdown.netPay}</span>
                     <span className="font-bold text-white tabular-nums">
@@ -357,7 +357,7 @@ export default function Calculator({
                 </div>
 
                 <div className="flex items-start gap-2 bg-[#070b12] p-2.5 rounded-xl border border-slate-800/80">
-                  <span className="w-3 h-3 rounded-sm bg-blue-500 mt-0.5 shrink-0" />
+                  <span className="w-3 h-3 rounded-xs bg-blue-500 mt-0.5 shrink-0" />
                   <div>
                     <span className="text-slate-400 block">{dict.results.breakdown.federalTax}</span>
                     <span className="font-bold text-white tabular-nums">
@@ -367,7 +367,7 @@ export default function Calculator({
                 </div>
 
                 <div className="flex items-start gap-2 bg-[#070b12] p-2.5 rounded-xl border border-slate-800/80">
-                  <span className="w-3 h-3 rounded-sm bg-cyan-500 mt-0.5 shrink-0" />
+                  <span className="w-3 h-3 rounded-xs bg-cyan-500 mt-0.5 shrink-0" />
                   <div>
                     <span className="text-slate-400 block">{dict.results.breakdown.provincialTax}</span>
                     <span className="font-bold text-white tabular-nums">
@@ -377,7 +377,7 @@ export default function Calculator({
                 </div>
 
                 <div className="flex items-start gap-2 bg-[#070b12] p-2.5 rounded-xl border border-slate-800/80">
-                  <span className="w-3 h-3 rounded-sm bg-indigo-500 mt-0.5 shrink-0" />
+                  <span className="w-3 h-3 rounded-xs bg-indigo-500 mt-0.5 shrink-0" />
                   <div>
                     <span className="text-slate-400 block">{dict.results.breakdown.cpp}</span>
                     <span className="font-bold text-white tabular-nums">
@@ -387,7 +387,7 @@ export default function Calculator({
                 </div>
 
                 <div className="flex items-start gap-2 bg-[#070b12] p-2.5 rounded-xl border border-slate-800/80">
-                  <span className="w-3 h-3 rounded-sm bg-amber-500 mt-0.5 shrink-0" />
+                  <span className="w-3 h-3 rounded-xs bg-amber-500 mt-0.5 shrink-0" />
                   <div>
                     <span className="text-slate-400 block">{dict.results.breakdown.ei}</span>
                     <span className="font-bold text-white tabular-nums">
@@ -397,7 +397,7 @@ export default function Calculator({
                 </div>
 
                 <div className="flex items-start gap-2 bg-[#070b12] p-2.5 rounded-xl border border-slate-800/80">
-                  <span className="w-3 h-3 rounded-sm bg-slate-500 mt-0.5 shrink-0" />
+                  <span className="w-3 h-3 rounded-xs bg-slate-500 mt-0.5 shrink-0" />
                   <div>
                     <span className="text-slate-400 block">{dict.results.totalDeductions}</span>
                     <span className="font-bold text-white tabular-nums">
@@ -455,7 +455,7 @@ function TraceList({ traces, locale }: { traces: ExplanationTraceItem[]; locale:
                       {locale === 'fr' ? trace.titleFr : trace.titleEn}
                     </span>
                     {trace.formReference && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 bg-[#070b12] text-slate-400 border border-slate-800 rounded">
+                      <span className="text-[10px] font-mono px-2 py-0.5 bg-[#070b12] text-slate-400 border border-slate-800 rounded-sm">
                         {trace.formReference}
                       </span>
                     )}

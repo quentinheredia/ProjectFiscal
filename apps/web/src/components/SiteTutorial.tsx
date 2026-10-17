@@ -20,7 +20,7 @@ export default function SiteTutorial({ locale }: SiteTutorialProps) {
   const isFr = locale === 'fr';
 
   return (
-    <section className="max-w-4xl mx-auto my-12 bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 relative overflow-hidden">
+    <section className="max-w-4xl mx-auto bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 relative overflow-hidden">
       {/* Decorative top glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-24 bg-emerald-500/10 blur-3xl pointer-events-none" />
 
