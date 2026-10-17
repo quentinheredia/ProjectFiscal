@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import { Locale, getDictionary } from '@/lib/i18n';
+import BackgroundGuides from '@/components/BackgroundGuides';
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'fr' }];
@@ -50,8 +51,9 @@ export default async function LocaleLayout({
 
   return (
     <>
+      <BackgroundGuides />
       <Navbar locale={locale} />
-      <main className="grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
     </>
