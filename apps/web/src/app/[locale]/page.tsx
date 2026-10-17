@@ -58,10 +58,11 @@ export default async function HomePage({
       <section className="max-w-7xl mx-auto">
         <BrowserWindow
           url={`https://fiscal-insights.ca/${locale}/calculator/ontario`}
+          size="auto"
           variant="safari"
           theme="dark"
           headerStyle="full"
-          className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl overflow-hidden"
+          className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl"
         >
           <div className="p-4 sm:p-8 space-y-10">
             <Calculator locale={locale} initialProvince="ON" initialSalaryDollars={80000} />
@@ -83,9 +84,9 @@ export default async function HomePage({
             <div className="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)]">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
             </div>
-            <h4 className="text-base font-bold text-white">
+            <h3 className="text-base font-bold text-white">
               {locale === 'fr' ? 'Précision garantie par tests' : 'Mathematically Proven & Tested'}
-            </h4>
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {locale === 'fr'
                 ? 'Plus de 40 scénarios validés directement contre les formulaires d’impôt officiels de l’ARC et Revenu Québec.'
@@ -97,9 +98,9 @@ export default async function HomePage({
             <div className="w-10 h-10 rounded-xl bg-blue-950/70 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold shadow-[0_0_10px_rgba(59,130,246,0.2)]">
               <Shield className="w-5 h-5 text-blue-400" />
             </div>
-            <h4 className="text-base font-bold text-white">
+            <h3 className="text-base font-bold text-white">
               {locale === 'fr' ? 'Confidentialité totale' : 'Local Browser Execution'}
-            </h4>
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {locale === 'fr'
                 ? 'Aucune donnée financière ne quitte votre appareil. Vos revenus ne sont jamais enregistrés ni envoyés à des serveurs tiers.'
@@ -111,9 +112,9 @@ export default async function HomePage({
             <div className="w-10 h-10 rounded-xl bg-purple-950/70 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold shadow-[0_0_10px_rgba(168,85,247,0.2)]">
               <BookOpen className="w-5 h-5 text-purple-400" />
             </div>
-            <h4 className="text-base font-bold text-white">
+            <h3 className="text-base font-bold text-white">
               {locale === 'fr' ? 'Transparence des dépenses' : 'Public Spending Clarity'}
-            </h4>
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {locale === 'fr'
                 ? 'Voyez exactement comment vos impôts fédéraux financent la santé, les aînés, la défense et les programmes sociaux.'

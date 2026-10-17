@@ -190,7 +190,7 @@ export default function Calculator({
                 {dict.calculator.employmentIncome} ($ CAD)
               </label>
               <div className="relative rounded-xl shadow-xs">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 font-medium text-sm">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-medium text-sm">
                   $
                 </span>
                 <input
@@ -225,7 +225,7 @@ export default function Calculator({
                     {dict.calculator.selfEmploymentIncome} ($ CAD)
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-sm">$</span>
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
                     <input
                       id="self-employment-income-input"
                       type="number"
@@ -244,7 +244,7 @@ export default function Calculator({
                     {dict.calculator.rrspDeduction} ($ CAD)
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-sm">$</span>
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
                     <input
                       id="rrsp-deduction-input"
                       type="number"
@@ -263,7 +263,7 @@ export default function Calculator({
                     {dict.calculator.fhsaDeduction} (Max $8,000/yr)
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-sm">$</span>
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
                     <input
                       id="fhsa-deduction-input"
                       type="number"
@@ -553,7 +553,7 @@ function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: numbe
         })}
       </div>
 
-      <div className="pt-2 text-[11px] text-slate-500">
+      <div className="pt-2 text-[11px] text-slate-400">
         {dict.spending.sourceNote}
       </div>
     </section>

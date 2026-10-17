@@ -83,7 +83,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
               {isFr ? `Taux de rétention à ${money.format(salary)}` : `Retention at ${money.format(salary)}`}
             </span>
             <span className="text-emerald-400 font-bold text-sm tabular-nums">{retention(salary)}</span>{' '}
-            <span className="text-slate-500">
+            <span className="text-slate-400">
               {isFr ? 'conservé après impôts et cotisations' : 'kept after tax and payroll deductions'}
             </span>
           </div>

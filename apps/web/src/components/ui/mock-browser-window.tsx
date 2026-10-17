@@ -30,7 +30,7 @@ interface SidebarContentProps {
 interface BrowserWindowProps {
   children?: React.ReactNode
   className?: string
-  size?: "sm" | "md" | "lg" | "xl"
+  size?: "sm" | "md" | "lg" | "xl" | "auto"
   showSidebar?: boolean
   sidebarPosition?: "left" | "right" | "top" | "bottom"
   headerStyle?: "minimal" | "full"
@@ -254,7 +254,9 @@ export function BrowserWindow({
     sm: "h-64 max-w-sm",
     md: "h-80 max-w-2xl",
     lg: "h-96 max-w-4xl",
-    xl: "h-128 max-w-6xl",
+    xl: "h-[32rem] max-w-6xl",
+    // Grows with its content, for live content that must not be clipped.
+    auto: "w-full",
   }
 
   const sidebarSizes = {
@@ -262,7 +264,10 @@ export function BrowserWindow({
     md: "w-48",
     lg: "w-56",
     xl: "w-64",
+    auto: "w-48",
   }
+
+  const isAuto = size === "auto"
 
   const themeClasses =
     theme === "dark"
@@ -315,7 +320,7 @@ export function BrowserWindow({
         </div>
       )}
 
-      <div className="flex h-0 flex-1">
+      <div className={cn("flex flex-1", !isAuto && "h-0")}>
         {/* Left Sidebar */}
         {showSidebar && sidebarPosition === "left" && (
           <div
@@ -326,7 +331,7 @@ export function BrowserWindow({
         )}
 
         {/* Main Content Area */}
-        <div className="relative h-full min-w-0 flex-1">
+        <div className={cn("relative min-w-0 flex-1", !isAuto && "h-full")}>
           {children || <div className="absolute inset-0">{children}</div>}
         </div>
 

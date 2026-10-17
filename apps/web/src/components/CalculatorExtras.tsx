@@ -85,7 +85,7 @@ export default function CalculatorExtras({ locale }: { locale: Locale }) {
       </section>
 
       {/* LEGAL & STATUTORY DISCLAIMER */}
-      <footer className="text-center text-xs text-slate-500 py-4 max-w-4xl mx-auto">
+      <footer className="text-center text-xs text-slate-400 py-4 max-w-4xl mx-auto">
         <p>{dict.disclaimer}</p>
       </footer>
     </div>

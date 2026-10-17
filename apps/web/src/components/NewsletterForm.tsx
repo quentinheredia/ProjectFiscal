@@ -22,7 +22,7 @@ export default function NewsletterForm({ locale }: { locale: Locale }) {
           type="submit"
           intent="primary"
           size="medium"
-          className="shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white"
+          className="shrink-0 bg-emerald-700 hover:bg-emerald-800 text-white"
         >
           {dict.newsletter.button}
         </NeumorphButton>
