@@ -8,7 +8,7 @@ on:
 
 jobs:
   verify:
-    name: Typecheck, Test & Build
+    name: Typecheck, Lint, Test, Build & E2E
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,6 +31,9 @@ jobs:
       - name: Typecheck all workspace packages
         run: pnpm typecheck
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Run Tax Engine Test Vectors (100% CI Gate)
         run: pnpm --filter @fiscal-insights/tax-engine test
 
@@ -41,3 +44,17 @@ jobs:
 
       - name: Build Next.js Web App
         run: pnpm --filter web build
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7

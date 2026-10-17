@@ -5,6 +5,11 @@ build/
 .turbo/
 .cache/
 coverage/
+*.tsbuildinfo
+
+# Playwright
+playwright-report/
+test-results/
 
 # Environment files
 .env*.local

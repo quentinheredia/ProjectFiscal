@@ -3,11 +3,18 @@
 import React from 'react';
 import { Onboarding, TipsList } from '@/components/ui/onboarding';
 import { Locale } from '@/lib/i18n';
-import { Shield, Sparkles, Compass, CheckCircle2, FileText, PieChart } from 'lucide-react';
+import { FEDERAL_SPENDING_CATEGORIES } from '@/lib/spending';
+import { Shield, Compass, CheckCircle2, FileText, PieChart } from 'lucide-react';
 
 interface SiteTutorialProps {
   locale: Locale;
 }
+
+// Same spending shares the calculator shows, so the two never disagree.
+const spendingShare = (id: string, isFr: boolean) => {
+  const percentage = FEDERAL_SPENDING_CATEGORIES.find((category) => category.id === id)?.percentage ?? 0;
+  return isFr ? `${String(percentage).replace('.', ',')} %` : `${percentage}%`;
+};
 
 export default function SiteTutorial({ locale }: SiteTutorialProps) {
   const isFr = locale === 'fr';
@@ -171,18 +178,26 @@ export default function SiteTutorial({ locale }: SiteTutorialProps) {
                 <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-white">
-                    {isFr ? 'Transfert canadien en santé: ' : 'Canada Health Transfer (CHT): '}
+                    {isFr ? 'Transferts en santé et programmes sociaux (TCS/TCPS) : ' : 'Health & social transfers (CHT/CST): '}
                   </span>
-                  <span>{isFr ? '23,4% de l’impôt fédéral pour les soins de santé.' : '23.4% of federal revenue directed to healthcare.'}</span>
+                  <span>
+                    {isFr
+                      ? `${spendingShare('health_social_transfers', true)} des dépenses fédérales.`
+                      : `${spendingShare('health_social_transfers', false)} of federal spending.`}
+                  </span>
                 </div>
               </TipsList.Item>
               <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
                 <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-white">
-                    {isFr ? 'Prestations aux aînés: ' : 'Elderly benefits & OAS: '}
+                    {isFr ? 'Prestations aux aînés (SV et SRG) : ' : 'Elderly benefits (OAS & GIS): '}
                   </span>
-                  <span>{isFr ? '16,7% pour le soutien aux retraités canadiens.' : '16.7% dedicated to senior security and OAS.'}</span>
+                  <span>
+                    {isFr
+                      ? `${spendingShare('elderly_benefits', true)} des dépenses fédérales.`
+                      : `${spendingShare('elderly_benefits', false)} of federal spending.`}
+                  </span>
                 </div>
               </TipsList.Item>
             </TipsList>

@@ -33,6 +33,8 @@ export const translations = {
       },
       advancedToggleShow: '+ More income and deductions',
       advancedToggleHide: '- Fewer options',
+      yearUnavailable: 'Not available for this province yet',
+      provinceUnavailable: 'not yet available for {year}',
     },
     results: {
       heroLabel: 'Estimated Take-Home Pay',
@@ -110,6 +112,8 @@ export const translations = {
       },
       advancedToggleShow: '+ Plus de revenus et déductions',
       advancedToggleHide: '- Moins d’options',
+      yearUnavailable: 'Pas encore offert pour cette province',
+      provinceUnavailable: 'pas encore offert pour {year}',
     },
     results: {
       heroLabel: 'Revenu net estimé',

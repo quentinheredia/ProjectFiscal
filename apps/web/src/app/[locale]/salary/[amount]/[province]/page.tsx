@@ -1,11 +1,12 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Calculator from '@/components/Calculator';
-import { Locale, getDictionary } from '@/lib/i18n';
+import CalculatorExtras from '@/components/CalculatorExtras';
+import { Locale } from '@/lib/i18n';
 import { calculateTax, formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
-import { CheckCircle2, ShieldCheck, TrendingUp } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { BrowserWindow } from '@/components/ui/mock-browser-window';
 
 interface SalaryPageProps {
@@ -78,8 +79,6 @@ export default async function SalaryPage({ params }: SalaryPageProps) {
   const province = resolved.province;
 
   if (amount !== '80000' || province.toLowerCase() !== 'ontario') notFound();
-
-  const dict = getDictionary(locale);
 
   // Compute exact figures statically for $80,000 in Ontario for 2026
   const result = calculateTax(
@@ -154,12 +153,13 @@ export default async function SalaryPage({ params }: SalaryPageProps) {
           headerStyle="full"
           className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl overflow-hidden"
         >
-          <div className="p-4 sm:p-8">
+          <div className="p-4 sm:p-8 space-y-10">
             <Calculator
               locale={locale}
               initialProvince="ON"
               initialSalaryDollars={80000}
             />
+            <CalculatorExtras locale={locale} />
           </div>
         </BrowserWindow>
       </section>

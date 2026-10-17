@@ -13,7 +13,8 @@
     "build": "pnpm --recursive run build",
     "test": "pnpm --recursive run test",
     "lint": "pnpm --recursive run lint",
-    "typecheck": "pnpm --recursive run typecheck"
+    "typecheck": "pnpm --recursive run typecheck",
+    "e2e": "pnpm --filter web e2e"
   },
   "devDependencies": {
     "typescript": "^5.7.3"
