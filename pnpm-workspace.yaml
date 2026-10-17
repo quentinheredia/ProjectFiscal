@@ -3,3 +3,4 @@ packages:
   - 'packages/*'
 allowBuilds:
   esbuild: true
+  pnpm: set this to true or false
