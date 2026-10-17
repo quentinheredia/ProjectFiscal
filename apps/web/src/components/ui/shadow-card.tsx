@@ -46,7 +46,7 @@ function ShadowCard({ className, asChild, ...props }: ShadowCardProps) {
   const Comp = asChild ? Slot : "div"
   return (
     <Comp
-      className={cn("relative overflow-hidden rounded-sm", className)}
+      className={cn("relative overflow-hidden rounded-xs", className)}
       data-slot="shadow-card"
       {...props}
     />

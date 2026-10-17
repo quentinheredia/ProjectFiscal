@@ -41,11 +41,11 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
     `${((TAKE_HOME.get(salary)! / salary) * 100).toFixed(1).replace('.', isFr ? ',' : '.')}${isFr ? ' %' : '%'}`;
 
   return (
-    <section className="max-w-7xl mx-auto my-12 bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6 relative overflow-hidden">
+    <section className="max-w-7xl mx-auto bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6 relative overflow-hidden">
       {/* Background radial accent */}
       <div className="absolute -top-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5 mt-6">
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">
             <Activity className="w-4 h-4 text-emerald-400" />
@@ -83,7 +83,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
               {isFr ? `Taux de rétention à ${money.format(salary)}` : `Retention at ${money.format(salary)}`}
             </span>
             <span className="text-emerald-400 font-bold text-sm tabular-nums">{retention(salary)}</span>{' '}
-            <span className="text-slate-500">
+            <span className="text-slate-400">
               {isFr ? 'conservé après impôts et cotisations' : 'kept after tax and payroll deductions'}
             </span>
           </div>

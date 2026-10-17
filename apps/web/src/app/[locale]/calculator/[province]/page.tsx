@@ -129,7 +129,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <section className="text-center max-w-4xl mx-auto space-y-3 pt-4">
+      <section className="text-center max-w-4xl mx-auto space-y-3 pt-16">
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
           {locale === 'fr'
             ? `Calculateur d’impôt sur le revenu de ${config.nameFr} 2026`
@@ -149,7 +149,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
           variant="safari"
           theme="dark"
           headerStyle="full"
-          className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl overflow-hidden"
+          className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl"
         >
           <div className="p-4 sm:p-8 space-y-10">
             <Calculator locale={locale} initialProvince={config.code} initialSalaryDollars={80000} />

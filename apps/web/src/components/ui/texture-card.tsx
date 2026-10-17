@@ -10,7 +10,7 @@ const TextureCardStyled = React.forwardRef<
     ref={ref}
     className={cn(
       "rounded-[24px] border border-slate-200 border-white/60 dark:border-stone-950/60 dark:border-slate-800",
-      "bg-gradient-to-b from-neutral-100 to-white/70 dark:from-neutral-800 dark:to-neutral-900",
+      "bg-linear-to-b from-neutral-100 to-white/70 dark:from-neutral-800 dark:to-neutral-900",
       className
     )}
     {...props}
@@ -48,7 +48,7 @@ const TextureCard = React.forwardRef<
       <div className="rounded-[calc(var(--radius)-1px)] border border-slate-200 border-black/10 dark:border-neutral-900/80 dark:border-slate-800">
         <div className="rounded-[calc(var(--radius)-2px)] border border-slate-200 border-white/50 dark:border-neutral-950 dark:border-slate-800">
           <div className="rounded-[calc(var(--radius)-3px)] border border-slate-200 border-neutral-950/20 dark:border-neutral-900/70 dark:border-slate-800">
-            <div className="from-card/70 to-secondary/50 w-full rounded-[calc(var(--radius)-4px)] border border-slate-200 border-white/50 bg-gradient-to-b text-neutral-500 dark:border-neutral-700/50 dark:border-slate-800">
+            <div className="from-card/70 to-secondary/50 w-full rounded-[calc(var(--radius)-4px)] border border-slate-200 border-white/50 bg-linear-to-b text-neutral-500 dark:border-neutral-700/50 dark:border-slate-800">
               {children}
             </div>
           </div>

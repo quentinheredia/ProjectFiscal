@@ -211,7 +211,7 @@ export function GradientButtonGroup() {
           <div className="relative z-10 flex">
             {/* Outer rim/bezel */}
             <div
-              className="bg-slate-100 dark:bg-white absolute -inset-[4px] rounded-[28px] border-[1px] transition-colors duration-300 dark:bg-slate-800 dark:dark:bg-slate-950"
+              className="bg-slate-100 dark:bg-white absolute inset-[-4px] rounded-[28px] border transition-colors duration-300 dark:bg-slate-800 dark:dark:bg-slate-950"
               style={{
                 borderColor: isDarkMode
                   ? "rgba(255,255,255,0.05)"
@@ -369,7 +369,7 @@ export function GradientButtonGroup() {
               })}
             </nav>
             {/* Theme toggle - sits in the recessed tray on the right */}
-            <div className="relative z-[1] flex items-center px-4">
+            <div className="relative z-1 flex items-center px-4">
               <button
                 type="button"
                 onClick={() => setTheme(isDarkMode ? "light" : "dark")}
