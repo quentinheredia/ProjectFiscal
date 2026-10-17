@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { Calculator, MapPin, DollarSign, Globe } from 'lucide-react';
@@ -59,10 +60,8 @@ export default function Navbar({ locale }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link href={`/${locale}`} className="flex items-center gap-3 group shrink-0">
-          <div className="relative w-9 h-9 rounded-xl bg-linear-to-br from-emerald-500 via-teal-500 to-blue-600 flex items-center justify-center text-white font-black text-sm shadow-[0_0_20px_rgba(16,185,129,0.35)] group-hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-all">
-            <span className="relative z-10">FI</span>
-            <div className="absolute inset-0 rounded-xl bg-emerald-400/20 blur-[2px]" />
-          </div>
+          {/* Logo emblem; the name next to it is live text, so the image is decorative */}
+          <Image src="/brand/emblem-96.png" alt="" width={40} height={40} priority className="w-10 h-10 shrink-0" />
           <div className="flex flex-col">
             <span className="font-extrabold text-white tracking-tight text-lg leading-none">
               Fiscal<span className="text-emerald-400">Insights</span>
