@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
@@ -11,6 +12,7 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
+  ArrowRight,
 } from 'lucide-react';
 
 interface TaxInformationHubProps {
@@ -33,11 +35,11 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
   ];
 
   return (
-    <section className="max-w-7xl mx-auto my-14 space-y-12" id="tax-information">
+    <section className="max-w-7xl mx-auto my-14 space-y-14" id="tax-information">
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-purple-950/70 text-purple-400 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-          <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700/80 shadow-sm">
+          <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
           <span>{dict.infoHub.badge}</span>
         </div>
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
@@ -48,8 +50,8 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
         </p>
       </div>
 
-      {/* 1. Official 2026 Tax Brackets (Federal & Ontario) */}
-      <div className="bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6">
+      {/* 1. Official 2026 Tax Brackets (Open Canvas Heading, Only Tables Are Bordered Containers) */}
+      <div id="brackets" className="space-y-6">
         <div>
           <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
             {locale === 'fr' ? 'Barèmes officiels indexés' : 'Statutory Schedules'}
@@ -58,7 +60,7 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
             {dict.infoHub.brackets.title}
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
-            {dict.infoHub.brackets.subtitle} {dict.infoHub.brackets.federalTitle}
+            {dict.infoHub.brackets.subtitle}
           </p>
         </div>
 
@@ -69,13 +71,13 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
               <span className="w-2 h-2 rounded-full bg-blue-400" />
               <span>{dict.infoHub.brackets.federalTitle}</span>
             </h4>
-            <div className="overflow-x-auto rounded-xl border border-slate-800">
+            <div className="overflow-x-auto rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.5)]">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-800 bg-[#070b12] text-slate-300 font-semibold">
-                    <th className="py-2.5 px-3.5">{dict.infoHub.brackets.thresholdCol}</th>
-                    <th className="py-2.5 px-3.5">{dict.infoHub.brackets.rateCol}</th>
-                    <th className="py-2.5 px-3.5">{dict.infoHub.brackets.citationCol}</th>
+                    <th className="py-3 px-4">{dict.infoHub.brackets.thresholdCol}</th>
+                    <th className="py-3 px-4">{dict.infoHub.brackets.rateCol}</th>
+                    <th className="py-3 px-4">{dict.infoHub.brackets.citationCol}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]">
@@ -85,13 +87,13 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
                     const currentUpTo = b.upToCents ? formatCentsToDollars(b.upToCents.value) : (locale === 'fr' ? 'Tout montant supérieur' : 'Above this threshold');
                     return (
                       <tr key={idx} className="hover:bg-slate-800/30">
-                        <td className="py-2.5 px-3.5 font-medium text-white tabular-nums">
+                        <td className="py-2.5 px-4 font-medium text-white tabular-nums">
                           {prevUpTo} – {currentUpTo}
                         </td>
-                        <td className="py-2.5 px-3.5 font-bold text-blue-400 tabular-nums">
+                        <td className="py-2.5 px-4 font-bold text-blue-400 tabular-nums">
                           {(b.rate.value * 100).toFixed(2)}%
                         </td>
-                        <td className="py-2.5 px-3.5 text-slate-400 font-mono text-[11px]">
+                        <td className="py-2.5 px-4 text-slate-400 font-mono text-[11px]">
                           Schedule 1, Part B
                         </td>
                       </tr>
@@ -105,16 +107,16 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
           {/* Ontario Brackets Table */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-yellow-400" />
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
               <span>{dict.infoHub.brackets.ontarioTitle}</span>
             </h4>
-            <div className="overflow-x-auto rounded-xl border border-slate-800">
+            <div className="overflow-x-auto rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.5)]">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-800 bg-[#070b12] text-slate-300 font-semibold">
-                    <th className="py-2.5 px-3.5">{dict.infoHub.brackets.thresholdCol}</th>
-                    <th className="py-2.5 px-3.5">{dict.infoHub.brackets.rateCol}</th>
-                    <th className="py-2.5 px-3.5">{dict.infoHub.brackets.citationCol}</th>
+                    <th className="py-3 px-4">{dict.infoHub.brackets.thresholdCol}</th>
+                    <th className="py-3 px-4">{dict.infoHub.brackets.rateCol}</th>
+                    <th className="py-3 px-4">{dict.infoHub.brackets.citationCol}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]">
@@ -124,13 +126,13 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
                     const currentUpTo = b.upToCents ? formatCentsToDollars(b.upToCents.value) : (locale === 'fr' ? 'Tout montant supérieur' : 'Above this threshold');
                     return (
                       <tr key={idx} className="hover:bg-slate-800/30">
-                        <td className="py-2.5 px-3.5 font-medium text-white tabular-nums">
+                        <td className="py-2.5 px-4 font-medium text-white tabular-nums">
                           {prevUpTo} – {currentUpTo}
                         </td>
-                        <td className="py-2.5 px-3.5 font-bold text-yellow-400 tabular-nums">
+                        <td className="py-2.5 px-4 font-bold text-amber-400 tabular-nums">
                           {(b.rate.value * 100).toFixed(2)}%
                         </td>
-                        <td className="py-2.5 px-3.5 text-slate-400 font-mono text-[11px]">
+                        <td className="py-2.5 px-4 text-slate-400 font-mono text-[11px]">
                           Form ON428, Part A
                         </td>
                       </tr>
@@ -143,71 +145,75 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
         </div>
       </div>
 
-      {/* 2. Marginal Rate vs. Average Tax Rate Guide & RRSP/FHSA Optimization */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* 2. Marginal Rate vs. Average Tax Rate Guide & RRSP/FHSA Optimization (Open-Canvas 2-Column Hairline Split) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-white/[0.08] border-y border-white/[0.08] py-10">
         {/* Marginal vs Average */}
-        <div className="bg-[#0c121e] rounded-2xl border border-slate-800/90 p-6 sm:p-7 space-y-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-400">
-              <Scale className="w-5 h-5" />
+        <div className="p-6 sm:p-8 space-y-5 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-400">
+                <Scale className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                {dict.infoHub.marginalVsAverage.title}
+              </h3>
             </div>
-            <h3 className="text-xl font-bold text-white tracking-tight">
-              {dict.infoHub.marginalVsAverage.title}
-            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              {dict.infoHub.marginalVsAverage.description}
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            {dict.infoHub.marginalVsAverage.description}
-          </p>
 
-          <div className="space-y-3 pt-2">
-            <div className="bg-[#070b12] p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
+          <div className="space-y-4 pt-2">
+            <div className="border-l-2 border-blue-400/80 pl-4 py-1 text-xs text-slate-300 space-y-1">
               <span className="font-bold text-white block">
                 {dict.infoHub.marginalVsAverage.point1Title}
               </span>
-              <p className="text-slate-400">{dict.infoHub.marginalVsAverage.point1Desc}</p>
+              <p className="text-slate-400 leading-relaxed">{dict.infoHub.marginalVsAverage.point1Desc}</p>
             </div>
-            <div className="bg-[#070b12] p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
+            <div className="border-l-2 border-emerald-400/80 pl-4 py-1 text-xs text-slate-300 space-y-1">
               <span className="font-bold text-white block">
                 {dict.infoHub.marginalVsAverage.point2Title}
               </span>
-              <p className="text-slate-400">{dict.infoHub.marginalVsAverage.point2Desc}</p>
+              <p className="text-slate-400 leading-relaxed">{dict.infoHub.marginalVsAverage.point2Desc}</p>
             </div>
           </div>
         </div>
 
         {/* RRSP & FHSA Optimization */}
-        <div className="bg-[#0c121e] rounded-2xl border border-slate-800/90 p-6 sm:p-7 space-y-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-400">
-              <TrendingUp className="w-5 h-5" />
+        <div className="p-6 sm:p-8 space-y-5 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-400">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                {dict.infoHub.deductions.title}
+              </h3>
             </div>
-            <h3 className="text-xl font-bold text-white tracking-tight">
-              {dict.infoHub.deductions.title}
-            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              {dict.infoHub.deductions.description}
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            {dict.infoHub.deductions.description}
-          </p>
 
-          <div className="space-y-3 pt-2">
-            <div className="bg-[#070b12] p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
+          <div className="space-y-4 pt-2">
+            <div className="border-l-2 border-purple-400/80 pl-4 py-1 text-xs text-slate-300 space-y-1">
               <span className="font-bold text-white block">
                 {dict.infoHub.deductions.rrspTitle}
               </span>
-              <p className="text-slate-400">{dict.infoHub.deductions.rrspDesc}</p>
+              <p className="text-slate-400 leading-relaxed">{dict.infoHub.deductions.rrspDesc}</p>
             </div>
-            <div className="bg-[#070b12] p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
+            <div className="border-l-2 border-teal-400/80 pl-4 py-1 text-xs text-slate-300 space-y-1">
               <span className="font-bold text-white block">
                 {dict.infoHub.deductions.fhsaTitle}
               </span>
-              <p className="text-slate-400">{dict.infoHub.deductions.fhsaDesc}</p>
+              <p className="text-slate-400 leading-relaxed">{dict.infoHub.deductions.fhsaDesc}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. 2026 Statutory Payroll Ceilings (CPP, CPP2, EI) */}
-      <div className="bg-[#0c121e] rounded-2xl border border-slate-800/90 p-6 sm:p-7 space-y-5">
+      {/* 3. 2026 Statutory Payroll Ceilings (CPP, CPP2, EI) — Open Canvas Header with Single Bordered Hairline Box */}
+      <div className="space-y-5">
         <div>
           <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block">
             {locale === 'fr' ? 'Cotisations salariales obligatoires' : 'Mandatory Payroll Limits'}
@@ -215,36 +221,36 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
           <h3 className="text-2xl font-bold text-white tracking-tight mt-1">
             {dict.infoHub.ceilings.title}
           </h3>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
             {dict.infoHub.ceilings.description}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="bg-[#070b12] p-4 rounded-xl border border-slate-800 space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.08] border border-white/[0.08] rounded-2xl overflow-hidden bg-[#0a0f1a]/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.5)] text-xs">
+          <div className="p-6 space-y-2 hover:bg-white/[0.02] transition-colors">
             <div className="flex items-center justify-between">
               <span className="font-bold text-white">{dict.infoHub.ceilings.cppBaseTitle}</span>
-              <span className="font-mono text-emerald-400 font-bold">$73,200</span>
+              <span className="font-mono text-emerald-400 font-bold tabular-nums">$73,200</span>
             </div>
             <p className="text-slate-400 leading-relaxed text-[11px]">
               {dict.infoHub.ceilings.cppBaseDesc}
             </p>
           </div>
 
-          <div className="bg-[#070b12] p-4 rounded-xl border border-slate-800 space-y-2">
+          <div className="p-6 space-y-2 hover:bg-white/[0.02] transition-colors">
             <div className="flex items-center justify-between">
               <span className="font-bold text-white">{dict.infoHub.ceilings.cpp2Title}</span>
-              <span className="font-mono text-purple-400 font-bold">$81,200</span>
+              <span className="font-mono text-purple-400 font-bold tabular-nums">$81,200</span>
             </div>
             <p className="text-slate-400 leading-relaxed text-[11px]">
               {dict.infoHub.ceilings.cpp2Desc}
             </p>
           </div>
 
-          <div className="bg-[#070b12] p-4 rounded-xl border border-slate-800 space-y-2">
+          <div className="p-6 space-y-2 hover:bg-white/[0.02] transition-colors">
             <div className="flex items-center justify-between">
               <span className="font-bold text-white">{dict.infoHub.ceilings.eiTitle}</span>
-              <span className="font-mono text-blue-400 font-bold">$65,700</span>
+              <span className="font-mono text-blue-400 font-bold tabular-nums">$65,700</span>
             </div>
             <p className="text-slate-400 leading-relaxed text-[11px]">
               {dict.infoHub.ceilings.eiDesc}
@@ -253,78 +259,94 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
         </div>
       </div>
 
-      {/* 4. The Famous $80,000 Ontario Test: Old Site vs. Rebuild */}
-      <div className="bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6">
-        <div>
-          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
-            {locale === 'fr' ? 'Preuve d’audit rigoureuse' : 'Audit Verification Point'}
-          </span>
-          <h3 className="text-2xl font-bold text-white tracking-tight mt-1">
-            {dict.pitch.title}
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
-            {dict.pitch.subtitle} (Ontario, $80,000 benchmark)
-          </p>
+      {/* 4. The Famous $80,000 Ontario Test: Old Site vs. Rebuild (Audit Verification Point) — Open Canvas Header with Flush Table */}
+      <div id="legacy-audit" className="space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+              {locale === 'fr' ? 'Preuve d’audit rigoureuse' : 'Audit Verification Point'}
+            </span>
+            <h3 className="text-2xl font-bold text-white tracking-tight mt-1">
+              {dict.pitch.title}
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+              {dict.pitch.subtitle} (Ontario, $80,000 benchmark)
+            </p>
+          </div>
+          <Link
+            href={`/${locale}/salary/80000/ontario`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)] transition-all shrink-0 cursor-pointer"
+          >
+            <span>{dict.pitch.inspectAuditAction}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.5)] bg-[#0a0f1a]/60">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-800 bg-[#070b12] text-slate-300 font-semibold">
-                <th className="py-3 px-4">{dict.pitch.table.line}</th>
-                <th className="py-3 px-4 text-red-400 bg-red-950/30">{dict.pitch.table.oldSite}</th>
-                <th className="py-3 px-4 text-emerald-400 bg-emerald-950/30">{dict.pitch.table.newEngine}</th>
-                <th className="py-3 px-4">{dict.pitch.table.difference}</th>
+                <th className="py-3.5 px-4">{dict.pitch.table.line}</th>
+                <th className="py-3.5 px-4 text-rose-400 bg-rose-950/20">{dict.pitch.table.oldSite}</th>
+                <th className="py-3.5 px-4 text-emerald-400 bg-emerald-500/[0.08] border-x border-emerald-500/20 font-bold">{dict.pitch.table.newEngine}</th>
+                <th className="py-3.5 px-4">{dict.pitch.table.difference}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]">
+            <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]/80">
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">Federal Tax</td>
-                <td className="py-3 px-4 tabular-nums text-red-400 bg-red-950/15">$10,323</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">~$9,552</td>
-                <td className="py-3 px-4 text-slate-400">Old site was ~$771 too high (used obsolete pre-2025 brackets).</td>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.fedLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$10,323</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">~$9,552</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.fedDiff}</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">Ontario Tax + OHP</td>
-                <td className="py-3 px-4 tabular-nums text-red-400 bg-red-950/15">$3,985</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">~$4,940</td>
-                <td className="py-3 px-4 text-slate-400">Old site was ~$955 too low (completely omitted Ontario Health Premium of $750).</td>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.provLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$3,985</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">~$4,940</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.provDiff}</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">CPP + CPP2</td>
-                <td className="py-3 px-4 tabular-nums text-slate-300">$4,382.10</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$4,382.10</td>
-                <td className="py-3 px-4 text-slate-400">Exact match on YMPE + enhanced CPP2 ceiling.</td>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.cppLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-slate-300">$4,382.10</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$4,382.10</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.cppDiff}</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">Employment Insurance (EI)</td>
-                <td className="py-3 px-4 tabular-nums text-slate-300">$1,077.48</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$1,077.48</td>
-                <td className="py-3 px-4 text-slate-400">Exact match on maximum insurable earnings limit.</td>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.eiLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-slate-300">$1,077.48</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$1,077.48</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.eiDiff}</td>
               </tr>
               <tr className="bg-[#070b12] font-bold">
-                <td className="py-3 px-4 text-white">Take-Home Net Income</td>
-                <td className="py-3 px-4 tabular-nums text-slate-300">$60,232</td>
-                <td className="py-3 px-4 tabular-nums text-emerald-400 bg-emerald-950/30">~$60,048</td>
-                <td className="py-3 px-4 text-slate-300">Net looked plausible only because two large errors canceled each other out!</td>
+                <td className="py-3.5 px-4 text-white">{dict.pitch.table.netLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-slate-300">$60,232</td>
+                <td className="py-3.5 px-4 tabular-nums text-emerald-400 bg-emerald-500/[0.08] border-x border-emerald-500/30">~$60,048</td>
+                <td className="py-3.5 px-4 text-emerald-300/90 font-medium">{dict.pitch.table.netDiff}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* 5. Frequently Asked Questions Accordion */}
-      <div className="bg-[#0c121e] rounded-2xl border border-slate-800/90 p-6 sm:p-8 space-y-5">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-emerald-400">
+      {/* 5. Frequently Asked Questions (Asymmetric 12-Column Open Editorial Layout) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-8 border-t border-white/[0.08]">
+        {/* Left Column (lg:col-span-4): Badge, Title, Subtitle */}
+        <div className="lg:col-span-4 space-y-3">
+          <div className="inline-flex items-center gap-2 p-2 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 w-fit">
             <HelpCircle className="w-5 h-5" />
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             {dict.infoHub.faq.title}
           </h3>
+          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            {locale === 'fr'
+              ? 'Réponses claires aux questions courantes sur la précision fiscale et la confidentialité.'
+              : 'Direct answers to key questions regarding mathematical accuracy, statutory data, and private execution.'}
+          </p>
         </div>
 
-        <div className="divide-y divide-slate-800">
+        {/* Right Column (lg:col-span-8): Accordion Items Separated Strictly by Hairlines */}
+        <div className="lg:col-span-8 divide-y divide-white/[0.08] border-y border-white/[0.08]">
           {faqs.map((faq, idx) => {
             const isOpen = openFaq === idx;
             return (

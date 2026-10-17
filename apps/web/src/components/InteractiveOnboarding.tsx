@@ -1,17 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { Onboarding, TipsList } from '@/components/ui/onboarding';
 import { Locale, getDictionary } from '@/lib/i18n';
 import {
   Compass,
   MapPin,
-  DollarSign,
-  TrendingUp,
+  FileCheck2,
   CheckCircle2,
-  ArrowRight,
-  Calculator,
+  Lock,
 } from 'lucide-react';
 
 interface InteractiveOnboardingProps {
@@ -20,317 +16,203 @@ interface InteractiveOnboardingProps {
 
 export default function InteractiveOnboarding({ locale }: InteractiveOnboardingProps) {
   const dict = getDictionary(locale);
-  const [activeStep, setActiveStep] = useState<number>(1);
-  const [selectedDemoProvince, setSelectedDemoProvince] = useState<string>('ON');
-  const [demoIncome, setDemoIncome] = useState<number>(85000);
-  const [demoRrsp, setDemoRrsp] = useState<number>(8000);
+  const [selectedProvince, setSelectedProvince] = useState<string>('ON');
 
-  // Approximate marginal tax savings preview for Step 3 demonstration
-  const estSavings = Math.round(demoRrsp * 0.3148);
+  const provinces = [
+    { code: 'ON', slug: 'ontario', name: 'Ontario', form: 'ON428' },
+    { code: 'QC', slug: 'quebec', name: 'Québec', form: 'TP-1' },
+    { code: 'BC', slug: 'british-columbia', name: 'British Columbia', form: 'BC428' },
+    { code: 'AB', slug: 'alberta', name: 'Alberta', form: 'AB428' },
+  ];
 
   return (
-    <section className="max-w-5xl mx-auto my-14 bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-9 relative overflow-hidden">
-      {/* Subtle background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-28 bg-emerald-500/10 blur-3xl pointer-events-none" />
-
-      <div className="flex items-center gap-2 mb-4">
+    <section className="max-w-7xl mx-auto my-14 space-y-10" id="how-it-works">
+      {/* Section Header with clean sans-serif typography */}
+      <div className="text-center max-w-3xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30">
           <Compass className="w-3.5 h-3.5 text-emerald-400" />
           <span>{dict.onboarding.badge}</span>
         </div>
+        <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          {dict.onboarding.title}
+        </h2>
+        <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
+          {dict.onboarding.subtitle}
+        </p>
       </div>
 
-      <Onboarding
-        totalSteps={5}
-        value={activeStep}
-        onValueChange={setActiveStep}
-        className="space-y-6"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
-          <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              {dict.onboarding.title}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              {dict.onboarding.subtitle}
-            </p>
-          </div>
-          <Onboarding.StepIndicator />
-        </div>
-
-        {/* STEP 1: PROVINCE & TAX YEAR */}
-        <Onboarding.Step step={1} className="space-y-4">
-          <Onboarding.Header
-            title={dict.onboarding.step1.title}
-            description={dict.onboarding.step1.description}
-          />
-          <div className="bg-[#070b12] rounded-xl p-5 border border-slate-800 space-y-4">
-            <div className="flex flex-wrap items-center gap-2 pb-2">
-              {[
-                { code: 'ON', label: 'Ontario (ON428)' },
-                { code: 'QC', label: 'Québec (TP-1)' },
-                { code: 'BC', label: 'British Columbia (BC428)' },
-                { code: 'AB', label: 'Alberta (AB428)' },
-              ].map((p) => (
-                <button
-                  key={p.code}
-                  type="button"
-                  onClick={() => setSelectedDemoProvince(p.code)}
-                  className={`px-3 py-1.5 text-xs rounded-lg font-semibold transition-all cursor-pointer ${
-                    selectedDemoProvince === p.code
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
-                      : 'bg-[#0f1422] text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  <MapPin className="w-3 h-3 inline mr-1" />
-                  {p.label}
-                </button>
-              ))}
+      {/* Single 3-Column Architectural Grid on Open Canvas (Zero Outer Nested Box Wrappers) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-white/[0.08] border-y border-white/[0.08]">
+        
+        {/* COLUMN 1: Statutory Jurisdiction Selection */}
+        <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold text-emerald-400 tracking-wider">
+                01 / JURISDICTION
+              </span>
+              <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <MapPin className="w-4 h-4" />
+              </span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white tracking-tight">
+                {dict.onboarding.step1.title}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                {dict.onboarding.step1.description}
+              </p>
             </div>
 
-            <TipsList className="pt-2 border-t border-slate-800/80 space-y-2.5">
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step1.tip1Title}
-                  </span>
-                  <span>{dict.onboarding.step1.tip1Desc}</span>
-                </div>
-              </TipsList.Item>
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step1.tip2Title}
-                  </span>
-                  <span>{dict.onboarding.step1.tip2Desc}</span>
-                </div>
-              </TipsList.Item>
-            </TipsList>
-          </div>
-        </Onboarding.Step>
-
-        {/* STEP 2: SALARY & FREQUENCIES */}
-        <Onboarding.Step step={2} className="space-y-4">
-          <Onboarding.Header
-            title={dict.onboarding.step2.title}
-            description={dict.onboarding.step2.description}
-          />
-          <div className="bg-[#070b12] rounded-xl p-5 border border-slate-800 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0c121e] p-3.5 rounded-xl border border-slate-800">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-semibold text-white">
-                  {locale === 'fr' ? 'Exemple de rémunération :' : 'Sample Gross Income:'}
-                </span>
-                <span className="text-xs font-bold text-emerald-400 tabular-nums">
-                  ${demoIncome.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                {[65000, 85000, 115000].map((inc) => (
+            {/* Interactive Province Selector (Only visual artifact on this column) */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              {provinces.map((p) => {
+                const isSelected = selectedProvince === p.code;
+                return (
                   <button
-                    key={inc}
+                    key={p.code}
                     type="button"
-                    onClick={() => setDemoIncome(inc)}
-                    className={`px-2.5 py-1 text-xs rounded-md font-medium cursor-pointer ${
-                      demoIncome === inc
-                        ? 'bg-slate-700 text-white'
-                        : 'bg-[#070b12] text-slate-400 hover:text-slate-200'
+                    onClick={() => setSelectedProvince(p.code)}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all cursor-pointer border ${
+                      isSelected
+                        ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                        : 'bg-[#070b12] border-white/[0.06] text-slate-400 hover:text-white hover:border-slate-700'
                     }`}
                   >
-                    ${(inc / 1000).toFixed(0)}k
+                    <div className="flex items-center justify-between">
+                      <span>{p.code}</span>
+                      <span className="text-[10px] font-mono text-slate-500">{p.form}</span>
+                    </div>
+                    <div className="text-[11px] text-slate-300 font-normal truncate mt-0.5">{p.name}</div>
                   </button>
-                ))}
-              </div>
-            </div>
-
-            <TipsList className="pt-2 border-t border-slate-800/80 space-y-2.5">
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step2.tip1Title}
-                  </span>
-                  <span>{dict.onboarding.step2.tip1Desc}</span>
-                </div>
-              </TipsList.Item>
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step2.tip2Title}
-                  </span>
-                  <span>{dict.onboarding.step2.tip2Desc}</span>
-                </div>
-              </TipsList.Item>
-            </TipsList>
-          </div>
-        </Onboarding.Step>
-
-        {/* STEP 3: RRSP & FHSA DEDUCTIONS */}
-        <Onboarding.Step step={3} className="space-y-4">
-          <Onboarding.Header
-            title={dict.onboarding.step3.title}
-            description={dict.onboarding.step3.description}
-          />
-          <div className="bg-[#070b12] rounded-xl p-5 border border-slate-800 space-y-4">
-            <div className="bg-[#0c121e] p-3.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-purple-400" />
-                <span className="text-xs font-medium text-slate-300">
-                  {locale === 'fr' ? 'Cotisation REER simulée :' : 'Modeled RRSP Contribution:'}
-                </span>
-                <span className="text-xs font-bold text-purple-400">${demoRrsp.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                {[4000, 8000, 12000].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => setDemoRrsp(amt)}
-                    className={`px-2 py-0.5 text-xs rounded-md font-medium cursor-pointer ${
-                      demoRrsp === amt
-                        ? 'bg-purple-900/60 text-purple-300 border border-purple-500/40'
-                        : 'bg-[#070b12] text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    ${(amt / 1000).toFixed(0)}k
-                  </button>
-                ))}
-              </div>
-              <div className="text-xs font-semibold text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/30">
-                {locale === 'fr'
-                  ? `Économie d’impôt immédiate : ~${estSavings.toLocaleString()} $`
-                  : `Instant Tax Reduction: ~$${estSavings.toLocaleString()}`}
-              </div>
-            </div>
-
-            <TipsList className="pt-2 border-t border-slate-800/80 space-y-2.5">
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step3.tip1Title}
-                  </span>
-                  <span>{dict.onboarding.step3.tip1Desc}</span>
-                </div>
-              </TipsList.Item>
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step3.tip2Title}
-                  </span>
-                  <span>{dict.onboarding.step3.tip2Desc}</span>
-                </div>
-              </TipsList.Item>
-            </TipsList>
-          </div>
-        </Onboarding.Step>
-
-        {/* STEP 4: AUDITABLE LINE-BY-LINE TRACES */}
-        <Onboarding.Step step={4} className="space-y-4">
-          <Onboarding.Header
-            title={dict.onboarding.step4.title}
-            description={dict.onboarding.step4.description}
-          />
-          <div className="bg-[#070b12] rounded-xl p-5 border border-slate-800 space-y-4">
-            <div className="bg-[#0c121e] p-3 rounded-lg border border-slate-800 text-xs font-mono text-slate-300 space-y-1">
-              <div className="text-emerald-400 font-bold">Line 42000: Net Federal Tax</div>
-              <div className="text-slate-400 text-[11px]">
-                = Tax on Taxable Income ($13,420.50) - Federal Non-Refundable Credits ($2,258.06)
-              </div>
-              <div className="text-[10px] text-blue-400 pt-0.5">
-                Official source: CRA Schedule 1, Line 42000 (Tax year 2026)
-              </div>
-            </div>
-
-            <TipsList className="pt-2 border-t border-slate-800/80 space-y-2.5">
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step4.tip1Title}
-                  </span>
-                  <span>{dict.onboarding.step4.tip1Desc}</span>
-                </div>
-              </TipsList.Item>
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step4.tip2Title}
-                  </span>
-                  <span>{dict.onboarding.step4.tip2Desc}</span>
-                </div>
-              </TipsList.Item>
-            </TipsList>
-          </div>
-        </Onboarding.Step>
-
-        {/* STEP 5: PUBLIC SPENDING ALLOCATION */}
-        <Onboarding.Step step={5} className="space-y-4">
-          <Onboarding.Header
-            title={dict.onboarding.step5.title}
-            description={dict.onboarding.step5.description}
-          />
-          <div className="bg-[#070b12] rounded-xl p-5 border border-slate-800 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="bg-[#0c121e] p-3 rounded-lg border border-slate-800 space-y-1">
-                <span className="text-white font-semibold block">
-                  {locale === 'fr' ? 'Santé & Programmes Sociaux' : 'Health & Social Transfers'}
-                </span>
-                <span className="text-emerald-400 font-bold">25.0% of Federal Budget</span>
-              </div>
-              <div className="bg-[#0c121e] p-3 rounded-lg border border-slate-800 space-y-1">
-                <span className="text-white font-semibold block">
-                  {locale === 'fr' ? 'Prestations aux aînés (SV / SRG)' : 'Elderly Benefits (OAS / GIS)'}
-                </span>
-                <span className="text-emerald-400 font-bold">17.2% of Federal Budget</span>
-              </div>
-            </div>
-
-            <TipsList className="pt-2 border-t border-slate-800/80 space-y-2.5">
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step5.tip1Title}
-                  </span>
-                  <span>{dict.onboarding.step5.tip1Desc}</span>
-                </div>
-              </TipsList.Item>
-              <TipsList.Item className="flex items-start gap-2.5 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-white">
-                    {dict.onboarding.step5.tip2Title}
-                  </span>
-                  <span>{dict.onboarding.step5.tip2Desc}</span>
-                </div>
-              </TipsList.Item>
-            </TipsList>
-
-            {/* Direct CTA on the Final Step */}
-            <div className="pt-3 flex justify-end">
-              <Link
-                href={`/${locale}/calculator/ontario`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer"
-              >
-                <Calculator className="w-4 h-4" />
-                <span>{dict.onboarding.launchCta} (Ontario)</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+                );
+              })}
             </div>
           </div>
-        </Onboarding.Step>
 
-        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
-          <Onboarding.Navigation />
+          <div className="pt-4 border-t border-white/[0.06] space-y-2.5 text-xs text-slate-300">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong className="text-slate-200 font-semibold">{dict.onboarding.step1.tip1Title}</strong>{' '}
+                <span className="text-slate-400">{dict.onboarding.step1.tip1Desc}</span>
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong className="text-slate-200 font-semibold">{dict.onboarding.step1.tip2Title}</strong>{' '}
+                <span className="text-slate-400">{dict.onboarding.step1.tip2Desc}</span>
+              </span>
+            </div>
+          </div>
         </div>
-      </Onboarding>
+
+        {/* COLUMN 2: Zero-I/O Pure Calculation Engine */}
+        <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold text-blue-400 tracking-wider">
+                02 / ZERO I/O ENGINE
+              </span>
+              <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <Lock className="w-4 h-4" />
+              </span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white tracking-tight">
+                {dict.onboarding.step3.title}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                {dict.onboarding.step3.description}
+              </p>
+            </div>
+
+            {/* Deduction & Privacy Proof Box (Only visual artifact on this column) */}
+            <div className="bg-[#070b12] p-3.5 rounded-xl border border-white/[0.06] space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-medium">RRSP / FHSA Tax Shield</span>
+                <span className="text-emerald-400 font-bold font-mono tabular-nums">-$2,400+ Tax</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400 font-medium">Privacy Architecture</span>
+                <span className="text-blue-400 font-bold font-mono">100% Client-Side</span>
+              </div>
+              <div className="text-[11px] text-slate-500 pt-1 border-t border-white/[0.06]">
+                Salaries never touch remote APIs, databases, or tracking logs.
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-white/[0.06] space-y-2.5 text-xs text-slate-300">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong className="text-slate-200 font-semibold">{dict.onboarding.step3.tip1Title}</strong>{' '}
+                <span className="text-slate-400">{dict.onboarding.step3.tip1Desc}</span>
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong className="text-slate-200 font-semibold">{dict.onboarding.step3.tip2Title}</strong>{' '}
+                <span className="text-slate-400">{dict.onboarding.step3.tip2Desc}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* COLUMN 3: Official CRA Audits & Mathematical Proof */}
+        <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold text-emerald-400 tracking-wider">
+                03 / CRA AUDIT TRACES
+              </span>
+              <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <FileCheck2 className="w-4 h-4" />
+              </span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white tracking-tight">
+                {dict.onboarding.step4.title}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                {dict.onboarding.step4.description}
+              </p>
+            </div>
+
+            {/* Line 42000 Audit Badge (Only visual artifact on this column) */}
+            <div className="bg-[#070b12] p-3.5 rounded-xl border border-white/[0.06] space-y-1.5 text-xs font-mono">
+              <div className="text-emerald-400 font-bold flex items-center justify-between">
+                <span>Line 42000 Audited</span>
+                <span className="text-[10px] text-slate-400 font-normal">CRA Schedule 1</span>
+              </div>
+              <div className="text-slate-400 text-[11px] leading-relaxed font-sans">
+                Every calculation shows statutory formula breakdowns down to the exact integer cent.
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-white/[0.06] space-y-2.5 text-xs text-slate-300">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong className="text-slate-200 font-semibold">{dict.onboarding.step4.tip1Title}</strong>{' '}
+                <span className="text-slate-400">{dict.onboarding.step4.tip1Desc}</span>
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong className="text-slate-200 font-semibold">{dict.onboarding.step4.tip2Title}</strong>{' '}
+                <span className="text-slate-400">{dict.onboarding.step4.tip2Desc}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </section>
   );
 }

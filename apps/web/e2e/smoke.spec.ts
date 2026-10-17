@@ -83,3 +83,13 @@ test('an unknown province page is a 404', async ({ page }) => {
   const response = await page.goto('/en/calculator/manitoba');
   expect(response?.status()).toBe(404);
 });
+
+test('the home page renders the audit comparison and how it works cards', async ({ page }) => {
+  const errors = trackPageErrors(page);
+  await page.goto('/en');
+  await expect(page.locator('#how-it-works')).toBeVisible();
+  await expect(page.locator('#legacy-audit')).toBeVisible();
+  await expect(page.locator('#legacy-audit a')).toHaveAttribute('href', '/en/salary/80000/ontario');
+  expect(errors).toEqual([]);
+});
+

@@ -22,6 +22,9 @@ export interface AnalyticsDataPoint {
   date: string
   label: string
   value: number
+  header?: string
+  hideDate?: boolean
+  xLabel?: string
 }
 
 export interface AnalyticsGradientStop {
@@ -69,12 +72,18 @@ export function dotColor(i: number, n: number, overrides?: string[]): string {
 }
 
 export function fmtDate(s: string) {
-  return new Date(`${s}T00:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  })
+  try {
+    const d = new Date(`${s}T00:00:00`)
+    if (Number.isNaN(d.getTime())) return ""
+    return d.toLocaleDateString("en-US", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })
+  } catch {
+    return ""
+  }
 }
 
 export function fmtNum(n: number) {
@@ -102,6 +111,8 @@ export interface AnalyticsTooltipProps {
   show: boolean
   /** When true, stacks above pinned/static tooltip cards */
   isHovered?: boolean
+  isRightEdge?: boolean
+  isLeftEdge?: boolean
 }
 
 export function AnalyticsTooltip({
@@ -113,13 +124,29 @@ export function AnalyticsTooltip({
   valueLabel,
   show,
   isHovered = false,
+  isRightEdge = false,
+  isLeftEdge = false,
 }: AnalyticsTooltipProps) {
+  if (!show) return null
+
   const isTop = side === "top" // card sits ABOVE the point
   const circR = 11 // connector circle outer radius
-  const gap = 4 // space between circle edge and card
+  const gap = 12 // generous vertical clearance to float cleanly above data points and SVG line strokes
 
-  // Anchor wrapper is centered exactly on the data point.
-  // Everything else is positioned relative to this anchor.
+  // Horizontal positioning:
+  // If at right edge (x > 75%), anchor card to the RIGHT so it extends LEFT into the chart without clipping
+  // If at left edge (x < 25%), anchor card to the LEFT so it extends RIGHT into the chart
+  // Otherwise center the card over the circle
+  const horizontalPosition = isRightEdge
+    ? { right: -(circR - 4), left: "auto" }
+    : isLeftEdge
+    ? { left: -(circR - 4), right: "auto" }
+    : { left: "50%", transform: "translateX(-50%)", right: "auto" }
+
+  const verticalPosition = isTop
+    ? { bottom: circR * 2 + gap }
+    : { top: circR * 2 + gap }
+
   return (
     <div
       data-slot="analytics-tooltip"
@@ -130,10 +157,7 @@ export function AnalyticsTooltip({
         // Center the anchor on the data point
         transform: "translate(-50%, -50%)",
         pointerEvents: "none",
-        opacity: show ? 1 : 0,
-        filter: show ? "blur(0px)" : "blur(4px)",
-        transition: `opacity 220ms ${EASE_OUT}, filter 220ms ${EASE_OUT}`,
-        zIndex: isHovered ? 50 : 10,
+        zIndex: isHovered ? 50 : 20,
       }}
     >
       {/* Connector circle — sits right on the data point (center of wrapper) */}
@@ -147,9 +171,9 @@ export function AnalyticsTooltip({
         <circle
           cx={circR}
           cy={circR}
-          fill="var(--card)"
+          fill="#0c121e"
           r={circR - 0.5}
-          stroke="var(--border)"
+          stroke="rgba(51, 65, 85, 0.8)"
           strokeWidth="1"
         />
         <circle cx={circR} cy={circR} fill={color} r={4.5} />
@@ -161,41 +185,41 @@ export function AnalyticsTooltip({
         style={{
           position: "absolute",
           whiteSpace: "nowrap",
-          // Horizontal: card's near edge aligns roughly with the circle
-          ...(isTop
-            ? { bottom: circR * 2 + gap, right: -(circR + 2) }
-            : { top: circR * 2 + gap, left: -(circR + 2) }),
-          background: "var(--card)",
+          ...verticalPosition,
+          ...horizontalPosition,
+          background: "#0c121e",
+          backgroundColor: "rgba(12, 18, 30, 0.96)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           borderRadius: 10,
           padding: "9px 13px",
-          border: "1px solid var(--border)",
-          boxShadow: [
-            "0 1px 2px -1px rgba(0,0,0,0.07)",
-            "0 3px 8px rgba(0,0,0,0.04)",
-            "0 8px 20px -4px rgba(0,0,0,0.06)",
-          ].join(","),
+          border: "1px solid rgba(51, 65, 85, 0.8)",
+          boxShadow:
+            "0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05)",
         }}
       >
-        <div
-          data-slot="analytics-tooltip-date"
-          style={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: "var(--muted-foreground)",
-            letterSpacing: "0.005em",
-            lineHeight: 1,
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
-          {point.formattedDate}
-        </div>
+        {point.formattedDate ? (
+          <div
+            data-slot="analytics-tooltip-date"
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: "var(--muted-foreground)",
+              letterSpacing: "0.005em",
+              lineHeight: 1,
+              fontVariantNumeric: "tabular-nums",
+              marginBottom: 5,
+            }}
+          >
+            {point.formattedDate}
+          </div>
+        ) : null}
         <div
           data-slot="analytics-tooltip-value"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 7,
-            marginTop: 5,
           }}
         >
           <span
@@ -245,7 +269,7 @@ export function AnalyticsLineChart({
   gradientStops = DEFAULT_GRADIENT,
   dotColors,
   gridLines = 5,
-  height = 280,
+  height = 320,
   pinnedIndices,
   valueLabel = "clicks",
   className,
@@ -254,11 +278,11 @@ export function AnalyticsLineChart({
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)
   const [mounted, setMounted] = useState(false)
-  const [wrapRect, setWrapRect] = useState({ w: 600, h: 280 })
+  const [wrapRect, setWrapRect] = useState({ w: 1000, h: 320 })
 
-  const VB_W = 600
+  const VB_W = 1000
   const VB_H = height
-  const pad = useMemo(() => ({ t: 48, r: 48, b: 36, l: 48 }), [])
+  const pad = useMemo(() => ({ t: 36, r: 48, b: 54, l: 64 }), [])
   const iW = VB_W - pad.l - pad.r
   const iH = VB_H - pad.t - pad.b
 
@@ -294,7 +318,7 @@ export function AnalyticsLineChart({
       ...d,
       x: pad.l + (i / Math.max(data.length - 1, 1)) * iW,
       y: pad.t + iH - ((d.value - mn) / rng) * iH,
-      formattedDate: fmtDate(d.date),
+      formattedDate: d.header ?? (d.hideDate ? "" : fmtDate(d.date)),
       color: dotColor(i, data.length, dotColors),
     }))
   }, [data, iW, iH, pad, dotColors])
@@ -365,14 +389,19 @@ export function AnalyticsLineChart({
 
   const gradId = `g-${useId().replaceAll(":", "")}`
 
+  const vs = data.map((d) => d.value)
+  const mnVal = Math.min(...vs)
+  const mxVal = Math.max(...vs)
+  const rngVal = mxVal - mnVal || 1
+
   return (
     <div
-      className={cn(className)}
+      className={cn("w-full", className)}
       data-slot="analytics-line-chart"
       ref={wrapRef}
       style={{
         position: "relative",
-        maxWidth: VB_W,
+        width: "100%",
         userSelect: "none",
         WebkitFontSmoothing: "antialiased",
       }}
@@ -402,25 +431,88 @@ export function AnalyticsLineChart({
               />
             ))}
           </linearGradient>
+          <linearGradient id={`${gradId}-area`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+            <stop offset="65%" stopColor="#10b981" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+          </linearGradient>
         </defs>
 
-        {/* Grid */}
+        {/* Grid and Y-axis labels with precision dashed financial gridlines */}
         {Array.from({ length: gridLines }).map((_, i) => {
           const y = pad.t + (i / (gridLines - 1)) * iH
+          const tickVal = Math.round(mxVal - (i / (gridLines - 1)) * rngVal)
           return (
-            <line
-              key={`grid-${y.toFixed(2)}`}
-              stroke="var(--border)"
-              strokeWidth="1"
-              style={{
-                opacity: mounted ? 1 : 0,
-                transition: `opacity 600ms ease ${80 + i * 50}ms`,
-              }}
-              x1={pad.l}
-              x2={pad.l + iW}
-              y1={y}
-              y2={y}
-            />
+            <g key={`grid-row-${y.toFixed(2)}`}>
+              <line
+                stroke="rgba(51, 65, 85, 0.45)"
+                strokeDasharray="4 4"
+                strokeWidth="1"
+                style={{
+                  opacity: mounted ? 0.75 : 0,
+                  transition: `opacity 600ms ease ${80 + i * 50}ms`,
+                }}
+                x1={pad.l}
+                x2={pad.l + iW}
+                y1={y}
+                y2={y}
+              />
+              <text
+                x={pad.l - 12}
+                y={y + 3.5}
+                textAnchor="end"
+                fill="#64748b"
+                fontSize="10"
+                fontFamily="ui-monospace, monospace"
+                fontWeight="500"
+                className="tabular-nums"
+              >
+                ${Math.round(tickVal / 1000)}k
+              </text>
+            </g>
+          )
+        })}
+
+        {/* Area fill under curve */}
+        {points.length > 0 && (
+          <path
+            d={`${pathD} L ${points[points.length - 1]?.x ?? pad.l + iW} ${pad.t + iH} L ${points[0]?.x ?? pad.l} ${pad.t + iH} Z`}
+            fill={`url(#${gradId}-area)`}
+            style={{
+              opacity: mounted ? 1 : 0,
+              transition: "opacity 800ms ease",
+            }}
+          />
+        )}
+
+        {/* X-axis baseline */}
+        <line
+          stroke="var(--border)"
+          strokeWidth="1.5"
+          x1={pad.l}
+          x2={pad.l + iW}
+          y1={pad.t + iH}
+          y2={pad.t + iH}
+        />
+
+        {/* X-axis tick labels */}
+        {points.map((p, i) => {
+          const label = p.xLabel ?? (p.label ? p.label.split(" ")[0] : "")
+          if (!label) return null
+          return (
+            <text
+              key={`x-axis-tick-${p.date}-${i}`}
+              x={p.x}
+              y={pad.t + iH + 24}
+              textAnchor="middle"
+              fill="#94a3b8"
+              fontSize="11"
+              fontFamily="ui-monospace, monospace"
+              fontWeight="600"
+              className="tabular-nums"
+            >
+              {label}
+            </text>
           )
         })}
 
@@ -474,19 +566,25 @@ export function AnalyticsLineChart({
       </svg>
 
       {/* Tooltip layer */}
-      {points.map((p, i) => (
-        <AnalyticsTooltip
-          color={p.color}
-          isHovered={hovered === i}
-          key={`tooltip-${p.date}-${p.label}-${p.value}`}
-          point={p}
-          px={p.x * sx}
-          py={p.y * sx}
-          show={active.has(i) && mounted}
-          side={p.y < pad.t + iH * 0.45 ? "bottom" : "top"}
-          valueLabel={valueLabel}
-        />
-      ))}
+      {points.map((p, i) => {
+        const isRightEdge = p.x > VB_W * 0.75
+        const isLeftEdge = p.x < VB_W * 0.25
+        return (
+          <AnalyticsTooltip
+            color={p.color}
+            isHovered={hovered === i}
+            isLeftEdge={isLeftEdge}
+            isRightEdge={isRightEdge}
+            key={`tooltip-${p.date}-${p.label}-${p.value}`}
+            point={p}
+            px={p.x * sx}
+            py={p.y * sx}
+            show={active.has(i) && mounted}
+            side={p.y < pad.t + iH * 0.45 ? "bottom" : "top"}
+            valueLabel={valueLabel}
+          />
+        )
+      })}
     </div>
   )
 }

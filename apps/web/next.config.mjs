@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   transpilePackages: ['@fiscal-insights/tax-data', '@fiscal-insights/tax-engine'],
   outputFileTracingRoot: path.resolve(__dirname, '../../'),
   // Every page lives under a locale; unlocalized requests redirect to /en
