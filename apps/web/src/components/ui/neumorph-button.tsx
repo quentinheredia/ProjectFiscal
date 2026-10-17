@@ -3,11 +3,10 @@
 import type React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Loader2 } from "lucide-react"
-import { motion, type HTMLMotionProps } from "motion/react"
 
 const buttonVariants = cva(
-  // Base styles
-  "flex items-center justify-center px-4 text-sm font-medium transition-[box-shadow,background-color] active:transition-none disabled:cursor-not-allowed disabled:opacity-50",
+  // Base styles; the press/hover scale is plain CSS so the button ships without an animation library.
+  "flex items-center justify-center px-4 text-sm font-medium transition-[box-shadow,background-color,scale] active:transition-none motion-safe:hover:enabled:scale-[1.02] motion-safe:active:enabled:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       intent: {
@@ -82,7 +81,7 @@ const buttonVariants = cva(
 )
 
 export interface NeumorphButtonProps
-  extends HTMLMotionProps<"button">,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   children: React.ReactNode
   loading?: boolean
@@ -99,23 +98,16 @@ const NeumorphButton: React.FC<NeumorphButtonProps> = ({
   ...props
 }) => {
   return (
-    <motion.button
+    <button
       className={buttonVariants({ intent, size, fullWidth, className })}
       disabled={disabled || loading}
-      whileTap={{ scale: 0.98 }}
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 400, damping: 10 }}
       {...props}
     >
-      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      <motion.span
-        initial={{ opacity: 1 }}
-        animate={{ opacity: loading ? 0.7 : 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : null}
+      <span className={`transition-opacity duration-200 ${loading ? "opacity-70" : "opacity-100"}`}>
         {children}
-      </motion.span>
-    </motion.button>
+      </span>
+    </button>
   )
 }
 
