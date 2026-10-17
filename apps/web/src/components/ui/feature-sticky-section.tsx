@@ -348,8 +348,7 @@ const PanelWithRef = forwardRef(Panel)
  * Wrapper
  * ----------------------------------------------------------------------- */
 
-export interface StickySectionWrapperProps
-  extends ComponentPropsWithoutRef<"div"> {}
+export type StickySectionWrapperProps = ComponentPropsWithoutRef<"div">
 
 const Wrapper = ({
   className,
@@ -578,8 +577,7 @@ function GithubIcon({ className }: { className?: string }) {
   )
 }
 
-export interface OSSSectionContainerProps
-  extends ComponentPropsWithoutRef<"section"> {}
+export type OSSSectionContainerProps = ComponentPropsWithoutRef<"section">
 
 function OSSSectionContainer({
   className,
@@ -597,8 +595,7 @@ function OSSSectionContainer({
   )
 }
 
-export interface OSSSectionSidebarProps
-  extends ComponentPropsWithoutRef<"div"> {}
+export type OSSSectionSidebarProps = ComponentPropsWithoutRef<"div">
 
 function OSSSectionSidebar({
   className,
@@ -619,8 +616,7 @@ function OSSSectionSidebar({
   )
 }
 
-export interface OSSSectionSidebarListProps
-  extends ComponentPropsWithoutRef<"ul"> {}
+export type OSSSectionSidebarListProps = ComponentPropsWithoutRef<"ul">
 
 function OSSSectionSidebarList({
   className,
@@ -638,8 +634,7 @@ function OSSSectionSidebarList({
   )
 }
 
-export interface OSSSectionSidebarItemProps
-  extends ComponentPropsWithoutRef<"li"> {}
+export type OSSSectionSidebarItemProps = ComponentPropsWithoutRef<"li">
 
 function OSSSectionSidebarItem({
   className,
@@ -660,8 +655,7 @@ function OSSSectionSidebarItem({
   )
 }
 
-export interface OSSSectionPanelsProps
-  extends ComponentPropsWithoutRef<"div"> {}
+export type OSSSectionPanelsProps = ComponentPropsWithoutRef<"div">
 
 function OSSSectionPanels({
   className,
@@ -705,8 +699,7 @@ function OSSSectionPanelGrid({
   )
 }
 
-export interface OSSSectionPanelContentProps
-  extends ComponentPropsWithoutRef<"div"> {}
+export type OSSSectionPanelContentProps = ComponentPropsWithoutRef<"div">
 
 function OSSSectionPanelContent({
   className,

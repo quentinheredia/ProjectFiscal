@@ -1,11 +1,11 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Calculator from '@/components/Calculator';
-import { Locale, getDictionary } from '@/lib/i18n';
+import { Locale } from '@/lib/i18n';
 import { calculateTax, formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
-import { CheckCircle2, ShieldCheck, TrendingUp } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { BrowserWindow } from '@/components/ui/mock-browser-window';
 
 interface SalaryPageProps {
@@ -78,8 +78,6 @@ export default async function SalaryPage({ params }: SalaryPageProps) {
   const province = resolved.province;
 
   if (amount !== '80000' || province.toLowerCase() !== 'ontario') notFound();
-
-  const dict = getDictionary(locale);
 
   // Compute exact figures statically for $80,000 in Ontario for 2026
   const result = calculateTax(

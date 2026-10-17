@@ -19,18 +19,38 @@ import {
   ShieldCheck,
   Layers,
   PieChart,
-  CheckCircle2,
 } from 'lucide-react';
 import NeumorphButton from '@/components/ui/neumorph-button';
-import { MinimalCard, MinimalCardContent, MinimalCardTitle, MinimalCardDescription } from '@/components/ui/minimal-card';
+import { MinimalCard } from '@/components/ui/minimal-card';
+
+type Province = 'ON' | 'QC' | 'BC' | 'AB';
 
 interface CalculatorProps {
   locale: Locale;
-  initialProvince?: 'ON' | 'QC' | 'BC' | 'AB';
+  initialProvince?: Province;
   initialSalaryDollars?: number;
 }
 
 type PayFrequency = 'annual' | 'monthly' | 'biweekly' | 'weekly' | 'hourly';
+
+const TAX_YEARS = [2026, 2025] as const;
+
+const PROVINCE_OPTIONS: { value: Province; label: string }[] = [
+  { value: 'ON', label: 'Ontario (ON)' },
+  { value: 'QC', label: 'Québec (QC)' },
+  { value: 'BC', label: 'British Columbia (BC)' },
+  { value: 'AB', label: 'Alberta (AB)' },
+];
+
+// The rule data throws for combinations it does not ship yet (for example Quebec 2025).
+function hasProvincialRules(province: Province, year: number): boolean {
+  try {
+    getProvincialRules(province, year);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const FREQUENCY_DIVISORS: Record<PayFrequency, number> = {
   annual: 1,
@@ -48,7 +68,7 @@ export default function Calculator({
   const dict = getDictionary(locale);
 
   const [year, setYear] = useState<number>(2026);
-  const [province, setProvince] = useState<'ON' | 'QC' | 'BC' | 'AB'>(initialProvince);
+  const [province, setProvince] = useState<Province>(initialProvince);
   const [employmentIncome, setEmploymentIncome] = useState<string>(initialSalaryDollars.toString());
   const [selfEmploymentIncome, setSelfEmploymentIncome] = useState<string>('0');
   const [rrspDeduction, setRrspDeduction] = useState<string>('0');
@@ -81,6 +101,14 @@ export default function Calculator({
     );
   }, [year, province, employmentIncome, selfEmploymentIncome, rrspDeduction, fhsaDeduction]);
 
+  // Only combinations with published rules can be selected, so the calculation never throws.
+  const selectYear = (nextYear: number) => {
+    if (hasProvincialRules(province, nextYear)) setYear(nextYear);
+  };
+  const selectProvince = (nextProvince: Province) => {
+    if (hasProvincialRules(nextProvince, year)) setProvince(nextProvince);
+  };
+
   const divisor = FREQUENCY_DIVISORS[frequency];
   const formatScaledCents = (cents: number) => {
     return formatCentsToDollars(Math.round(cents / divisor));
@@ -110,29 +138,27 @@ export default function Calculator({
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]"></span>
               {dict.calculator.title}
             </h2>
-            <div className="flex items-center gap-1.5 bg-[#070b12] p-1 rounded-xl border border-slate-800">
-              <button
-                type="button"
-                onClick={() => setYear(2026)}
-                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
-                  year === 2026
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                2026
-              </button>
-              <button
-                type="button"
-                onClick={() => setYear(2025)}
-                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
-                  year === 2025
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                2025
-              </button>
+            <div className="flex items-center gap-1.5 bg-[#070b12] p-1 rounded-xl border border-slate-800" role="group" aria-label={dict.calculator.filingYear}>
+              {TAX_YEARS.map((taxYear) => {
+                const available = hasProvincialRules(province, taxYear);
+                return (
+                  <button
+                    key={taxYear}
+                    type="button"
+                    onClick={() => selectYear(taxYear)}
+                    disabled={!available}
+                    aria-pressed={year === taxYear}
+                    title={available ? undefined : dict.calculator.yearUnavailable}
+                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-40 ${
+                      year === taxYear
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-xs'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {taxYear}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -145,13 +171,17 @@ export default function Calculator({
               <select
                 id="province-select"
                 value={province}
-                onChange={(e) => setProvince(e.target.value as any)}
-                className="w-full px-3.5 py-2.5 bg-[#070b12] border border-slate-700/80 rounded-xl text-white font-medium text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all cursor-pointer"
+                onChange={(e) => selectProvince(e.target.value as Province)}
+                className="w-full px-3.5 py-2.5 bg-[#070b12] border border-slate-700/80 rounded-xl text-white font-medium text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all motion-reduce:transition-none cursor-pointer"
               >
-                <option value="ON">Ontario (ON)</option>
-                <option value="QC">Québec (QC)</option>
-                <option value="BC">British Columbia (BC)</option>
-                <option value="AB">Alberta (AB)</option>
+                {PROVINCE_OPTIONS.map(({ value, label }) => {
+                  const available = hasProvincialRules(value, year);
+                  return (
+                    <option key={value} value={value} disabled={!available}>
+                      {available ? label : `${label} — ${dict.calculator.provinceUnavailable.replace('{year}', String(year))}`}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -277,7 +307,7 @@ export default function Calculator({
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                   {dict.results.heroLabel} ({frequency})
                 </span>
-                <div className="text-4xl sm:text-5xl font-black text-white mt-1 tabular-nums tracking-tight">
+                <div role="status" className="text-4xl sm:text-5xl font-black text-white mt-1 tabular-nums tracking-tight">
                   {formatScaledCents(calculation.takeHomePayCents)}
                 </div>
               </div>
@@ -308,11 +338,11 @@ export default function Calculator({
                 <span className="tabular-nums text-slate-300">Gross: {formatScaledCents(calculation.totalIncomeCents)}</span>
               </div>
               <div className="h-4 w-full bg-[#070b12] border border-slate-800 rounded-full flex overflow-hidden shadow-inner p-0.5">
-                <div style={{ width: `${Math.max(2, netShare)}%` }} className="bg-emerald-500 rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(16,185,129,0.5)]" title="Take-Home Pay" />
-                <div style={{ width: `${Math.max(1, fedShare)}%` }} className="bg-blue-500 rounded-full transition-all duration-300" title="Federal Tax" />
-                <div style={{ width: `${Math.max(1, provShare)}%` }} className="bg-cyan-500 rounded-full transition-all duration-300" title="Provincial Tax" />
-                <div style={{ width: `${Math.max(1, cppShare)}%` }} className="bg-indigo-500 rounded-full transition-all duration-300" title="CPP/QPP" />
-                <div style={{ width: `${Math.max(1, eiShare)}%` }} className="bg-amber-500 rounded-full transition-all duration-300" title="EI/QPIP" />
+                <div style={{ width: `${Math.max(2, netShare)}%` }} className="bg-emerald-500 rounded-full transition-all duration-300 motion-reduce:transition-none shadow-[0_0_8px_rgba(16,185,129,0.5)]" title="Take-Home Pay" />
+                <div style={{ width: `${Math.max(1, fedShare)}%` }} className="bg-blue-500 rounded-full transition-all duration-300 motion-reduce:transition-none" title="Federal Tax" />
+                <div style={{ width: `${Math.max(1, provShare)}%` }} className="bg-cyan-500 rounded-full transition-all duration-300 motion-reduce:transition-none" title="Provincial Tax" />
+                <div style={{ width: `${Math.max(1, cppShare)}%` }} className="bg-indigo-500 rounded-full transition-all duration-300 motion-reduce:transition-none" title="CPP/QPP" />
+                <div style={{ width: `${Math.max(1, eiShare)}%` }} className="bg-amber-500 rounded-full transition-all duration-300 motion-reduce:transition-none" title="EI/QPIP" />
               </div>
 
               {/* Legend with exact numbers */}

@@ -1,9 +1,9 @@
 import React from 'react';
 import Calculator from '@/components/Calculator';
 import { Locale, getDictionary } from '@/lib/i18n';
-import { CheckCircle2, Shield, Sparkles, BookOpen, Layers, Terminal } from 'lucide-react';
+import { CheckCircle2, Shield, Sparkles, BookOpen } from 'lucide-react';
 import { BrowserWindow } from '@/components/ui/mock-browser-window';
-import { TextureCard, TextureCardHeader, TextureCardTitle, TextureCardDescription, TextureCardContent } from '@/components/ui/texture-card';
+import { TextureCard } from '@/components/ui/texture-card';
 import SiteTutorial from '@/components/SiteTutorial';
 import TaxCurveAnalytics from '@/components/TaxCurveAnalytics';
 

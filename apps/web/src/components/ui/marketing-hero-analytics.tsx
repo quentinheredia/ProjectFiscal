@@ -273,8 +273,7 @@ export const ANALYTICS_HERO_ICONS: Record<
   github: AnalyticsHeroGithubIcon,
 }
 
-export interface AnalyticsHeroCrosshairProps
-  extends React.ComponentProps<"div"> {}
+export type AnalyticsHeroCrosshairProps = React.ComponentProps<"div">
 
 export function AnalyticsHeroCrosshair({
   className,
