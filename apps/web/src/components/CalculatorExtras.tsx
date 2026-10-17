@@ -12,7 +12,7 @@ export default function CalculatorExtras({ locale }: { locale: Locale }) {
       <section className="bg-[#0c121e] rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.6)] border border-slate-800/90 p-6 sm:p-8 space-y-6">
         <div>
           <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-            Phase 0 Pitch Point
+            {locale === 'fr' ? 'VÉRIFICATION D’AUDIT LÉGAL DE L’ARC' : 'CRA STATUTORY AUDIT VERIFICATION'}
           </span>
           <h3 className="text-2xl font-bold text-white tracking-tight mt-1">
             {dict.pitch.title}
@@ -34,34 +34,34 @@ export default function CalculatorExtras({ locale }: { locale: Locale }) {
             </thead>
             <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]">
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">Federal Tax</td>
-                <td className="py-3 px-4 tabular-nums text-red-400 bg-red-950/15">$10,323</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">~$9,552</td>
-                <td className="py-3 px-4 text-slate-400">Old site was ~$771 too high (used obsolete pre-2025 brackets).</td>
+                <td className="py-3 px-4 font-semibold text-white">{dict.pitch.table.fedLine}</td>
+                <td className="py-3 px-4 tabular-nums text-red-400 bg-red-950/15">$10,323.00</td>
+                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$9,242.60</td>
+                <td className="py-3 px-4 text-slate-400">{dict.pitch.table.fedDiff}</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">Ontario Tax + OHP</td>
-                <td className="py-3 px-4 tabular-nums text-red-400 bg-red-950/15">$3,985</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">~$4,940</td>
-                <td className="py-3 px-4 text-slate-400">Old site was ~$955 too low (completely omitted Ontario Health Premium of $750).</td>
+                <td className="py-3 px-4 font-semibold text-white">{dict.pitch.table.provLine}</td>
+                <td className="py-3 px-4 tabular-nums text-red-400 bg-red-950/15">$3,985.00</td>
+                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$4,885.26</td>
+                <td className="py-3 px-4 text-slate-400">{dict.pitch.table.provDiff}</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">CPP + CPP2</td>
+                <td className="py-3 px-4 font-semibold text-white">{dict.pitch.table.cppLine}</td>
                 <td className="py-3 px-4 tabular-nums text-slate-300">$4,382.10</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$4,382.10</td>
-                <td className="py-3 px-4 text-slate-400">Exact match on YMPE + enhanced CPP2 contribution ceiling.</td>
+                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$4,446.45</td>
+                <td className="py-3 px-4 text-slate-400">{dict.pitch.table.cppDiff}</td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-semibold text-white">Employment Insurance (EI)</td>
+                <td className="py-3 px-4 font-semibold text-white">{dict.pitch.table.eiLine}</td>
                 <td className="py-3 px-4 tabular-nums text-slate-300">$1,077.48</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$1,077.48</td>
-                <td className="py-3 px-4 text-slate-400">Exact match on maximum insurable earnings limit.</td>
+                <td className="py-3 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-950/20">$1,123.07</td>
+                <td className="py-3 px-4 text-slate-400">{dict.pitch.table.eiDiff}</td>
               </tr>
               <tr className="bg-[#070b12] font-bold">
-                <td className="py-3 px-4 text-white">Take-Home Net Income</td>
-                <td className="py-3 px-4 tabular-nums text-slate-300">$60,232</td>
-                <td className="py-3 px-4 tabular-nums text-emerald-400 bg-emerald-950/30">~$60,048</td>
-                <td className="py-3 px-4 text-slate-300">Net looked plausible only because two large errors canceled each other out!</td>
+                <td className="py-3 px-4 text-white">{dict.pitch.table.netLine}</td>
+                <td className="py-3 px-4 tabular-nums text-slate-300">$60,232.42</td>
+                <td className="py-3 px-4 tabular-nums text-emerald-400 bg-emerald-950/30">$60,302.62</td>
+                <td className="py-3 px-4 text-slate-300">{dict.pitch.table.netDiff}</td>
               </tr>
             </tbody>
           </table>

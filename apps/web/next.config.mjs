@@ -15,6 +15,7 @@ const nextConfig = {
       { source: '/', destination: '/en', permanent: false },
       { source: '/calculator/:path*', destination: '/en/calculator/:path*', permanent: false },
       { source: '/salary/:path*', destination: '/en/salary/:path*', permanent: false },
+      { source: '/simulator', destination: '/en/simulator', permanent: false },
     ];
   },
 };

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { BrowserWindow } from '@/components/ui/mock-browser-window';
 import { Locale, getDictionary } from '@/lib/i18n';
+import { useProvince, ProvinceSlug } from '@/context/ProvinceContext';
 import { calculateTax, formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { getFederalRules, getProvincialRules } from '@fiscal-insights/tax-data';
 import { FEDERAL_SPENDING_CATEGORIES } from '@/lib/spending';
@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Scale,
   Calculator,
+  Sliders,
 } from 'lucide-react';
 
 interface TaxSimulationPreviewProps {
@@ -26,14 +27,14 @@ type Frequency = 'annual' | 'biweekly' | 'monthly';
 
 interface PresetScenario {
   id: string;
-  labelKey: 'career' | 'benchmark' | 'quebec' | 'bc' | 'alberta';
+  labelKey: 'median' | 'benchmark' | 'career' | 'quebec' | 'bc' | 'alberta';
   province: SimulatedProvince;
   provinceSlug: string;
   salary: number;
 }
 
 const PRESET_SCENARIOS: PresetScenario[] = [
-  { id: 'on-95k', labelKey: 'career', province: 'ON', provinceSlug: 'ontario', salary: 95000 },
+  { id: 'canadian-median', labelKey: 'median', province: 'ON', provinceSlug: 'ontario', salary: 68500 },
   { id: 'on-80k', labelKey: 'benchmark', province: 'ON', provinceSlug: 'ontario', salary: 80000 },
   { id: 'qc-85k', labelKey: 'quebec', province: 'QC', provinceSlug: 'quebec', salary: 85000 },
   { id: 'bc-110k', labelKey: 'bc', province: 'BC', provinceSlug: 'british-columbia', salary: 110000 },
@@ -42,13 +43,28 @@ const PRESET_SCENARIOS: PresetScenario[] = [
 
 export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewProps) {
   const dict = getDictionary(locale);
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('on-95k');
-  const [salary, setSalary] = useState<number>(95000);
-  const [province, setProvince] = useState<SimulatedProvince>('ON');
-  const [provinceSlug, setProvinceSlug] = useState<string>('ontario');
+  const { selectedProvince, setSelectedProvinceSlug } = useProvince();
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('canadian-median');
+  const [salary, setSalary] = useState<number>(68500);
+  const [province, setProvince] = useState<SimulatedProvince>(selectedProvince.code);
+  const [provinceSlug, setProvinceSlug] = useState<string>(selectedProvince.slug);
   const [hasRrspDeduction, setHasRrspDeduction] = useState<boolean>(false);
   const [frequency, setFrequency] = useState<Frequency>('annual');
-  const [activeTab, setActiveTab] = useState<'traces' | 'spending' | 'comparison'>('traces');
+  const [activeTab, setActiveTab] = useState<'spending' | 'traces' | 'comparison'>('spending');
+
+  // Keep in lockstep with navbar jurisdiction switcher
+  useEffect(() => {
+    if (selectedProvince.code !== province) {
+      setProvince(selectedProvince.code);
+      setProvinceSlug(selectedProvince.slug);
+      // Reset preset highlight if different province
+      const matchingPreset = PRESET_SCENARIOS.find((p) => p.province === selectedProvince.code);
+      if (matchingPreset) {
+        setSelectedPresetId(matchingPreset.id);
+        setSalary(matchingPreset.salary);
+      }
+    }
+  }, [selectedProvince, province]);
 
   const rrspAmount = hasRrspDeduction ? 8000 : 0;
 
@@ -75,6 +91,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
     setSalary(preset.salary);
     setProvince(preset.province);
     setProvinceSlug(preset.provinceSlug);
+    setSelectedProvinceSlug(preset.provinceSlug as ProvinceSlug);
   };
 
   const divisor = frequency === 'annual' ? 1 : frequency === 'monthly' ? 12 : 26;
@@ -90,15 +107,8 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
 
   return (
     <section id="simulator" className="w-full max-w-7xl mx-auto">
-      {/* Desktop Browser Window Framing the Simulation Preview */}
-      <BrowserWindow
-        url={`https://fiscal-insights.ca/${locale}/calculator/${provinceSlug}`}
-        variant="safari"
-        theme="dark"
-        headerStyle="full"
-        size="auto"
-        className="border-white/[0.08] bg-[#090d16]/95 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl overflow-hidden"
-      >
+      {/* Live Interactive Tax & Spending Console Card */}
+      <div className="rounded-2xl border border-white/[0.08] bg-[#0c121e]/90 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_20px_50px_-15px_rgba(0,0,0,0.8)] backdrop-blur-xl overflow-hidden">
         <div className="flex flex-col">
           {/* TOOLBAR ROW 1: Flush Preset Scenarios Selector */}
           <div className="border-b border-white/[0.06] px-5 sm:px-6 py-3.5 bg-white/[0.01] flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
@@ -128,10 +138,6 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
               })}
             </div>
 
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded-full border border-emerald-500/30 shrink-0">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{dict.simulation.verifiedTag}</span>
-            </div>
           </div>
 
           {/* TOOLBAR ROW 2: Flush Interactive Controls (Salary, Deductions, Frequency) */}
@@ -156,26 +162,30 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       setSalary(Math.max(0, val));
+                      setSelectedPresetId('custom');
                     }}
                     className="w-full bg-[#0c121e] border border-slate-700/80 focus:border-emerald-400 rounded-lg pl-6 pr-2 py-1.5 text-xs font-bold text-white tabular-nums outline-none transition-colors"
-                    placeholder="85000"
+                    placeholder="68500"
                   />
                 </div>
                 <div className="flex items-center gap-1 flex-wrap">
-                  {[60000, 80000, 95000, 120000].map((amt) => {
+                  {[50000, 68500, 80000, 100000, 130000].map((amt) => {
                     const isCurrent = salary === amt;
                     return (
                       <button
                         key={amt}
                         type="button"
-                        onClick={() => setSalary(amt)}
+                        onClick={() => {
+                          setSalary(amt);
+                          setSelectedPresetId(amt === 68500 ? 'canadian-median' : amt === 80000 ? 'on-80k' : 'custom');
+                        }}
                         className={`px-2 py-1 text-xs rounded-md transition-colors cursor-pointer ${
                           isCurrent
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold'
                             : 'bg-[#0f1422] text-slate-400 hover:text-slate-200 border border-white/[0.06]'
                         }`}
                       >
-                        ${(amt / 1000).toFixed(0)}k
+                        ${amt === 68500 ? '68.5k' : `${(amt / 1000).toFixed(0)}k`}
                       </button>
                     );
                   })}
@@ -248,49 +258,40 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
                 {scaleAmount(calculation.totalTaxCents + calculation.cpp.totalCents + calculation.ei.totalCents)}
               </div>
               <span className="text-[11px] text-slate-400 block pt-1">
-                {locale === 'fr' ? 'Impôt fédéral + provincial + RPC/AE' : 'Fed + Prov tax + CPP & EI'}
+                Federal + Provincial + CPP/EI
               </span>
             </div>
 
-            {/* Average (Effective) Rate */}
+            {/* Effective Tax Rate */}
             <div className="p-5 sm:p-6 space-y-1 bg-white/[0.01]">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
                 {dict.simulation.metrics.effectiveRate}
               </span>
-              <div className="text-2xl sm:text-3xl font-bold text-blue-400 tabular-nums">
-                {((calculation.totalTaxCents / totalInc) * 100).toFixed(2)}%
+              <div className="text-2xl sm:text-3xl font-bold text-slate-200 tabular-nums">
+                {((calculation.averageTaxRate || 0) * 100).toFixed(2)}%
               </div>
               <span className="text-[11px] text-slate-400 block pt-1">
-                {locale === 'fr' ? 'Pourcentage global payé en impôt' : 'Actual percentage of income taxed'}
+                Total tax as % of gross salary
               </span>
             </div>
 
-            {/* Marginal Rate */}
+            {/* Marginal Tax Rate */}
             <div className="p-5 sm:p-6 space-y-1 bg-white/[0.01]">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
                 {dict.simulation.metrics.marginalRate}
               </span>
-              <div className="text-2xl sm:text-3xl font-bold text-purple-400 tabular-nums">
-                {((calculation.marginalTaxRate ?? 0) * 100).toFixed(2)}%
+              <div className="text-2xl sm:text-3xl font-bold text-slate-200 tabular-nums">
+                {((calculation.marginalTaxRate || 0) * 100).toFixed(2)}%
               </div>
               <span className="text-[11px] text-slate-400 block pt-1">
-                {locale === 'fr' ? 'Taxe sur le prochain dollar gagné' : 'Tax on your next dollar earned'}
+                Tax bracket on next $1 earned
               </span>
             </div>
           </div>
 
-          {/* ROW 4: Earnings Distribution Stack (Directly on Canvas, No Outer Box) */}
-          <div className="py-5 sm:py-6 px-5 sm:px-6 border-b border-white/[0.06] space-y-3">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span className="font-semibold text-white">
-                {locale === 'fr' ? 'Répartition visuelle de la rémunération' : 'Earnings Distribution Stack'}
-              </span>
-              <span className="text-slate-300 font-mono font-medium">
-                {salary.toLocaleString(locale === 'fr' ? 'fr-CA' : 'en-CA', { style: 'currency', currency: 'CAD' })}
-              </span>
-            </div>
-
-            <div className="h-3.5 w-full rounded-full bg-slate-900/90 overflow-hidden flex" role="progressbar">
+          {/* ROW 4: Earnings Distribution Stack Bar (Flush to Canvas) */}
+          <div className="px-5 sm:px-6 py-4 border-b border-white/[0.06] bg-white/[0.01] space-y-2.5">
+            <div className="h-4 w-full rounded-full overflow-hidden flex bg-slate-900 border border-white/[0.08]">
               <div
                 style={{ width: `${takeHomeShare}%` }}
                 className="bg-emerald-500 h-full transition-all duration-300"
@@ -346,19 +347,6 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
             <div className="flex items-center border-b border-white/[0.06] gap-4 text-xs font-semibold">
               <button
                 type="button"
-                onClick={() => setActiveTab('traces')}
-                className={`pb-2.5 flex items-center gap-1.5 transition-colors cursor-pointer border-b-2 ${
-                  activeTab === 'traces'
-                    ? 'border-emerald-400 text-emerald-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <FileCheck2 className="w-4 h-4" />
-                <span>{dict.simulation.tabs.traces}</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setActiveTab('spending')}
                 className={`pb-2.5 flex items-center gap-1.5 transition-colors cursor-pointer border-b-2 ${
                   activeTab === 'spending'
@@ -368,6 +356,19 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
               >
                 <PieChart className="w-4 h-4" />
                 <span>{dict.simulation.tabs.spending}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('traces')}
+                className={`pb-2.5 flex items-center gap-1.5 transition-colors cursor-pointer border-b-2 ${
+                  activeTab === 'traces'
+                    ? 'border-emerald-400 text-emerald-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <FileCheck2 className="w-4 h-4" />
+                <span>{dict.simulation.tabs.traces}</span>
               </button>
 
               <button
@@ -387,7 +388,52 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
               </button>
             </div>
 
-            {/* TAB CONTENT: FORMULA TRACES (Unified Hairline Grid) */}
+            {/* TAB CONTENT: PUBLIC SPENDING IMPACT (DEFAULT FIRST) */}
+            {activeTab === 'spending' && (
+              <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01] p-4 sm:p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
+                  <span className="font-bold text-white text-sm">{dict.simulation.spendingSummary.title}</span>
+                  <span className="text-slate-400 text-[11px]">{dict.simulation.spendingSummary.subtitle}</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs pt-1">
+                  {FEDERAL_SPENDING_CATEGORIES.map((cat) => {
+                    const allocatedDollars = Math.round((federalTaxDollars * cat.percentage) / 100);
+                    return (
+                      <div key={cat.id} className="bg-[#070b12] p-3 rounded-lg border border-white/[0.06] space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-slate-300 font-medium truncate">{locale === 'fr' ? cat.nameFr : cat.nameEn}</span>
+                          <span className="text-emerald-400 font-bold tabular-nums shrink-0">${allocatedDollars.toLocaleString()}</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div style={{ width: `${Math.min(100, cat.percentage * 4)}%` }} className="bg-emerald-500 h-full rounded-full" />
+                        </div>
+                        <span className="text-[10px] text-slate-400 block">{cat.percentage}% of federal budget</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Federal Budget Simulator Callout Banner */}
+                <div className="mt-2 p-3.5 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/30 border border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="space-y-0.5">
+                    <span className="font-semibold text-blue-200 block">
+                      {dict.simulation.budgetCallout.summary}
+                    </span>
+                  </div>
+                  <Link
+                    href={`/${locale}/simulator`}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0 cursor-pointer"
+                  >
+                    <Sliders className="w-3.5 h-3.5" />
+                    <span>{dict.simulation.budgetCallout.cta}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT: FORMULA TRACES */}
             {activeTab === 'traces' && (
               <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.06] border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01] text-xs">
                 <div className="p-4 sm:p-5 space-y-1.5">
@@ -428,34 +474,6 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
               </div>
             )}
 
-            {/* TAB CONTENT: PUBLIC SPENDING IMPACT */}
-            {activeTab === 'spending' && (
-              <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01] p-4 sm:p-5 space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-white">{dict.simulation.spendingSummary.title}</span>
-                  <span className="text-slate-400 text-[11px]">{dict.simulation.spendingSummary.subtitle}</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs pt-1">
-                  {FEDERAL_SPENDING_CATEGORIES.slice(0, 6).map((cat) => {
-                    const allocatedDollars = Math.round((federalTaxDollars * cat.percentage) / 100);
-                    return (
-                      <div key={cat.id} className="bg-[#070b12] p-3 rounded-lg border border-white/[0.06] space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 font-medium truncate">{locale === 'fr' ? cat.nameFr : cat.nameEn}</span>
-                          <span className="text-emerald-400 font-bold tabular-nums">${allocatedDollars.toLocaleString()}</span>
-                        </div>
-                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                          <div style={{ width: `${cat.percentage * 3.5}%` }} className="bg-emerald-500 h-full rounded-full" />
-                        </div>
-                        <span className="text-[10px] text-slate-400 block">{cat.percentage}% of federal budget</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             {/* TAB CONTENT: COMPARISON WITH LEGACY SITE */}
             {activeTab === 'comparison' && (
               <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-white/[0.01] p-4 sm:p-5 space-y-3 text-xs">
@@ -491,7 +509,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
             <div className="flex items-center gap-3">
               <Link
                 href={`/${locale}/calculator/${provinceSlug}`}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-[0_2px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.28)] transition-all cursor-pointer"
               >
                 <Calculator className="w-4 h-4" />
                 <span>{dict.simulation.ctaButton}</span>
@@ -500,7 +518,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
             </div>
           </div>
         </div>
-      </BrowserWindow>
+      </div>
     </section>
   );
 }

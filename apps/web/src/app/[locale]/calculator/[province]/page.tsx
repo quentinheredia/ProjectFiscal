@@ -1,12 +1,14 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import Calculator from '@/components/Calculator';
-import CalculatorExtras from '@/components/CalculatorExtras';
-import { Locale } from '@/lib/i18n';
+import NewsletterForm from '@/components/NewsletterForm';
+import Footer from '@/components/Footer';
+import { Locale, getDictionary } from '@/lib/i18n';
 import { getProvincialRules } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
-import { BrowserWindow } from '@/components/ui/mock-browser-window';
+import { ArrowRight } from 'lucide-react';
 
 interface ProvincePageProps {
   params: Promise<{
@@ -105,6 +107,7 @@ export async function generateMetadata({
 export default async function ProvincePage({ params }: ProvincePageProps) {
   const resolved = await params;
   const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const dict = getDictionary(locale);
   const provinceSlug = resolved.province.toLowerCase();
   const config = SUPPORTED_PROVINCES[provinceSlug];
 
@@ -123,79 +126,74 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
   };
 
   return (
-    <div className="space-y-12">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <section className="text-center max-w-4xl mx-auto space-y-3 pt-4">
+      {/* 1. COMPACT PAGE HEADER */}
+      <section className="text-center max-w-4xl mx-auto space-y-3 pt-2">
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
           {locale === 'fr'
             ? `Calculateur d’impôt sur le revenu de ${config.nameFr} 2026`
             : `${config.nameEn} Income Tax Calculator 2026`}
         </h1>
-        <p className="text-base text-slate-400 max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
           {locale === 'fr'
             ? `Explorez les tranches d’imposition de ${config.nameFr} pour 2026 et calculez votre paie nette exacte.`
             : `Calculate your exact net pay in ${config.nameEn} with current 2026 provincial brackets and statutory payroll deductions.`}
         </p>
       </section>
 
-      {/* Calculator Framed in Mock Browser Window */}
-      <section className="max-w-7xl mx-auto">
-        <BrowserWindow
-          url={`https://fiscal-insights.ca/${locale}/calculator/${provinceSlug}`}
-          variant="safari"
-          theme="dark"
-          headerStyle="full"
-          className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl overflow-hidden"
-        >
-          <div className="p-4 sm:p-8 space-y-10">
-            <Calculator locale={locale} initialProvince={config.code} initialSalaryDollars={80000} />
-            <CalculatorExtras locale={locale} />
-          </div>
-        </BrowserWindow>
+      {/* 2 & 3. 2-COLUMN INTERACTIVE CALCULATOR WORKSPACE + WHERE YOUR FEDERAL TAXES GO */}
+      <section>
+        <Calculator locale={locale} initialProvince={config.code} initialSalaryDollars={80000} />
       </section>
 
-      {/* Official Provincial 2026 Tax Brackets Table */}
-      <section className="bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
-        <div>
-          <h2 className="text-xl font-bold text-white">
-            {locale === 'fr'
-              ? `Barèmes d’imposition de ${config.nameFr} (2026)`
-              : `${config.nameEn} 2026 Tax Brackets & Rates`}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            {locale === 'fr'
-              ? `Taux officiels issus du formulaire provincial ${config.formName}.`
-              : `Official provincial rates based on ${config.formName} guidelines.`}
-          </p>
+      {/* 4. PROVINCIAL 2026 TAX BRACKETS & RATES (Open Canvas De-Boxed) */}
+      <section className="space-y-4 pt-4 border-t border-white/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+          <div>
+            <h2 className="text-xl font-bold text-white tracking-tight">
+              {locale === 'fr'
+                ? `Barèmes d’imposition de ${config.nameFr} (2026)`
+                : `${config.nameEn} 2026 Tax Brackets & Rates`}
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {locale === 'fr'
+                ? `Taux officiels issus du formulaire provincial ${config.formName}.`
+                : `Official provincial rates based on ${config.formName} guidelines.`}
+            </p>
+          </div>
+          <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit">
+            {config.formName}
+          </span>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] bg-[#0c121e]/70">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-[#070b12] text-slate-300 font-semibold">
-                <th className="py-3 px-4">Bracket Threshold</th>
-                <th className="py-3 px-4">Tax Rate</th>
-                <th className="py-3 px-4">Source Schedule</th>
+              <tr className="border-b border-white/[0.08] bg-[#070b12] text-slate-300 font-semibold">
+                <th className="py-3.5 px-4">Bracket Threshold</th>
+                <th className="py-3.5 px-4">Tax Rate</th>
+                <th className="py-3.5 px-4">Source Schedule</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]">
+            <tbody className="divide-y divide-white/[0.06]">
               {provRules.brackets.map((b, idx) => {
                 const prevBracket = idx > 0 ? provRules.brackets[idx - 1] : undefined;
                 const prevUpTo = prevBracket?.upToCents ? formatCentsToDollars(prevBracket.upToCents.value) : '$0';
                 const currentUpTo = b.upToCents ? formatCentsToDollars(b.upToCents.value) : 'Any amount above';
                 return (
-                  <tr key={idx} className="hover:bg-slate-800/30">
-                    <td className="py-3 px-4 font-medium text-white tabular-nums">
+                  <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-white tabular-nums">
                       {prevUpTo} to {currentUpTo}
                     </td>
-                    <td className="py-3 px-4 font-bold text-emerald-400 tabular-nums">
+                    <td className="py-3.5 px-4 font-bold text-emerald-400 tabular-nums">
                       {(b.rate.value * 100).toFixed(2)}%
                     </td>
-                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                    <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
                       {config.formName}
                     </td>
                   </tr>
@@ -215,6 +213,94 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
           </div>
         )}
       </section>
+
+      {/* 5. THE REBUILD DIFFERENCE: ACCURACY VERIFIED (Audit Verification Table) */}
+      <section className="space-y-4 pt-4 border-t border-white/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-3">
+          <div>
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+              {locale === 'fr' ? 'VÉRIFICATION D’AUDIT LÉGAL DE L’ARC' : 'CRA STATUTORY AUDIT VERIFICATION'}
+            </span>
+            <h3 className="text-2xl font-bold text-white tracking-tight mt-1">
+              {dict.pitch.title}
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+              {dict.pitch.subtitle} (Ontario, $80,000 benchmark)
+            </p>
+          </div>
+          <Link
+            href={`/${locale}/salary/80000/ontario`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.25)] transition-all shrink-0 cursor-pointer"
+          >
+            <span>{dict.pitch.inspectAuditAction}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] bg-[#0c121e]/70">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-white/[0.08] bg-[#070b12] text-slate-300 font-semibold">
+                <th className="py-3.5 px-4">{dict.pitch.table.line}</th>
+                <th className="py-3.5 px-4 text-rose-400 bg-rose-950/20">{dict.pitch.table.oldSite}</th>
+                <th className="py-3.5 px-4 text-emerald-400 bg-emerald-500/[0.08] border-x border-emerald-500/20 font-bold">{dict.pitch.table.newEngine}</th>
+                <th className="py-3.5 px-4">{dict.pitch.table.difference}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.06]">
+              <tr>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.fedLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$10,323.00</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$9,242.60</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.fedDiff}</td>
+              </tr>
+              <tr>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.provLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$3,985.00</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$4,885.26</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.provDiff}</td>
+              </tr>
+              <tr>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.cppLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-slate-300">$4,382.10</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$4,446.45</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.cppDiff}</td>
+              </tr>
+              <tr>
+                <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.eiLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-slate-300">$1,077.48</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$1,123.07</td>
+                <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.eiDiff}</td>
+              </tr>
+              <tr className="bg-[#070b12] font-bold">
+                <td className="py-3.5 px-4 text-white">{dict.pitch.table.netLine}</td>
+                <td className="py-3.5 px-4 tabular-nums text-slate-300">$60,232.42</td>
+                <td className="py-3.5 px-4 tabular-nums text-emerald-400 bg-emerald-500/[0.08] border-x border-emerald-500/30">$60,302.62</td>
+                <td className="py-3.5 px-4 text-emerald-300/90 font-medium">{dict.pitch.table.netDiff}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* 6. NEWSLETTER CAPTURE CARD */}
+      <section className="bg-gradient-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-6 sm:p-8 space-y-4 border border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+        <div className="max-w-2xl space-y-2">
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+            {dict.newsletter.badge}
+          </span>
+          <h4 className="text-2xl font-bold tracking-tight">
+            {dict.newsletter.title}
+          </h4>
+          <p className="text-sm text-slate-300">
+            {dict.newsletter.description}
+          </p>
+        </div>
+        <NewsletterForm locale={locale} />
+      </section>
+
+      {/* 7. UNIFIED SITE FOOTER */}
+      <Footer locale={locale} />
     </div>
   );
 }

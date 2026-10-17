@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Locale, getDictionary } from '@/lib/i18n';
+import { useProvince, ProvinceSlug } from '@/context/ProvinceContext';
 import {
-  Compass,
   MapPin,
   FileCheck2,
   CheckCircle2,
@@ -16,7 +16,7 @@ interface InteractiveOnboardingProps {
 
 export default function InteractiveOnboarding({ locale }: InteractiveOnboardingProps) {
   const dict = getDictionary(locale);
-  const [selectedProvince, setSelectedProvince] = useState<string>('ON');
+  const { selectedProvince: globalProvince, setSelectedProvinceSlug } = useProvince();
 
   const provinces = [
     { code: 'ON', slug: 'ontario', name: 'Ontario', form: 'ON428' },
@@ -29,10 +29,6 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
     <section className="max-w-7xl mx-auto my-14 space-y-10" id="how-it-works">
       {/* Section Header with clean sans-serif typography */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30">
-          <Compass className="w-3.5 h-3.5 text-emerald-400" />
-          <span>{dict.onboarding.badge}</span>
-        </div>
         <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
           {dict.onboarding.title}
         </h2>
@@ -49,7 +45,7 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold text-emerald-400 tracking-wider">
-                01 / JURISDICTION
+                {locale === 'fr' ? 'JURIDICTION' : 'JURISDICTION'}
               </span>
               <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <MapPin className="w-4 h-4" />
@@ -67,12 +63,12 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
             {/* Interactive Province Selector (Only visual artifact on this column) */}
             <div className="grid grid-cols-2 gap-2 pt-1">
               {provinces.map((p) => {
-                const isSelected = selectedProvince === p.code;
+                const isSelected = globalProvince.code === p.code;
                 return (
                   <button
                     key={p.code}
                     type="button"
-                    onClick={() => setSelectedProvince(p.code)}
+                    onClick={() => setSelectedProvinceSlug(p.slug as ProvinceSlug)}
                     className={`px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all cursor-pointer border ${
                       isSelected
                         ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
@@ -108,12 +104,12 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
           </div>
         </div>
 
-        {/* COLUMN 2: Zero-I/O Pure Calculation Engine */}
+        {/* COLUMN 2: Deductions */}
         <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold text-blue-400 tracking-wider">
-                02 / ZERO I/O ENGINE
+                {locale === 'fr' ? 'DÉDUCTIONS' : 'DEDUCTIONS'}
               </span>
               <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 <Lock className="w-4 h-4" />
@@ -167,7 +163,7 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold text-emerald-400 tracking-wider">
-                03 / CRA AUDIT TRACES
+                {locale === 'fr' ? 'TRACES D’AUDIT DE L’ARC' : 'CRA AUDIT TRACES'}
               </span>
               <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <FileCheck2 className="w-4 h-4" />

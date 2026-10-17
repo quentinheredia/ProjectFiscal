@@ -1,14 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import { Locale, getDictionary } from '@/lib/i18n';
 import {
-  Sparkles,
-  ArrowRight,
   CheckCircle2,
-  Lock,
   Layers,
-  Calculator,
 } from 'lucide-react';
 import TaxSimulationPreview from '@/components/TaxSimulationPreview';
 import InteractiveOnboarding from '@/components/InteractiveOnboarding';
@@ -16,6 +13,8 @@ import CalculatorHub from '@/components/CalculatorHub';
 import TaxInformationHub from '@/components/TaxInformationHub';
 import TaxCurveAnalytics from '@/components/TaxCurveAnalytics';
 import NewsletterForm from '@/components/NewsletterForm';
+import HeroCtas from '@/components/HeroCtas';
+import BottomConversionCta from '@/components/BottomConversionCta';
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
@@ -85,12 +84,6 @@ export default async function HomePage({ params }: HomePageProps) {
       {/* HERO SECTION + SIMULATION PREVIEW (Tightened Gap for Screen Share / Demo) */}
       <div className="space-y-6 sm:space-y-8">
         <section className="text-center max-w-4xl mx-auto space-y-6 pt-4 sm:pt-8">
-          {/* Live Tax Rules Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{dict.hero.badge}</span>
-          </div>
-
           {/* Main Title */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1]">
             {dict.hero.title}
@@ -101,31 +94,8 @@ export default async function HomePage({ params }: HomePageProps) {
             {dict.hero.subtitle}
           </p>
 
-          {/* Hero Call To Actions */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-1">
-            <Link
-              href={`/${locale}/calculator/ontario`}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] transition-all cursor-pointer"
-            >
-              <Calculator className="w-4 h-4" />
-              <span>{dict.hero.ctaPrimary}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-
-            <a
-              href="#how-it-works"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-slate-300 hover:text-white bg-[#0e1422] hover:bg-[#151e32] border border-slate-800 hover:border-slate-700 shadow-sm transition-all cursor-pointer"
-            >
-              <span>{dict.hero.ctaSecondary}</span>
-            </a>
-
-            <a
-              href="#provinces"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-slate-300 hover:text-white bg-slate-900/50 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 shadow-sm transition-all cursor-pointer"
-            >
-              <span>{dict.hero.ctaExploreProvinces}</span>
-            </a>
-          </div>
+          {/* Hero Call To Actions & Quick Section Anchors */}
+          <HeroCtas locale={locale} exploreProvincesText={dict.hero.ctaExploreProvinces} />
 
           {/* Trust Badges Row */}
           <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 pt-2 text-xs text-slate-400">
@@ -134,19 +104,14 @@ export default async function HomePage({ params }: HomePageProps) {
               <span>{dict.hero.trustItem1}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-blue-400" />
-              <span>{dict.hero.trustItem2}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-purple-400" />
               <span>{dict.hero.trustItem3}</span>
             </div>
           </div>
         </section>
 
-        {/* 1. MOCK BROWSER WINDOW COMPONENT: FULL SIMULATION PREVIEW (HERO ANCHOR WITH AMBIENT GLOW) */}
+        {/* 1. MOCK BROWSER WINDOW COMPONENT: FULL SIMULATION PREVIEW (HERO ANCHOR) */}
         <div className="relative mt-8">
-          <div className="absolute inset-0 max-w-5xl mx-auto bg-gradient-to-b from-emerald-500/15 via-teal-500/8 to-transparent blur-3xl -z-10 pointer-events-none rounded-3xl" />
           <TaxSimulationPreview locale={locale} />
         </div>
       </div>
@@ -170,10 +135,6 @@ export default async function HomePage({ params }: HomePageProps) {
             {/* Left Column: Primary Conversion Action */}
             <div className="lg:col-span-7 p-8 sm:p-10 flex flex-col justify-between space-y-6">
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30">
-                  <Calculator className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{dict.bottomCta.badge}</span>
-                </div>
                 <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
                   {dict.bottomCta.title}
                 </h3>
@@ -183,19 +144,8 @@ export default async function HomePage({ params }: HomePageProps) {
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
-                <Link
-                  href={`/${locale}/calculator/ontario`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer"
-                >
-                  <Calculator className="w-4 h-4" />
-                  <span>{dict.bottomCta.button}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                <BottomConversionCta locale={locale} />
                 <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{locale === 'fr' ? 'Zéro I/O' : 'Zero I/O'}</span>
-                  </div>
                   <div className="flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     <span>{locale === 'fr' ? 'Précision au centime' : 'Exact Cent'}</span>
@@ -231,9 +181,13 @@ export default async function HomePage({ params }: HomePageProps) {
           {/* Column 1: Brand & Verification */}
           <div className="col-span-2 md:col-span-1 space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-xs text-emerald-400">
-                FI
-              </div>
+              <Image
+                src="/logo-icon.png"
+                alt="Fiscal Insights Logo"
+                width={24}
+                height={24}
+                className="w-6 h-6 object-contain"
+              />
               <span className="font-extrabold text-white text-sm">
                 Fiscal<span className="text-emerald-400">Insights</span>
               </span>

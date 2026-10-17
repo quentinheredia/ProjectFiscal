@@ -3,10 +3,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Locale, getDictionary } from '@/lib/i18n';
-import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
+import { useProvince, PROVINCES_LIST, ProvinceSlug, DEFAULT_PROVINCE } from '@/context/ProvinceContext';
+import {
+  federal2026,
+  ontario2026,
+  quebec2026,
+  britishColumbia2026,
+  alberta2026,
+} from '@fiscal-insights/tax-data';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import {
-  BookOpen,
   Scale,
   TrendingUp,
   HelpCircle,
@@ -19,9 +25,69 @@ interface TaxInformationHubProps {
   locale: Locale;
 }
 
+const PROVINCIAL_DATA: Record<
+  ProvinceSlug,
+  {
+    rules: typeof ontario2026;
+    color: string;
+    rateColor: string;
+    badgeBorder: string;
+    badgeBg: string;
+    badgeText: string;
+    citation: string;
+    citationFr: string;
+  }
+> = {
+  ontario: {
+    rules: ontario2026,
+    color: 'bg-amber-400',
+    rateColor: 'text-amber-400',
+    badgeBorder: 'border-amber-500/40',
+    badgeBg: 'bg-amber-500/15',
+    badgeText: 'text-amber-300',
+    citation: 'Form ON428, Part A',
+    citationFr: 'Formulaire ON428, partie A',
+  },
+  quebec: {
+    rules: quebec2026,
+    color: 'bg-indigo-400',
+    rateColor: 'text-indigo-400',
+    badgeBorder: 'border-indigo-500/40',
+    badgeBg: 'bg-indigo-500/15',
+    badgeText: 'text-indigo-300',
+    citation: 'Revenu Québec TP-1, Line 401',
+    citationFr: 'Revenu Québec TP-1, ligne 401',
+  },
+  'british-columbia': {
+    rules: britishColumbia2026,
+    color: 'bg-teal-400',
+    rateColor: 'text-teal-400',
+    badgeBorder: 'border-teal-500/40',
+    badgeBg: 'bg-teal-500/15',
+    badgeText: 'text-teal-300',
+    citation: 'Form BC428, Part A',
+    citationFr: 'Formulaire BC428, partie A',
+  },
+  alberta: {
+    rules: alberta2026,
+    color: 'bg-sky-400',
+    rateColor: 'text-sky-400',
+    badgeBorder: 'border-sky-500/40',
+    badgeBg: 'bg-sky-500/15',
+    badgeText: 'text-sky-300',
+    citation: 'Form AB428, Part A',
+    citationFr: 'Formulaire AB428, partie A',
+  },
+};
+
 export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
   const dict = getDictionary(locale);
+  const { selectedProvince } = useProvince();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  const activeProvinceConfig =
+    PROVINCES_LIST.find((p) => p.slug === selectedProvince.slug) ?? DEFAULT_PROVINCE;
+  const activeProvData = PROVINCIAL_DATA[activeProvinceConfig.slug] ?? PROVINCIAL_DATA.ontario;
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -38,10 +104,6 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
     <section className="max-w-7xl mx-auto my-14 space-y-14" id="tax-information">
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-700/80 shadow-sm">
-          <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-          <span>{dict.infoHub.badge}</span>
-        </div>
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           {dict.infoHub.title}
         </h2>
@@ -50,7 +112,7 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
         </p>
       </div>
 
-      {/* 1. Official 2026 Tax Brackets (Open Canvas Heading, Only Tables Are Bordered Containers) */}
+      {/* 1. Official 2026 Tax Brackets (Federal + Dynamic Provincial Brackets with Selector) */}
       <div id="brackets" className="space-y-6">
         <div>
           <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
@@ -67,10 +129,15 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Federal Brackets Table */}
           <div className="space-y-3">
-            <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-400" />
-              <span>{dict.infoHub.brackets.federalTitle}</span>
-            </h4>
+            <div className="flex items-center justify-between min-h-[32px]">
+              <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-400" />
+                <span>{dict.infoHub.brackets.federalTitle}</span>
+              </h4>
+              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                CRA Federal
+              </span>
+            </div>
             <div className="overflow-x-auto rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.5)]">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -102,14 +169,33 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
                 </tbody>
               </table>
             </div>
+            <div className="flex justify-end pt-1">
+              <span className="text-xs text-slate-500 font-mono">
+                {locale === 'fr' ? 'S’applique à tous les résidents canadiens' : 'Applies to all Canadian residents'}
+              </span>
+            </div>
           </div>
 
-          {/* Ontario Brackets Table */}
+          {/* Dynamic Provincial Brackets Table (Driven by Navbar Province State) */}
           <div className="space-y-3">
-            <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              <span>{dict.infoHub.brackets.ontarioTitle}</span>
-            </h4>
+            <div className="flex items-center justify-between min-h-[32px]">
+              <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${activeProvData.color}`} />
+                <span>
+                  {locale === 'fr'
+                    ? `Barèmes ${activeProvinceConfig.nameFr} 2026 (${activeProvinceConfig.form})`
+                    : `2026 ${activeProvinceConfig.nameEn} Provincial Brackets (Form ${activeProvinceConfig.form})`}
+                </span>
+              </h4>
+
+              {/* Active Jurisdiction Badge (Synced from Navbar) */}
+              <span
+                className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${activeProvData.badgeBg} ${activeProvData.badgeText} border ${activeProvData.badgeBorder}`}
+              >
+                📍 {activeProvinceConfig.nameEn} ({activeProvinceConfig.code})
+              </span>
+            </div>
+
             <div className="overflow-x-auto rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.5)]">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -120,8 +206,8 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]">
-                  {ontario2026.brackets.map((b, idx) => {
-                    const prevBracket = idx > 0 ? ontario2026.brackets[idx - 1] : undefined;
+                  {activeProvData.rules.brackets.map((b, idx) => {
+                    const prevBracket = idx > 0 ? activeProvData.rules.brackets[idx - 1] : undefined;
                     const prevUpTo = prevBracket?.upToCents ? formatCentsToDollars(prevBracket.upToCents.value) : '$0';
                     const currentUpTo = b.upToCents ? formatCentsToDollars(b.upToCents.value) : (locale === 'fr' ? 'Tout montant supérieur' : 'Above this threshold');
                     return (
@@ -129,17 +215,32 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
                         <td className="py-2.5 px-4 font-medium text-white tabular-nums">
                           {prevUpTo} – {currentUpTo}
                         </td>
-                        <td className="py-2.5 px-4 font-bold text-amber-400 tabular-nums">
+                        <td className={`py-2.5 px-4 font-bold tabular-nums ${activeProvData.rateColor}`}>
                           {(b.rate.value * 100).toFixed(2)}%
                         </td>
                         <td className="py-2.5 px-4 text-slate-400 font-mono text-[11px]">
-                          Form ON428, Part A
+                          {locale === 'fr' ? activeProvData.citationFr : activeProvData.citation}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Quick Link to Launch Calculator for Selected Province */}
+            <div className="flex justify-end pt-1">
+              <Link
+                href={`/${locale}/calculator/${activeProvinceConfig.slug}`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors group"
+              >
+                <span>
+                  {locale === 'fr'
+                    ? `Calculer l'impôt en ${activeProvinceConfig.nameFr} (${activeProvinceConfig.code})`
+                    : `Calculate ${activeProvinceConfig.nameEn} (${activeProvinceConfig.code}) Taxes`}
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
             </div>
           </div>
         </div>
@@ -264,7 +365,7 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
-              {locale === 'fr' ? 'Preuve d’audit rigoureuse' : 'Audit Verification Point'}
+              {locale === 'fr' ? 'VÉRIFICATION D’AUDIT LÉGAL DE L’ARC' : 'CRA STATUTORY AUDIT VERIFICATION'}
             </span>
             <h3 className="text-2xl font-bold text-white tracking-tight mt-1">
               {dict.pitch.title}
@@ -275,7 +376,7 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
           </div>
           <Link
             href={`/${locale}/salary/80000/ontario`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)] transition-all shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.25)] transition-all shrink-0 cursor-pointer"
           >
             <span>{dict.pitch.inspectAuditAction}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -295,32 +396,32 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
             <tbody className="divide-y divide-slate-800/80 bg-[#0a0f1c]/80">
               <tr>
                 <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.fedLine}</td>
-                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$10,323</td>
-                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">~$9,552</td>
+                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$10,323.00</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$9,242.60</td>
                 <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.fedDiff}</td>
               </tr>
               <tr>
                 <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.provLine}</td>
-                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$3,985</td>
-                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">~$4,940</td>
+                <td className="py-3.5 px-4 tabular-nums text-rose-400 bg-rose-950/10">$3,985.00</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$4,885.26</td>
                 <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.provDiff}</td>
               </tr>
               <tr>
                 <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.cppLine}</td>
                 <td className="py-3.5 px-4 tabular-nums text-slate-300">$4,382.10</td>
-                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$4,382.10</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$4,446.45</td>
                 <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.cppDiff}</td>
               </tr>
               <tr>
                 <td className="py-3.5 px-4 font-semibold text-white">{dict.pitch.table.eiLine}</td>
                 <td className="py-3.5 px-4 tabular-nums text-slate-300">$1,077.48</td>
-                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$1,077.48</td>
+                <td className="py-3.5 px-4 tabular-nums font-bold text-emerald-400 bg-emerald-500/[0.04] border-x border-emerald-500/20">$1,123.07</td>
                 <td className="py-3.5 px-4 text-slate-400">{dict.pitch.table.eiDiff}</td>
               </tr>
               <tr className="bg-[#070b12] font-bold">
                 <td className="py-3.5 px-4 text-white">{dict.pitch.table.netLine}</td>
-                <td className="py-3.5 px-4 tabular-nums text-slate-300">$60,232</td>
-                <td className="py-3.5 px-4 tabular-nums text-emerald-400 bg-emerald-500/[0.08] border-x border-emerald-500/30">~$60,048</td>
+                <td className="py-3.5 px-4 tabular-nums text-slate-300">$60,232.42</td>
+                <td className="py-3.5 px-4 tabular-nums text-emerald-400 bg-emerald-500/[0.08] border-x border-emerald-500/30">$60,302.62</td>
                 <td className="py-3.5 px-4 text-emerald-300/90 font-medium">{dict.pitch.table.netDiff}</td>
               </tr>
             </tbody>

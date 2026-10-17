@@ -25,6 +25,17 @@ export interface AnalyticsDataPoint {
   header?: string
   hideDate?: boolean
   xLabel?: string
+  xValue?: number
+  tooltipHeader?: string
+  tooltipBody?: string
+  tooltipSubtext?: string
+}
+
+export interface ChartAnnotationMarker {
+  xValue: number
+  label: string
+  sublabel?: string
+  color?: string
 }
 
 export interface AnalyticsGradientStop {
@@ -198,7 +209,22 @@ export function AnalyticsTooltip({
             "0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05)",
         }}
       >
-        {point.formattedDate ? (
+        {/* Tooltip Header line */}
+        {point.tooltipHeader ? (
+          <div
+            data-slot="analytics-tooltip-header"
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "#94a3b8",
+              fontFamily: "ui-monospace, monospace",
+              marginBottom: 4,
+              letterSpacing: "0.01em",
+            }}
+          >
+            {point.tooltipHeader}
+          </div>
+        ) : point.formattedDate ? (
           <div
             data-slot="analytics-tooltip-date"
             style={{
@@ -214,39 +240,84 @@ export function AnalyticsTooltip({
             {point.formattedDate}
           </div>
         ) : null}
-        <div
-          data-slot="analytics-tooltip-value"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 7,
-          }}
-        >
-          <span
+
+        {/* Tooltip Body line */}
+        {point.tooltipBody ? (
+          <div
+            data-slot="analytics-tooltip-body"
             style={{
-              fontSize: 12.5,
-              fontWeight: 600,
-              color: "var(--foreground)",
-              background: `color-mix(in srgb, ${color} 14%, transparent)`,
-              padding: "1.5px 6px",
-              borderRadius: 4,
-              lineHeight: "19px",
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              fontSize: 13.5,
+              fontWeight: 700,
+              color: "#ffffff",
+              lineHeight: 1.3,
             }}
           >
-            {point.label}
-          </span>
-          <span
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                backgroundColor: color,
+                display: "inline-block",
+                boxShadow: `0 0 8px ${color}`,
+              }}
+            />
+            <span>{point.tooltipBody}</span>
+          </div>
+        ) : (
+          <div
+            data-slot="analytics-tooltip-value"
             style={{
-              fontSize: 13,
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: "var(--foreground)",
+                background: `color-mix(in srgb, ${color} 14%, transparent)`,
+                padding: "1.5px 6px",
+                borderRadius: 4,
+                lineHeight: "19px",
+              }}
+            >
+              {point.label}
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--muted-foreground)",
+                fontVariantNumeric: "tabular-nums",
+                lineHeight: "19px",
+              }}
+            >
+              {fmtNum(point.value)} {valueLabel}
+            </span>
+          </div>
+        )}
+
+        {/* Tooltip Subtext line */}
+        {point.tooltipSubtext ? (
+          <div
+            data-slot="analytics-tooltip-subtext"
+            style={{
+              fontSize: 11,
+              color: "#94a3b8",
+              marginTop: 4,
+              fontFamily: "ui-monospace, monospace",
               fontWeight: 500,
-              color: "var(--muted-foreground)",
-              fontVariantNumeric: "tabular-nums",
-              lineHeight: "19px",
             }}
           >
-            {fmtNum(point.value)} {valueLabel}
-          </span>
-        </div>
+            {point.tooltipSubtext}
+          </div>
+        ) : null}
       </div>
     </div>
   )
@@ -255,6 +326,8 @@ export function AnalyticsTooltip({
 /* ── Chart ───────────────────────────────────────────────────────────── */
 export interface AnalyticsLineChartProps {
   data?: AnalyticsDataPoint[]
+  secondaryData?: { value: number; label?: string }[]
+  secondaryColor?: string
   gradientStops?: AnalyticsGradientStop[]
   dotColors?: string[]
   gridLines?: number
@@ -262,10 +335,20 @@ export interface AnalyticsLineChartProps {
   pinnedIndices?: number[]
   valueLabel?: string
   className?: string
+  yFormat?: (val: number) => string
+  minY?: number
+  maxY?: number
+  annotations?: ChartAnnotationMarker[]
+  legend?: {
+    primary: string
+    secondary?: string
+  }
 }
 
 export function AnalyticsLineChart({
   data = DEFAULT_DATA,
+  secondaryData,
+  secondaryColor = "#38bdf8",
   gradientStops = DEFAULT_GRADIENT,
   dotColors,
   gridLines = 5,
@@ -273,6 +356,11 @@ export function AnalyticsLineChart({
   pinnedIndices,
   valueLabel = "clicks",
   className,
+  yFormat,
+  minY,
+  maxY,
+  annotations,
+  legend,
 }: AnalyticsLineChartProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
@@ -309,19 +397,43 @@ export function AnalyticsLineChart({
     return () => ro.disconnect()
   }, [])
 
+  const hasXValues = useMemo(() => data.some((d) => d.xValue !== undefined), [data])
+  const minX = useMemo(() => {
+    const xs = data.map((d) => d.xValue).filter((x): x is number => x !== undefined)
+    return xs.length > 0 ? Math.min(...xs) : 0
+  }, [data])
+  const maxX = useMemo(() => {
+    const xs = data.map((d) => d.xValue).filter((x): x is number => x !== undefined)
+    return xs.length > 0 ? Math.max(...xs) : 1
+  }, [data])
+  const rngX = maxX - minX || 1
+
+  const vs = useMemo(() => {
+    const primaryVs = data.map((d) => d.value)
+    const secVs = secondaryData ? secondaryData.map((d) => d.value) : []
+    return [...primaryVs, ...secVs]
+  }, [data, secondaryData])
+
+  const mnVal = minY !== undefined ? minY : Math.min(...vs)
+  const mxVal = maxY !== undefined ? maxY : Math.max(...vs)
+  const rngVal = mxVal - mnVal || 1
+
   const points = useMemo(() => {
-    const vs = data.map((d) => d.value)
-    const mn = Math.min(...vs),
-      mx = Math.max(...vs),
-      rng = mx - mn || 1
-    return data.map((d, i) => ({
-      ...d,
-      x: pad.l + (i / Math.max(data.length - 1, 1)) * iW,
-      y: pad.t + iH - ((d.value - mn) / rng) * iH,
-      formattedDate: d.header ?? (d.hideDate ? "" : fmtDate(d.date)),
-      color: dotColor(i, data.length, dotColors),
-    }))
-  }, [data, iW, iH, pad, dotColors])
+    return data.map((d, i) => {
+      const x =
+        hasXValues && d.xValue !== undefined
+          ? pad.l + ((d.xValue - minX) / rngX) * iW
+          : pad.l + (i / Math.max(data.length - 1, 1)) * iW
+      const y = pad.t + iH - ((d.value - mnVal) / rngVal) * iH
+      return {
+        ...d,
+        x,
+        y,
+        formattedDate: d.header ?? (d.hideDate ? "" : fmtDate(d.date)),
+        color: dotColor(i, data.length, dotColors),
+      }
+    })
+  }, [data, iW, iH, pad, dotColors, hasXValues, minX, rngX, mnVal, rngVal])
 
   const pathD = useMemo(
     () =>
@@ -330,6 +442,25 @@ export function AnalyticsLineChart({
         .join(""),
     [points]
   )
+
+  const secondaryPoints = useMemo(() => {
+    if (!secondaryData || secondaryData.length === 0) return []
+    return secondaryData.map((d, i) => {
+      const matchPoint = points[i]
+      const x = matchPoint
+        ? matchPoint.x
+        : pad.l + (i / Math.max(secondaryData.length - 1, 1)) * iW
+      const y = pad.t + iH - ((d.value - mnVal) / rngVal) * iH
+      return { x, y, value: d.value }
+    })
+  }, [secondaryData, points, mnVal, rngVal, pad.l, iW, pad.t, iH])
+
+  const secondaryPathD = useMemo(() => {
+    if (secondaryPoints.length === 0) return ""
+    return secondaryPoints
+      .map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+      .join("")
+  }, [secondaryPoints])
 
   const pathLen = useMemo(() => {
     let l = 0
@@ -389,11 +520,6 @@ export function AnalyticsLineChart({
 
   const gradId = `g-${useId().replaceAll(":", "")}`
 
-  const vs = data.map((d) => d.value)
-  const mnVal = Math.min(...vs)
-  const mxVal = Math.max(...vs)
-  const rngVal = mxVal - mnVal || 1
-
   return (
     <div
       className={cn("w-full", className)}
@@ -406,6 +532,27 @@ export function AnalyticsLineChart({
         WebkitFontSmoothing: "antialiased",
       }}
     >
+      {/* Chart Legend if secondary series is active */}
+      {legend && (
+        <div className="flex items-center justify-end gap-5 text-xs text-slate-300 font-medium mb-3 px-1">
+          <div className="flex items-center gap-2">
+            <span className="w-3.5 h-1 rounded-full bg-emerald-400 inline-block shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+            <span className="text-slate-200">{legend.primary}</span>
+          </div>
+          {legend.secondary && (
+            <div className="flex items-center gap-2">
+              <span
+                className="w-3.5 h-0.5 rounded-full inline-block"
+                style={{
+                  borderTop: `2px dashed ${secondaryColor || "#38bdf8"}`,
+                }}
+              />
+              <span className="text-sky-300">{legend.secondary}</span>
+            </div>
+          )}
+        </div>
+      )}
+
       <svg
         aria-label="Analytics line chart"
         data-slot="analytics-line-chart-svg"
@@ -441,7 +588,10 @@ export function AnalyticsLineChart({
         {/* Grid and Y-axis labels with precision dashed financial gridlines */}
         {Array.from({ length: gridLines }).map((_, i) => {
           const y = pad.t + (i / (gridLines - 1)) * iH
-          const tickVal = Math.round(mxVal - (i / (gridLines - 1)) * rngVal)
+          const tickVal = mxVal - (i / (gridLines - 1)) * rngVal
+          const labelText = yFormat
+            ? yFormat(tickVal)
+            : `$${Math.round(tickVal / 1000)}k`
           return (
             <g key={`grid-row-${y.toFixed(2)}`}>
               <line
@@ -467,7 +617,7 @@ export function AnalyticsLineChart({
                 fontWeight="500"
                 className="tabular-nums"
               >
-                ${Math.round(tickVal / 1000)}k
+                {labelText}
               </text>
             </g>
           )
@@ -484,6 +634,64 @@ export function AnalyticsLineChart({
             }}
           />
         )}
+
+        {/* Vertical Tax Bracket Annotation Markers */}
+        {annotations &&
+          annotations.map((ann) => {
+            const ax =
+              hasXValues && ann.xValue !== undefined
+                ? pad.l + ((ann.xValue - minX) / rngX) * iW
+                : pad.l + iW * 0.5
+            return (
+              <g key={`annotation-${ann.xValue}-${ann.label}`}>
+                {/* Subtle vertical dashed divider */}
+                <line
+                  x1={ax}
+                  x2={ax}
+                  y1={pad.t}
+                  y2={pad.t + iH}
+                  stroke="rgba(148, 163, 184, 0.22)"
+                  strokeDasharray="3 3"
+                  strokeWidth="1.2"
+                />
+                {/* Top bracket badge pill */}
+                <rect
+                  x={ax - 42}
+                  y={pad.t - 22}
+                  width={84}
+                  height={18}
+                  rx={5}
+                  fill="#0c121e"
+                  stroke="rgba(148, 163, 184, 0.35)"
+                  strokeWidth="1"
+                />
+                <text
+                  x={ax}
+                  y={pad.t - 9}
+                  textAnchor="middle"
+                  fill="#cbd5e1"
+                  fontSize="9.5"
+                  fontFamily="ui-monospace, monospace"
+                  fontWeight="600"
+                >
+                  {ann.label}
+                </text>
+                {ann.sublabel && (
+                  <text
+                    x={ax}
+                    y={pad.t + iH + 13}
+                    textAnchor="middle"
+                    fill="#64748b"
+                    fontSize="9"
+                    fontFamily="ui-monospace, monospace"
+                    fontWeight="500"
+                  >
+                    {ann.sublabel}
+                  </text>
+                )}
+              </g>
+            )
+          })}
 
         {/* X-axis baseline */}
         <line
@@ -503,7 +711,7 @@ export function AnalyticsLineChart({
             <text
               key={`x-axis-tick-${p.date}-${i}`}
               x={p.x}
-              y={pad.t + iH + 24}
+              y={pad.t + iH + 26}
               textAnchor="middle"
               fill="#94a3b8"
               fontSize="11"
@@ -516,7 +724,24 @@ export function AnalyticsLineChart({
           )
         })}
 
-        {/* Line — stroke-dashoffset draw */}
+        {/* Secondary Series: Effective Tax Rate (dashed line) */}
+        {secondaryPathD && (
+          <path
+            d={secondaryPathD}
+            fill="none"
+            stroke={secondaryColor || "#38bdf8"}
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2.5"
+            style={{
+              opacity: mounted ? 0.9 : 0,
+              transition: "opacity 800ms ease",
+            }}
+          />
+        )}
+
+        {/* Primary Series: Line — stroke-dashoffset draw */}
         <path
           d={pathD}
           fill="none"

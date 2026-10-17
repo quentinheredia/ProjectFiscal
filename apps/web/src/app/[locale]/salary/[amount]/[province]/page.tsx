@@ -6,8 +6,6 @@ import { Locale } from '@/lib/i18n';
 import { calculateTax, formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
-import { CheckCircle2 } from 'lucide-react';
-import { BrowserWindow } from '@/components/ui/mock-browser-window';
 
 interface SalaryPageProps {
   params: Promise<{
@@ -95,10 +93,6 @@ export default async function SalaryPage({ params }: SalaryPageProps) {
     <div className="space-y-12 max-w-7xl mx-auto pt-4">
       {/* Editorial Summary Header */}
       <section className="bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-950/70 text-blue-400 border border-blue-500/30">
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Audited 2026 Official Rates</span>
-        </div>
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
           {locale === 'fr'
             ? '80 000 $ après impôt en Ontario (2026)'
@@ -146,22 +140,14 @@ export default async function SalaryPage({ params }: SalaryPageProps) {
             Adjust this calculation or add RRSP/FHSA deductions
           </h2>
         </div>
-        <BrowserWindow
-          url={`https://fiscal-insights.ca/${locale}/salary/80000/ontario`}
-          variant="safari"
-          theme="dark"
-          headerStyle="full"
-          className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl overflow-hidden"
-        >
-          <div className="p-4 sm:p-8 space-y-10">
-            <Calculator
-              locale={locale}
-              initialProvince="ON"
-              initialSalaryDollars={80000}
-            />
-            <CalculatorExtras locale={locale} />
-          </div>
-        </BrowserWindow>
+        <div className="space-y-10">
+          <Calculator
+            locale={locale}
+            initialProvince="ON"
+            initialSalaryDollars={80000}
+          />
+          <CalculatorExtras locale={locale} />
+        </div>
       </section>
     </div>
   );

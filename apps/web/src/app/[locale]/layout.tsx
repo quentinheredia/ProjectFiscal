@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import { Locale, getDictionary } from '@/lib/i18n';
 import BackgroundGuides from '@/components/BackgroundGuides';
+import { ProvinceProvider } from '@/context/ProvinceContext';
 
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'fr' }];
@@ -57,11 +58,13 @@ export default async function LocaleLayout({
         className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300"
         suppressHydrationWarning
       >
-        <BackgroundGuides />
-        <Navbar locale={locale} />
-        <main className="relative z-10 grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-          {children}
-        </main>
+        <ProvinceProvider>
+          <BackgroundGuides />
+          <Navbar locale={locale} />
+          <main className="relative z-10 grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+            {children}
+          </main>
+        </ProvinceProvider>
       </body>
     </html>
   );

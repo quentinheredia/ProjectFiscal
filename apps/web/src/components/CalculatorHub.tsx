@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Locale, getDictionary } from '@/lib/i18n';
 import {
   ArrowRight,
-  Calculator,
   ShieldCheck,
   DollarSign,
 } from 'lucide-react';
@@ -72,10 +71,6 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
     <section className="max-w-7xl mx-auto my-14 space-y-8" id="provinces">
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-          <Calculator className="w-3.5 h-3.5 text-emerald-400" />
-          <span>{dict.hub.badge}</span>
-        </div>
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           {dict.hub.title}
         </h2>
@@ -117,7 +112,7 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
               </span>
               <Link
                 href={prov.href}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)] transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.25)] transition-all cursor-pointer"
               >
                 <span>{prov.cta}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
