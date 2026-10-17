@@ -65,7 +65,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {isFr ? 'Taux de rétention à 45k$' : 'Retention at $45,000'}
           </span>
           <span className="text-emerald-400 font-bold text-sm tabular-nums">84.2%</span>{' '}
-          <span className="text-slate-500">
+          <span className="text-slate-400">
             {isFr ? 'conservé après impôts' : 'kept after deductions'}
           </span>
         </div>
@@ -74,7 +74,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {isFr ? 'Taux de rétention à 80k$' : 'Retention at $80,000'}
           </span>
           <span className="text-emerald-400 font-bold text-sm tabular-nums">75.1%</span>{' '}
-          <span className="text-slate-500">
+          <span className="text-slate-400">
             {isFr ? 'conservé après impôts' : 'kept after deductions'}
           </span>
         </div>
@@ -83,7 +83,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {isFr ? 'Taux de rétention à 135k$' : 'Retention at $135,000'}
           </span>
           <span className="text-emerald-400 font-bold text-sm tabular-nums">68.7%</span>{' '}
-          <span className="text-slate-500">
+          <span className="text-slate-400">
             {isFr ? 'conservé après impôts' : 'kept after deductions'}
           </span>
         </div>

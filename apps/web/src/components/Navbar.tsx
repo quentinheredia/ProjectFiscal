@@ -137,10 +137,10 @@ export default function Navbar({ locale }: NavbarProps) {
           <Link
             href={targetPath}
             className="group relative inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-300 bg-[#161b26] hover:bg-[#1e2536] border border-slate-700/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_2px_4px_rgba(0,0,0,0.3)] hover:text-white transition-all"
-            aria-label="Switch Language"
+            hrefLang={targetLocale}
           >
             <Globe className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-12 transition-transform" />
-            <span>{dict.nav.languageSwitch}</span>
+            <span lang={targetLocale}>{dict.nav.languageSwitch}</span>
           </Link>
         </div>
       </div>
