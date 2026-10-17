@@ -15,7 +15,7 @@ export default function NewsletterForm({ locale }: { locale: Locale }) {
           type="email"
           aria-label={dict.newsletter.placeholder}
           placeholder={dict.newsletter.placeholder}
-          className="grow px-4 py-3 rounded-xl bg-[#070b12] border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="grow px-4 py-3 rounded-xl bg-[#070b12] border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
           required
         />
         <NeumorphButton
@@ -28,7 +28,7 @@ export default function NewsletterForm({ locale }: { locale: Locale }) {
         </NeumorphButton>
       </div>
       <div className="flex items-start gap-2 text-xs text-slate-400">
-        <input type="checkbox" id="consent-check" className="mt-0.5 rounded border-slate-700 bg-slate-800 text-emerald-500" />
+        <input type="checkbox" id="consent-check" className="mt-0.5 rounded-sm border-slate-700 bg-slate-800 text-emerald-500" />
         <label htmlFor="consent-check" className="cursor-pointer">
           {dict.newsletter.consent}
         </label>

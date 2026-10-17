@@ -41,7 +41,7 @@ export default async function HomePage({
       />
 
       {/* Hero Header with Cult UI Dark Aesthetic */}
-      <section className="text-center max-w-4xl mx-auto space-y-6 pt-4">
+      <section className="text-center max-w-4xl mx-auto space-y-6 pt-20">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
           <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
           <span>{dict.hero.badge}</span>

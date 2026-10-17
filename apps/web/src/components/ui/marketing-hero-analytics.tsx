@@ -347,8 +347,8 @@ export function AnalyticsHeroGridLines({
           }}
         />
       ))}
-      <AnalyticsHeroCrosshair className="-top-[7px] -left-[7px]" />
-      <AnalyticsHeroCrosshair className="-bottom-[7px] -right-[7px]" />
+      <AnalyticsHeroCrosshair className="top-[-7px] left-[-7px]" />
+      <AnalyticsHeroCrosshair className="bottom-[-7px] right-[-7px]" />
     </div>
   )
 }

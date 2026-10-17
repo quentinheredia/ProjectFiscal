@@ -88,7 +88,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <section className="text-center max-w-4xl mx-auto space-y-3 pt-4">
+      <section className="text-center max-w-4xl mx-auto space-y-3 pt-16">
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
           {locale === 'fr'
             ? 'Calculateur d’impôt sur le revenu de l’Ontario 2026'
@@ -152,7 +152,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
                     <td className="py-3 px-4 font-bold text-emerald-400 tabular-nums">
                       {(b.rate.value * 100).toFixed(2)}%
                     </td>
-                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px] leading-4">
                       Form ON428, Part A
                     </td>
                   </tr>

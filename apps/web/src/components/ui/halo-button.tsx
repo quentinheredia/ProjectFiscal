@@ -165,7 +165,7 @@ function TrailingLoadingSlot({
       aria-hidden
       className={cn(
         "absolute inset-0 flex items-center justify-center rounded-full",
-        "pointer-events-none bg-slate-100 text-slate-500 shadow-foreground/10 shadow-sm ring-1 ring-slate-950/10 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-50/10"
+        "pointer-events-none bg-slate-100 text-slate-500 shadow-foreground/10 shadow-xs ring-1 ring-slate-950/10 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-50/10"
       )}
       exit={{ ...cross.exit, transition: trailingExitTransition(reduceMotion) }}
       initial={cross.initial}
@@ -395,7 +395,7 @@ export function HaloButton({
             "border border-slate-200/90 dark:border-slate-800/90",
             "shadow-[0_1px_0_rgba(255,255,255,0.1)_inset,0_1px_2px_rgba(0,0,0,0.04),0_4px_14px_rgba(0,0,0,0.05)]",
             "dark:border-slate-200 dark:shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_1px_2px_rgba(0,0,0,0.35),0_4px_20px_rgba(0,0,0,0.35)] dark:dark:border-slate-800",
-            "outline-none focus-visible:border-slate-950/70 focus-visible:ring-2 focus-visible:ring-slate-950/30 dark:focus-visible:border-zinc-500/45 dark:focus-visible:border-slate-300/70 dark:focus-visible:ring-slate-300/30",
+            "outline-hidden focus-visible:border-slate-950/70 focus-visible:ring-2 focus-visible:ring-slate-950/30 dark:focus-visible:border-zinc-500/45 dark:focus-visible:border-slate-300/70 dark:focus-visible:ring-slate-300/30",
             "transition-[transform,background-color,backdrop-filter,border-color,box-shadow] duration-200 ease-out",
             "fine-hover:hover:border-slate-950/50 fine-hover:hover:shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_2px_6px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.08)] dark:fine-hover:hover:border-slate-300/50",
             "dark:fine-hover:hover:border-zinc-500/60 dark:fine-hover:hover:shadow-[0_1px_0_rgba(255,255,255,0.08)_inset,0_4px_12px_rgba(0,0,0,0.45),0_12px_32px_rgba(0,0,0,0.45)]",
