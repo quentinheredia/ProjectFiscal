@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'motion/react';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { Calculator, MapPin, DollarSign, Globe } from 'lucide-react';
 
@@ -94,31 +93,19 @@ export default function Navbar({ locale }: NavbarProps) {
                 {isActive && (
                   <>
                     {/* Inset groove */}
-                    <motion.span
-                      layoutId="nav-well"
-                      className="absolute inset-0 rounded-xl bg-[#0a0a0d] shadow-[inset_0_2px_4px_rgba(0,0,0,0.9),0_1px_1px_rgba(255,255,255,0.05)]"
-                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                    />
-                    {/* Animated glowing gradient ring */}
-                    <motion.span
-                      layoutId="nav-ring"
-                      className="absolute inset-[2px] overflow-hidden rounded-[10px]"
-                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                    >
+                    <span className="absolute inset-0 rounded-xl bg-[#0a0a0d] shadow-[inset_0_2px_4px_rgba(0,0,0,0.9),0_1px_1px_rgba(255,255,255,0.05)]" />
+                    {/* Glowing gradient ring (static when reduced motion is requested) */}
+                    <span className="absolute inset-[2px] overflow-hidden rounded-[10px]">
                       <span
-                        className="animate-gold-spin absolute inset-[-80%] origin-center will-change-transform opacity-90"
+                        className="animate-gold-spin motion-reduce:animate-none absolute inset-[-80%] origin-center will-change-transform opacity-90"
                         style={{
                           background:
                             'conic-gradient(from 220deg, #10B981 0%, #06B6D4 20%, #3B82F6 40%, #10B981 60%, #34D399 80%, #10B981 100%)',
                         }}
                       />
-                    </motion.span>
+                    </span>
                     {/* Inner raised button surface */}
-                    <motion.span
-                      layoutId="nav-surface"
-                      className="absolute inset-[3.5px] rounded-[8px] bg-[#141416] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_2px_4px_rgba(0,0,0,0.6)]"
-                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
-                    />
+                    <span className="absolute inset-[3.5px] rounded-[8px] bg-[#141416] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_2px_4px_rgba(0,0,0,0.6)]" />
                   </>
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
