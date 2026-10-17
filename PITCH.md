@@ -40,7 +40,7 @@ The current calculator gets the individual lines wrong. Two errors partly cancel
 
 - Each figure is the median of three runs with Lighthouse's standard mobile test (simulated slow 4G and a slowed-down phone CPU). The current site was tested live; the demo was tested as a production build on our machine. The demo figures come from the build before the dark-theme redesign and will be re-measured on a deployed preview.
 - The demo is not yet at our own launch targets: 95+ for performance and 100 for accessibility. The remaining gap is script work while the page loads, plus one colour-contrast issue. Closing it is part of Phase 1.
-- With the dark-theme redesign in place, the calculator pages ship 174–185 kB of compressed JavaScript. That is over our 150 kB budget; trimming it is part of Phase 1.
+- The calculator pages ship 130–141 kB of compressed JavaScript, inside our 150 kB budget.
 
 ---
 
@@ -74,7 +74,7 @@ The current calculator gets the individual lines wrong. Two errors partly cancel
 | Phase | What it delivers | Gate to the next phase |
 | :--- | :--- | :--- |
 | **0: Pitch demo** (this document) | Calculator for federal + ON, QC, BC, AB (2026) and Ontario 2025, with 46 cited test cases. Bilingual Ontario pages. "Where your taxes go" view (spending figures still to be sourced). | Scope and price for Phases 1 and 2 agreed |
-| **1: Engine and calculator** (4–6 weeks) | All 13 provinces and territories for 2025 and 2026. Dividends, capital gains, OAS recovery, age, pension and family credits. 10+ cited cases per jurisdiction per year. Full calculator UI. Mobile performance 95+, accessibility 100, and calculator JavaScript under 150 kB. | Every case passes, and 20 random cases match an independent calculator within $1 per line |
+| **1: Engine and calculator** (4–6 weeks) | All 13 provinces and territories for 2025 and 2026. Dividends, capital gains, OAS recovery, age, pension and family credits. 10+ cited cases per jurisdiction per year. Full calculator UI. Mobile performance 95+ and accessibility 100. | Every case passes, and 20 random cases match an independent calculator within $1 per line |
 | **2: Content, accounts, launch** (3–4 weeks) | Province, bracket, salary and learn pages. Privacy policy (PIPEDA and Quebec Law 25). Magic-link sign-in with saved scenarios. Newsletter with double opt-in. 2027 rates when CRA publishes them. | Live on fiscal-insights.ca before the February–April 2027 filing season |
 | **3: Upsells** (scoped separately) | History back to 2014, a simpler budget simulator, province comparison, education tier | — |
 
@@ -87,5 +87,5 @@ Pricing for Phases 1 and 2 is agreed at Gate 1.
 - **Rebuild tax figures:** test cases `on-2025-80k` and `on-2026-80k` in `packages/tax-engine/tests/vectors.ts` (branch `engine-cited-vectors`). They are worked from the 2025 T1 return, Form ON428 and CRA's T4127 payroll formulas, and checked against the build plan's hand calculation.
 - **Current-site tax figures and the "2026 label, 2025 rates" finding:** the October 15, 2026 audit in the build plan. They were not re-entered on the live site.
 - **Speed and accessibility:** Lighthouse 13.5.0, default mobile settings, median of three runs each on 2026-10-16. The current site was tested live at https://fiscal-insights.ca/. The demo was tested as a local production build (Next.js 15.5, branch `web-gates`). Full reports are in `docs/lighthouse/`.
-- **JavaScript budget:** `next build` output for the merged `main` build on 2026-10-16: first-load JS of 185 kB for the home page and 174 kB for the province and salary pages.
+- **JavaScript budget:** `next build` output on 2026-10-16: first-load JS of 141 kB for the home page and 130 kB for the province and salary pages.
 - **Search findings:** the canonical tag, the `/#/` URL and the missing `hreflang` were observed on the live site on 2026-10-16. The "enable JavaScript" finding comes from the audit.
