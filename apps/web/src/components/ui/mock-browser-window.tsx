@@ -30,7 +30,7 @@ interface SidebarContentProps {
 interface BrowserWindowProps {
   children?: React.ReactNode
   className?: string
-  size?: "sm" | "md" | "lg" | "xl"
+  size?: "sm" | "md" | "lg" | "xl" | "full" | "auto"
   showSidebar?: boolean
   sidebarPosition?: "left" | "right" | "top" | "bottom"
   headerStyle?: "minimal" | "full"
@@ -241,7 +241,7 @@ function SidebarContent({
 export function BrowserWindow({
   children,
   className = "",
-  size = "md",
+  size = "auto",
   showSidebar = false,
   sidebarPosition = "left",
   headerStyle = "minimal",
@@ -255,6 +255,8 @@ export function BrowserWindow({
     md: "h-80 max-w-2xl",
     lg: "h-96 max-w-4xl",
     xl: "h-[32rem] max-w-6xl",
+    auto: "h-auto w-full",
+    full: "h-auto w-full",
   }
 
   const sidebarSizes = {
@@ -262,7 +264,11 @@ export function BrowserWindow({
     md: "w-48",
     lg: "w-56",
     xl: "w-64",
+    auto: "w-48",
+    full: "w-56",
   }
+
+  const isAutoHeight = size === "auto" || size === "full"
 
   const themeClasses =
     theme === "dark"
@@ -315,7 +321,7 @@ export function BrowserWindow({
         </div>
       )}
 
-      <div className="flex h-0 flex-1">
+      <div className={`flex flex-1 ${isAutoHeight ? "min-h-0" : "h-0"}`}>
         {/* Left Sidebar */}
         {showSidebar && sidebarPosition === "left" && (
           <div

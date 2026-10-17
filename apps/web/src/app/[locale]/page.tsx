@@ -1,18 +1,60 @@
 import React from 'react';
-import Calculator from '@/components/Calculator';
-import CalculatorExtras from '@/components/CalculatorExtras';
+import Link from 'next/link';
+import type { Metadata } from 'next';
 import { Locale, getDictionary } from '@/lib/i18n';
-import { CheckCircle2, Shield, Sparkles, BookOpen } from 'lucide-react';
-import { BrowserWindow } from '@/components/ui/mock-browser-window';
-import { TextureCard } from '@/components/ui/texture-card';
-import SiteTutorial from '@/components/SiteTutorial';
+import {
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  Lock,
+  Layers,
+  Calculator,
+} from 'lucide-react';
+import TaxSimulationPreview from '@/components/TaxSimulationPreview';
+import InteractiveOnboarding from '@/components/InteractiveOnboarding';
+import CalculatorHub from '@/components/CalculatorHub';
+import TaxInformationHub from '@/components/TaxInformationHub';
 import TaxCurveAnalytics from '@/components/TaxCurveAnalytics';
+import NewsletterForm from '@/components/NewsletterForm';
 
-export default async function HomePage({
-  params,
-}: {
+interface HomePageProps {
   params: Promise<{ locale: string }>;
-}) {
+}
+
+export function generateStaticParams() {
+  return [{ locale: 'en' }, { locale: 'fr' }];
+}
+
+export async function generateMetadata({
+  params,
+}: HomePageProps): Promise<Metadata> {
+  const resolved = await params;
+  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const dict = getDictionary(locale);
+
+  return {
+    title: dict.siteTitle,
+    description: dict.siteDescription,
+    alternates: {
+      canonical: `https://fiscal-insights.ca/${locale}`,
+      languages: {
+        'en-CA': 'https://fiscal-insights.ca/en',
+        'fr-CA': 'https://fiscal-insights.ca/fr',
+        'x-default': 'https://fiscal-insights.ca/en',
+      },
+    },
+    openGraph: {
+      title: dict.siteTitle,
+      description: dict.siteDescription,
+      url: `https://fiscal-insights.ca/${locale}`,
+      siteName: 'Fiscal Insights',
+      locale: locale === 'fr' ? 'fr_CA' : 'en_CA',
+      type: 'website',
+    },
+  };
+}
+
+export default async function HomePage({ params }: HomePageProps) {
   const resolved = await params;
   const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
   const dict = getDictionary(locale);
@@ -34,93 +76,137 @@ export default async function HomePage({
   };
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-20 pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hero Header with Cult UI Dark Aesthetic */}
-      <section className="text-center max-w-4xl mx-auto space-y-6 pt-4">
+      {/* HERO SECTION */}
+      <section className="text-center max-w-4xl mx-auto space-y-7 pt-8 sm:pt-12">
+        {/* Live Tax Rules Pill */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
           <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
           <span>{dict.hero.badge}</span>
         </div>
-        <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
+
+        {/* Main Title */}
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1]">
           {dict.hero.title}
         </h1>
-        <p className="text-base sm:text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
+
+        {/* Subtitle */}
+        <p className="text-base sm:text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto">
           {dict.hero.subtitle}
         </p>
-      </section>
 
-      {/* Calculator Core Framed in Mock Browser Window (SaaS Showcase) */}
-      <section className="max-w-7xl mx-auto">
-        <BrowserWindow
-          url={`https://fiscal-insights.ca/${locale}/calculator/ontario`}
-          variant="safari"
-          theme="dark"
-          headerStyle="full"
-          className="border-slate-800 bg-[#090d16]/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_0_40px_rgba(16,185,129,0.08)] rounded-2xl overflow-hidden"
-        >
-          <div className="p-4 sm:p-8 space-y-10">
-            <Calculator locale={locale} initialProvince="ON" initialSalaryDollars={80000} />
-            <CalculatorExtras locale={locale} />
+        {/* Hero Call To Actions */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+          <Link
+            href={`/${locale}/calculator/ontario`}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] transition-all cursor-pointer"
+          >
+            <Calculator className="w-4 h-4" />
+            <span>{dict.hero.ctaPrimary}</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+
+          <a
+            href="#how-it-works"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-slate-300 hover:text-white bg-[#0e1422] hover:bg-[#151e32] border border-slate-800 hover:border-slate-700 shadow-sm transition-all cursor-pointer"
+          >
+            <span>{dict.hero.ctaSecondary}</span>
+          </a>
+
+          <a
+            href="#calculator-hub"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-slate-400 hover:text-emerald-400 bg-transparent hover:bg-slate-900/40 transition-all cursor-pointer"
+          >
+            <span>{dict.hero.ctaExploreProvinces}</span>
+          </a>
+        </div>
+
+        {/* Trust Badges Row */}
+        <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 pt-3 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{dict.hero.trustItem1}</span>
           </div>
-        </BrowserWindow>
+          <div className="flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-blue-400" />
+            <span>{dict.hero.trustItem2}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-purple-400" />
+            <span>{dict.hero.trustItem3}</span>
+          </div>
+        </div>
       </section>
 
-      {/* Tax Curve Analytics (Cult UI AnalyticsLineChart) */}
+      {/* 1. MOCK BROWSER WINDOW COMPONENT: FULL SIMULATION PREVIEW */}
+      <TaxSimulationPreview locale={locale} />
+
+      {/* 2. INTERACTIVE ONBOARDING PROCESS: HOW IT WORKS */}
+      <div id="how-it-works">
+        <InteractiveOnboarding locale={locale} />
+      </div>
+
+      {/* 3. CALCULATOR HUB & CTAS (DIRECT JUMP TO 1 OF THE CALCULATORS) */}
+      <CalculatorHub locale={locale} />
+
+      {/* 4. PROGRESSIVE TAX CURVE ANALYTICS (CULT UI LINE CHART) */}
       <TaxCurveAnalytics locale={locale} />
 
-      {/* Site Tutorial / Onboarding (Cult UI Onboarding & TipsList) */}
-      <SiteTutorial locale={locale} />
+      {/* 5. TAX INFORMATION & FINANCIAL KNOWLEDGE HUB (PREVIOUS SITE DATA) */}
+      <TaxInformationHub locale={locale} />
 
-      {/* Trust & Architecture Features Grid using Cult UI TextureCard */}
-      <section className="max-w-7xl mx-auto pt-8 border-t border-slate-800">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <TextureCard className="bg-[#0c121e] border-slate-800/90 shadow-[0_4px_20px_rgba(0,0,0,0.5)] p-6 rounded-2xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            </div>
-            <h4 className="text-base font-bold text-white">
-              {locale === 'fr' ? 'Précision garantie par tests' : 'Mathematically Proven & Tested'}
-            </h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              {locale === 'fr'
-                ? 'Plus de 40 scénarios validés directement contre les formulaires d’impôt officiels de l’ARC et Revenu Québec.'
-                : 'Every rate, threshold, and credit is backed by official CRA and provincial form citations with automated CI test vectors.'}
+      {/* 6. BOTTOM HIGH-IMPACT CTA & CASL NEWSLETTER CAPTURE */}
+      <section className="max-w-7xl mx-auto space-y-8">
+        <div className="bg-gradient-to-r from-[#0c1626] via-[#0e1c2e] to-[#09111c] text-white rounded-3xl p-8 sm:p-12 border border-slate-800 shadow-[0_15px_40px_-10px_rgba(0,0,0,0.8),0_0_30px_rgba(16,185,129,0.1)] flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="space-y-3 max-w-2xl">
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+              {dict.bottomCta.badge}
+            </span>
+            <h3 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+              {dict.bottomCta.title}
+            </h3>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+              {dict.bottomCta.subtitle}
             </p>
-          </TextureCard>
+          </div>
 
-          <TextureCard className="bg-[#0c121e] border-slate-800/90 shadow-[0_4px_20px_rgba(0,0,0,0.5)] p-6 rounded-2xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-950/70 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-              <Shield className="w-5 h-5 text-blue-400" />
-            </div>
-            <h4 className="text-base font-bold text-white">
-              {locale === 'fr' ? 'Confidentialité totale' : 'Local Browser Execution'}
-            </h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              {locale === 'fr'
-                ? 'Aucune donnée financière ne quitte votre appareil. Vos revenus ne sont jamais enregistrés ni envoyés à des serveurs tiers.'
-                : 'Zero network calls during calculation. Your income never leaves your device and is never sent to analytics or logging.'}
-            </p>
-          </TextureCard>
-
-          <TextureCard className="bg-[#0c121e] border-slate-800/90 shadow-[0_4px_20px_rgba(0,0,0,0.5)] p-6 rounded-2xl space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-950/70 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold shadow-[0_0_10px_rgba(168,85,247,0.2)]">
-              <BookOpen className="w-5 h-5 text-purple-400" />
-            </div>
-            <h4 className="text-base font-bold text-white">
-              {locale === 'fr' ? 'Transparence des dépenses' : 'Public Spending Clarity'}
-            </h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              {locale === 'fr'
-                ? 'Voyez exactement comment vos impôts fédéraux financent la santé, les aînés, la défense et les programmes sociaux.'
-                : 'Connect your tax dollars directly to the Public Accounts of Canada to see how public funds are invested in healthcare and social programs.'}
-            </p>
-          </TextureCard>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            <Link
+              href={`/${locale}/calculator/ontario`}
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer"
+            >
+              <Calculator className="w-4 h-4" />
+              <span>{dict.bottomCta.button}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
+
+        {/* Newsletter Capture Section */}
+        <div className="bg-gradient-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-6 sm:p-8 space-y-4 border border-slate-800 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+          <div className="max-w-2xl space-y-2">
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+              {dict.newsletter.badge}
+            </span>
+            <h4 className="text-2xl font-bold tracking-tight">
+              {dict.newsletter.title}
+            </h4>
+            <p className="text-sm text-slate-300">
+              {dict.newsletter.description}
+            </p>
+          </div>
+          <NewsletterForm locale={locale} />
+        </div>
+
+        {/* Statutory Legal Disclaimer */}
+        <footer className="text-center text-xs text-slate-500 py-4 max-w-4xl mx-auto leading-relaxed">
+          <p>{dict.disclaimer}</p>
+        </footer>
       </section>
     </div>
   );

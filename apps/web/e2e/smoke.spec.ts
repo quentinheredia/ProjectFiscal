@@ -26,7 +26,7 @@ test('the French home page is in French', async ({ page }) => {
 
 test('the result updates as the income changes', async ({ page }) => {
   const errors = trackPageErrors(page);
-  await page.goto('/en');
+  await page.goto('/en/calculator/ontario');
   const result = page.getByRole('status');
   await expect(result).toContainText('$');
   const before = await result.innerText();
@@ -38,7 +38,7 @@ test('the result updates as the income changes', async ({ page }) => {
 
 test('every year and province combination renders or is disabled', async ({ page }) => {
   const errors = trackPageErrors(page);
-  await page.goto('/en');
+  await page.goto('/en/calculator/ontario');
   const yearGroup = page.getByRole('group', { name: en.calculator.filingYear });
   const province = page.getByLabel(en.calculator.province);
   const result = page.getByRole('status');
