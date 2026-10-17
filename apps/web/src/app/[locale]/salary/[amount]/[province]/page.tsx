@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Calculator from '@/components/Calculator';
+import CalculatorExtras from '@/components/CalculatorExtras';
 import { Locale } from '@/lib/i18n';
 import { calculateTax, formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
@@ -150,6 +151,7 @@ export default async function SalaryPage({ params }: SalaryPageProps) {
           initialSalaryDollars={80000}
         />
       </div>
+      <CalculatorExtras locale={locale} />
     </div>
   );
 }

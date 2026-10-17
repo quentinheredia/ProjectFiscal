@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Calculator from '@/components/Calculator';
+import CalculatorExtras from '@/components/CalculatorExtras';
 import { Locale } from '@/lib/i18n';
 import { ontario2026 } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
@@ -101,6 +102,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
 
       {/* Preset for Ontario */}
       <Calculator locale={locale} initialProvince="ON" initialSalaryDollars={80000} />
+      <CalculatorExtras locale={locale} />
 
       {/* Official Ontario 2026 Tax Brackets Table */}
       <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 max-w-7xl mx-auto space-y-6">

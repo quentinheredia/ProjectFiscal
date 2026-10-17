@@ -1,5 +1,6 @@
 import React from 'react';
 import Calculator from '@/components/Calculator';
+import CalculatorExtras from '@/components/CalculatorExtras';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { CheckCircle2, Shield, Sparkles, BookOpen } from 'lucide-react';
 
@@ -51,6 +52,7 @@ export default async function HomePage({
 
       {/* Calculator Core */}
       <Calculator locale={locale} initialProvince="ON" initialSalaryDollars={80000} />
+      <CalculatorExtras locale={locale} />
 
       {/* Trust & Architecture Features Grid */}
       <section className="max-w-7xl mx-auto pt-8 border-t border-slate-200">

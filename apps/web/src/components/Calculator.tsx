@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { Suspense, useState, useMemo } from 'react';
 import {
   calculateTax,
   formatCentsToDollars,
+  ExplanationTraceItem,
   TaxCalculationResult,
 } from '@fiscal-insights/tax-engine';
 import {
@@ -73,7 +74,6 @@ export default function Calculator({
   const [fhsaDeduction, setFhsaDeduction] = useState<string>('0');
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [frequency, setFrequency] = useState<PayFrequency>('annual');
-  const [expandedTraceId, setExpandedTraceId] = useState<string | null>(null);
 
   // Calculation is 100% pure, instantaneous, client-side
   const calculation: TaxCalculationResult = useMemo(() => {
@@ -406,235 +406,153 @@ export default function Calculator({
             </div>
           </div>
 
-          {/* AUDITED EXPLANATION TRACES (Every number shows math & CRA link) */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-6 sm:p-7 space-y-4">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Layers className="w-4 h-4 text-brand-blue" />
-                {dict.results.tracesTitle}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {dict.results.tracesSubtitle}
-              </p>
-            </div>
-
-            <div className="divide-y divide-slate-100">
-              {calculation.traces.map((trace) => {
-                const isExpanded = expandedTraceId === trace.id;
-                return (
-                  <div key={trace.id} className="py-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setExpandedTraceId(isExpanded ? null : trace.id)}
-                      className="w-full flex items-center justify-between text-left hover:bg-slate-50 px-2 py-1.5 rounded-lg transition-colors group"
-                    >
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-slate-800 group-hover:text-brand-blue transition-colors">
-                            {locale === 'fr' ? trace.titleFr : trace.titleEn}
-                          </span>
-                          {trace.formReference && (
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
-                              {trace.formReference}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs text-slate-500 font-mono block">
-                          {trace.formula}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0 ml-4">
-                        <span className="text-sm font-bold text-slate-900 tabular-nums">
-                          {formatCentsToDollars(trace.amountCents)}
-                        </span>
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4 text-slate-400" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-slate-400" />
-                        )}
-                      </div>
-                    </button>
-
-                    {isExpanded && (
-                      <div className="mt-2 ml-2 pl-3 border-l-2 border-brand-blue/40 text-xs text-slate-600 space-y-1.5 bg-slate-50/80 p-2.5 rounded-r-lg">
-                        <p className="font-mono text-slate-700">Formula: {trace.formula}</p>
-                        <a
-                          href={trace.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-brand-blue hover:underline font-medium text-[11px]"
-                        >
-                          Official CRA / Provincial Schedule Source
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <Suspense fallback={null}>
+            <TraceList traces={calculation.traces} locale={locale} />
+          </Suspense>
         </div>
       </div>
 
-      {/* WHERE YOUR TAXES GO SECTION (Public Accounts of Canada Breakdown) */}
-      <section className="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-brand-blue uppercase tracking-wider mb-1">
-              <PieChart className="w-4 h-4 text-brand-blue" />
-              {dict.spending.badge}
-            </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">
-              {dict.spending.title}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
-              {dict.spending.subtitle}
-            </p>
-          </div>
-          <div className="text-right shrink-0 bg-brand-blue-light/50 border border-brand-blue/20 p-3 rounded-xl">
-            <span className="text-xs text-slate-600 block">Your Federal Contribution</span>
-            <span className="text-xl font-black text-brand-blue tabular-nums">
-              {formatCentsToDollars(calculation.federal.netFederalTaxCents)}
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEDERAL_SPENDING_CATEGORIES.map((cat) => {
-            const allocatedCents = Math.round((calculation.federal.netFederalTaxCents * cat.percentage) / 100);
-            return (
-              <div
-                key={cat.id}
-                className="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700">
-                    {locale === 'fr' ? cat.nameFr : cat.nameEn}
-                  </span>
-                  <span className="text-xs font-bold text-slate-900 bg-white px-2 py-0.5 rounded shadow-2xs tabular-nums">
-                    {cat.percentage}%
-                  </span>
-                </div>
-                <div className="text-lg font-extrabold text-slate-900 tabular-nums">
-                  {formatCentsToDollars(allocatedCents)}
-                </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  {locale === 'fr' ? cat.descriptionFr : cat.descriptionEn}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="pt-2 text-[11px] text-slate-400">
-          {dict.spending.sourceNote}
-        </div>
-      </section>
-
-      {/* PITCH COMPARISON TABLE (Audit Proof Point: Ontario $80,000) */}
-      <section className="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-6 sm:p-8 space-y-6">
-        <div>
-          <span className="text-xs font-bold text-brand-green-dark uppercase tracking-wider">
-            Phase 0 Pitch Point
-          </span>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight mt-1">
-            {dict.pitch.title}
-          </h3>
-          <p className="text-sm text-slate-600 mt-1 max-w-3xl">
-            {dict.pitch.subtitle} (Ontario, $80,000 salary comparison)
-          </p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-semibold">
-                <th className="py-3 px-4">{dict.pitch.table.line}</th>
-                <th className="py-3 px-4 text-red-600 bg-red-50/50">{dict.pitch.table.oldSite}</th>
-                <th className="py-3 px-4 text-brand-green-dark bg-emerald-50/50">{dict.pitch.table.newEngine}</th>
-                <th className="py-3 px-4">{dict.pitch.table.difference}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              <tr>
-                <td className="py-3 px-4 font-semibold text-slate-900">Federal Tax</td>
-                <td className="py-3 px-4 tabular-nums text-red-700 bg-red-50/30">$10,323</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-brand-green-dark bg-emerald-50/30">~$9,552</td>
-                <td className="py-3 px-4 text-slate-600">Old site was ~$771 too high (used obsolete pre-2025 brackets).</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 font-semibold text-slate-900">Ontario Tax + OHP</td>
-                <td className="py-3 px-4 tabular-nums text-red-700 bg-red-50/30">$3,985</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-brand-green-dark bg-emerald-50/30">~$4,940</td>
-                <td className="py-3 px-4 text-slate-600">Old site was ~$955 too low (completely omitted Ontario Health Premium of $750).</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 font-semibold text-slate-900">CPP + CPP2</td>
-                <td className="py-3 px-4 tabular-nums text-slate-700">$4,382.10</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-brand-green-dark bg-emerald-50/30">$4,382.10</td>
-                <td className="py-3 px-4 text-slate-600">Exact match on YMPE + enhanced CPP2 contribution ceiling.</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 font-semibold text-slate-900">Employment Insurance (EI)</td>
-                <td className="py-3 px-4 tabular-nums text-slate-700">$1,077.48</td>
-                <td className="py-3 px-4 tabular-nums font-bold text-brand-green-dark bg-emerald-50/30">$1,077.48</td>
-                <td className="py-3 px-4 text-slate-600">Exact match on maximum insurable earnings limit.</td>
-              </tr>
-              <tr className="bg-slate-50 font-bold">
-                <td className="py-3 px-4 text-slate-900">Take-Home Net Income</td>
-                <td className="py-3 px-4 tabular-nums text-slate-700">$60,232</td>
-                <td className="py-3 px-4 tabular-nums text-brand-green-dark bg-emerald-50/50">~$60,048</td>
-                <td className="py-3 px-4 text-slate-700">Net looked plausible only because two large errors canceled each other out!</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* NEWSLETTER CAPTURE (UI ONLY AS SPECIFIED IN PHASE 0) */}
-      <section className="bg-linear-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
-        <div className="max-w-2xl space-y-2">
-          <span className="text-xs font-bold text-brand-green-accent uppercase tracking-wider">
-            {dict.newsletter.badge}
-          </span>
-          <h4 className="text-2xl font-bold tracking-tight">
-            {dict.newsletter.title}
-          </h4>
-          <p className="text-sm text-slate-300">
-            {dict.newsletter.description}
-          </p>
-        </div>
-
-        <form onSubmit={(e) => e.preventDefault()} className="max-w-xl space-y-3 pt-2">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="email"
-              placeholder={dict.newsletter.placeholder}
-              className="grow px-4 py-3 rounded-lg bg-slate-800/90 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-brand-green-accent"
-              required
-            />
-            <button
-              type="submit"
-              className="px-6 py-3 rounded-lg bg-brand-green-accent hover:bg-brand-green text-white font-semibold text-sm transition-colors shrink-0"
-            >
-              {dict.newsletter.button}
-            </button>
-          </div>
-          <div className="flex items-start gap-2 text-xs text-slate-400">
-            <input type="checkbox" id="consent-check" className="mt-0.5 rounded border-slate-700 bg-slate-800 text-brand-green-accent" defaultChecked />
-            <label htmlFor="consent-check" className="cursor-pointer">
-              {dict.newsletter.consent}
-            </label>
-          </div>
-        </form>
-      </section>
-
-      {/* LEGAL & STATUTORY DISCLAIMER */}
-      <footer className="text-center text-xs text-slate-500 py-4 max-w-4xl mx-auto">
-        <p>{dict.disclaimer}</p>
-      </footer>
+      <Suspense fallback={null}>
+        <SpendingBreakdown federalTaxCents={calculation.federal.netFederalTaxCents} locale={locale} />
+      </Suspense>
     </div>
+  );
+}
+
+// Every result line with its formula and source; collapsed until clicked.
+function TraceList({ traces, locale }: { traces: ExplanationTraceItem[]; locale: Locale }) {
+  const dict = getDictionary(locale);
+  const [expandedTraceId, setExpandedTraceId] = useState<string | null>(null);
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-6 sm:p-7 space-y-4">
+      <div className="border-b border-slate-100 pb-3">
+        <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <Layers className="w-4 h-4 text-brand-blue" />
+          {dict.results.tracesTitle}
+        </h3>
+        <p className="text-xs text-slate-500 mt-0.5">
+          {dict.results.tracesSubtitle}
+        </p>
+      </div>
+
+      <div className="divide-y divide-slate-100">
+        {traces.map((trace) => {
+          const isExpanded = expandedTraceId === trace.id;
+          return (
+            <div key={trace.id} className="py-2.5">
+              <button
+                type="button"
+                onClick={() => setExpandedTraceId(isExpanded ? null : trace.id)}
+                className="w-full flex items-center justify-between text-left hover:bg-slate-50 px-2 py-1.5 rounded-lg transition-colors group"
+              >
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-800 group-hover:text-brand-blue transition-colors">
+                      {locale === 'fr' ? trace.titleFr : trace.titleEn}
+                    </span>
+                    {trace.formReference && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
+                        {trace.formReference}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-slate-500 font-mono block">
+                    {trace.formula}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0 ml-4">
+                  <span className="text-sm font-bold text-slate-900 tabular-nums">
+                    {formatCentsToDollars(trace.amountCents)}
+                  </span>
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </div>
+              </button>
+
+              {isExpanded && (
+                <div className="mt-2 ml-2 pl-3 border-l-2 border-brand-blue/40 text-xs text-slate-600 space-y-1.5 bg-slate-50/80 p-2.5 rounded-r-lg">
+                  <p className="font-mono text-slate-700">Formula: {trace.formula}</p>
+                  <a
+                    href={trace.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-brand-blue hover:underline font-medium text-[11px]"
+                  >
+                    Official CRA / Provincial Schedule Source
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// The user's federal tax split across spending categories.
+function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: number; locale: Locale }) {
+  const dict = getDictionary(locale);
+
+  return (
+    <section className="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-6 sm:p-8 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold text-brand-blue uppercase tracking-wider mb-1">
+            <PieChart className="w-4 h-4 text-brand-blue" />
+            {dict.spending.badge}
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight">
+            {dict.spending.title}
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+            {dict.spending.subtitle}
+          </p>
+        </div>
+        <div className="text-right shrink-0 bg-brand-blue-light/50 border border-brand-blue/20 p-3 rounded-xl">
+          <span className="text-xs text-slate-600 block">Your Federal Contribution</span>
+          <span className="text-xl font-black text-brand-blue tabular-nums">
+            {formatCentsToDollars(federalTaxCents)}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {FEDERAL_SPENDING_CATEGORIES.map((cat) => {
+          const allocatedCents = Math.round((federalTaxCents * cat.percentage) / 100);
+          return (
+            <div
+              key={cat.id}
+              className="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">
+                  {locale === 'fr' ? cat.nameFr : cat.nameEn}
+                </span>
+                <span className="text-xs font-bold text-slate-900 bg-white px-2 py-0.5 rounded shadow-2xs tabular-nums">
+                  {cat.percentage}%
+                </span>
+              </div>
+              <div className="text-lg font-extrabold text-slate-900 tabular-nums">
+                {formatCentsToDollars(allocatedCents)}
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                {locale === 'fr' ? cat.descriptionFr : cat.descriptionEn}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="pt-2 text-[11px] text-slate-500">
+        {dict.spending.sourceNote}
+      </div>
+    </section>
   );
 }
