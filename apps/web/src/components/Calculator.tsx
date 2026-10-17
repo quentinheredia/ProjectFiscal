@@ -190,7 +190,7 @@ export default function Calculator({
                   {dict.calculator.employmentIncome} ($ CAD)
                 </label>
                 <div className="relative rounded-xl shadow-xs">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 font-medium text-sm">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-medium text-sm">
                     $
                   </span>
                   <input
@@ -232,7 +232,7 @@ export default function Calculator({
                 <button
                   type="button"
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 focus:outline-hidden transition-colors cursor-pointer"
+                  className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   {showAdvanced ? dict.calculator.advancedToggleHide : dict.calculator.advancedToggleShow}
                 </button>
@@ -246,7 +246,7 @@ export default function Calculator({
                       {dict.calculator.selfEmploymentIncome} ($ CAD)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-sm">$</span>
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
                       <input
                         id="self-employment-income-input"
                         type="number"
@@ -265,7 +265,7 @@ export default function Calculator({
                       {dict.calculator.rrspDeduction} ($ CAD)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-sm">$</span>
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
                       <input
                         id="rrsp-deduction-input"
                         type="number"
@@ -284,7 +284,7 @@ export default function Calculator({
                       {dict.calculator.fhsaDeduction} (Max $8,000/yr)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-sm">$</span>
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">$</span>
                       <input
                         id="fhsa-deduction-input"
                         type="number"
@@ -311,7 +311,7 @@ export default function Calculator({
               <div className="text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight">
                 {(calculation.averageTaxRate * 100).toFixed(1)}%
               </div>
-              <span className="text-[10px] text-slate-500 block">
+              <span className="text-[10px] text-slate-400 block">
                 Total tax / Gross salary
               </span>
             </div>
@@ -322,7 +322,7 @@ export default function Calculator({
               <div className="text-xl sm:text-2xl font-black text-emerald-400 tabular-nums tracking-tight">
                 {(calculation.marginalTaxRate * 100).toFixed(1)}%
               </div>
-              <span className="text-[10px] text-slate-500 block">
+              <span className="text-[10px] text-slate-400 block">
                 Tax on next $1 earned
               </span>
             </div>
@@ -496,7 +496,7 @@ function TraceList({ traces, locale }: { traces: ExplanationTraceItem[]; locale:
                     {locale === 'fr' ? trace.titleFr : trace.titleEn}
                   </span>
                   {trace.formReference && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-slate-800 text-slate-400 border border-slate-700">
                       {trace.formReference}
                     </span>
                   )}
@@ -576,7 +576,7 @@ function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: numbe
                 <span className="font-bold text-slate-200 truncate">
                   {locale === 'fr' ? cat.nameFr : cat.nameEn}
                 </span>
-                <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded tabular-nums shrink-0">
+                <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-sm tabular-nums shrink-0">
                   {cat.percentage}%
                 </span>
               </div>
@@ -595,7 +595,7 @@ function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: numbe
       </div>
 
       {/* Federal Budget Simulator Callout Banner */}
-      <div className="p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/30 border border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div className="p-4 rounded-xl bg-linear-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/30 border border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="space-y-0.5">
           <span className="font-semibold text-blue-200 block">
             {dict.simulation.budgetCallout.summary}

@@ -164,7 +164,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
                       setSalary(Math.max(0, val));
                       setSelectedPresetId('custom');
                     }}
-                    className="w-full bg-[#0c121e] border border-slate-700/80 focus:border-emerald-400 rounded-lg pl-6 pr-2 py-1.5 text-xs font-bold text-white tabular-nums outline-none transition-colors"
+                    className="w-full bg-[#0c121e] border border-slate-700/80 focus:border-emerald-400 rounded-lg pl-6 pr-2 py-1.5 text-xs font-bold text-white tabular-nums outline-hidden transition-colors"
                     placeholder="68500"
                   />
                 </div>
@@ -205,7 +205,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
                 }`}
               >
                 <div
-                  className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
+                  className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${
                     hasRrspDeduction
                       ? 'bg-purple-500 border-purple-400 text-white'
                       : 'border-slate-600'
@@ -382,7 +382,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
               >
                 <Scale className="w-4 h-4 text-emerald-400" />
                 <span>{dict.simulation.tabs.comparison}</span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                   {dict.simulation.tabs.comparisonBadge}
                 </span>
               </button>
@@ -415,7 +415,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
                 </div>
 
                 {/* Federal Budget Simulator Callout Banner */}
-                <div className="mt-2 p-3.5 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/30 border border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="mt-2 p-3.5 rounded-xl bg-linear-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/30 border border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div className="space-y-0.5">
                     <span className="font-semibold text-blue-200 block">
                       {dict.simulation.budgetCallout.summary}
@@ -509,7 +509,7 @@ export default function TaxSimulationPreview({ locale }: TaxSimulationPreviewPro
             <div className="flex items-center gap-3">
               <Link
                 href={`/${locale}/calculator/${provinceSlug}`}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-[0_2px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.28)] transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-linear-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-[0_2px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.28)] transition-all cursor-pointer"
               >
                 <Calculator className="w-4 h-4" />
                 <span>{dict.simulation.ctaButton}</span>

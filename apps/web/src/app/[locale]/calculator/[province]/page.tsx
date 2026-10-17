@@ -133,7 +133,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
       />
 
       {/* 1. COMPACT PAGE HEADER */}
-      <section className="text-center max-w-4xl mx-auto space-y-3 pt-2">
+      <section className="text-center max-w-4xl mx-auto space-y-3 pt-18">
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
           {locale === 'fr'
             ? `Calculateur d’impôt sur le revenu de ${config.nameFr} 2026`
@@ -284,7 +284,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
       </section>
 
       {/* 6. NEWSLETTER CAPTURE CARD */}
-      <section className="bg-gradient-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-6 sm:p-8 space-y-4 border border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+      <section className="bg-linear-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-6 sm:p-8 space-y-4 border border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
         <div className="max-w-2xl space-y-2">
           <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
             {dict.newsletter.badge}

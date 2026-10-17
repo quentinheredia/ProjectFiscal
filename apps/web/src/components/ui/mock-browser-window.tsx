@@ -174,9 +174,9 @@ function AddressBar({
 }: AddressBarProps) {
   const variantStyles = {
     chrome:
-      "bg-muted/30 rounded-full border border-foreground/5 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.03)_inset] backdrop-blur-sm",
+      "bg-muted/30 rounded-full border border-foreground/5 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.03)_inset] backdrop-blur-xs",
     safari:
-      "bg-muted/20 rounded-lg border border-foreground/5 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.03)_inset] backdrop-blur-sm",
+      "bg-muted/20 rounded-lg border border-foreground/5 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.03)_inset] backdrop-blur-xs",
   }
 
   const iconColors = {
@@ -224,7 +224,7 @@ function SidebarContent({
           } `}
         >
           {item.icon && (
-            <div className="h-4 w-4 flex-shrink-0">{item.icon}</div>
+            <div className="h-4 w-4 shrink-0">{item.icon}</div>
           )}
           <span className="flex-1 truncate">{item.label}</span>
           {item.badge && (
@@ -294,7 +294,7 @@ export function BrowserWindow({
 
   return (
     <div
-      className={`relative rounded-2xl border mask-b-from-50% shadow-[0px_1px_1px_0px_rgba(0,_0,_0,_0.05),_0px_1px_1px_0px_rgba(255,_252,_240,_0.5)_inset,_0px_0px_0px_1px_hsla(0,_0%,_100%,_0.1)_inset,_0px_0px_1px_0px_rgba(28,_27,_26,_0.5)] dark:shadow-[0px_1px_1px_0px_rgba(0,_0,_0,_0.2),_0px_1px_1px_0px_rgba(0,_0,_0,_0.3)_inset,_0px_0px_0px_1px_hsla(0,_0%,_0%,_0.2)_inset,_0px_0px_1px_0px_rgba(255,_255,_255,_0.1)] ${sizeClasses[size]} ${themeClasses} ${className} flex flex-col`}
+      className={`relative rounded-2xl border shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05),0px_1px_1px_0px_rgba(255,252,240,0.5)_inset,0px_0px_0px_1px_hsla(0,0%,100%,0.1)_inset,0px_0px_1px_0px_rgba(28,27,26,0.5)] dark:shadow-[0px_1px_1px_0px_rgba(0,0,0,0.2),0px_1px_1px_0px_rgba(0,0,0,0.3)_inset,0px_0px_0px_1px_hsla(0,0%,0%,0.2)_inset,0px_0px_1px_0px_rgba(255,255,255,0.1)] ${sizeClasses[size]} ${themeClasses} ${className} flex flex-col`}
     >
       <div className={getHeaderStyles()}>
         <WindowControls
@@ -325,21 +325,21 @@ export function BrowserWindow({
         {/* Left Sidebar */}
         {showSidebar && sidebarPosition === "left" && (
           <div
-            className={`border-foreground/5 bg-muted/20 border-r ${sidebarSizes[size]} h-full flex-shrink-0`}
+            className={`border-foreground/5 bg-muted/20 border-r ${sidebarSizes[size]} h-full shrink-0`}
           >
             <SidebarContent items={sidebarItems} />
           </div>
         )}
 
         {/* Main Content Area */}
-        <div className="relative h-full min-w-0 flex-1">
+        <div className={cn("relative min-w-0 flex-1", !isAutoHeight && "h-full")}>
           {children || <div className="absolute inset-0">{children}</div>}
         </div>
 
         {/* Right Sidebar */}
         {showSidebar && sidebarPosition === "right" && (
           <div
-            className={`border-foreground/5 bg-muted/20 border-l ${sidebarSizes[size]} h-full flex-shrink-0`}
+            className={`border-foreground/5 bg-muted/20 border-l ${sidebarSizes[size]} h-full shrink-0`}
           >
             <SidebarContent items={sidebarItems} />
           </div>

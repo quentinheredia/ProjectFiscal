@@ -69,9 +69,9 @@ export default function CalculatorExtras({ locale }: { locale: Locale }) {
       </section>
 
       {/* NEWSLETTER CAPTURE (UI ONLY AS SPECIFIED IN PHASE 0) */}
-      <section className="bg-gradient-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-6 sm:p-8 space-y-4 border border-slate-800 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+      <section className="bg-linear-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-6 sm:p-8 space-y-4 border border-slate-800 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
         <div className="max-w-2xl space-y-2">
-          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+          <span className="block text-xs leading-6 font-bold text-emerald-400 uppercase tracking-wider">
             {dict.newsletter.badge}
           </span>
           <h4 className="text-2xl font-bold tracking-tight">
@@ -85,7 +85,7 @@ export default function CalculatorExtras({ locale }: { locale: Locale }) {
       </section>
 
       {/* LEGAL & STATUTORY DISCLAIMER */}
-      <footer className="text-center text-xs text-slate-500 py-4 max-w-4xl mx-auto">
+      <footer className="text-center text-xs text-slate-400 py-4 max-w-4xl mx-auto">
         <p>{dict.disclaimer}</p>
       </footer>
     </div>

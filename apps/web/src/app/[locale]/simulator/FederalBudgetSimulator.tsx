@@ -347,7 +347,7 @@ export default function FederalBudgetSimulator({ locale }: FederalBudgetSimulato
                 ? `1. Obligations statutaires et verrouillées (${statutoryPct} %)`
                 : `1. Statutory & Locked-In Obligations (${statutoryPct}%)`}
             </h2>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-sm bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
               {dict.budgetSimulator.lockedBadge}
             </span>
           </div>
@@ -375,7 +375,7 @@ export default function FederalBudgetSimulator({ locale }: FederalBudgetSimulato
                     </span>
                     {Math.abs(diff) > 0.05 && (
                       <span
-                        className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                        className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-sm ${
                           diff > 0
                             ? 'bg-red-500/20 text-red-400'
                             : 'bg-emerald-500/20 text-emerald-400'
@@ -423,7 +423,7 @@ export default function FederalBudgetSimulator({ locale }: FederalBudgetSimulato
                 ? `2. Enveloppes ministérielles discrétionnaires (${discretionaryPct} %)`
                 : `2. Discretionary Ministerial Envelopes (${discretionaryPct}%)`}
             </h2>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-sm bg-blue-500/10 text-blue-400 border border-blue-500/30">
               {dict.budgetSimulator.flexibleBadge}
             </span>
           </div>
@@ -451,7 +451,7 @@ export default function FederalBudgetSimulator({ locale }: FederalBudgetSimulato
                     </span>
                     {Math.abs(diff) > 0.05 && (
                       <span
-                        className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                        className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-sm ${
                           diff > 0
                             ? 'bg-red-500/20 text-red-400'
                             : 'bg-emerald-500/20 text-emerald-400'
@@ -488,7 +488,7 @@ export default function FederalBudgetSimulator({ locale }: FederalBudgetSimulato
           })}
 
           {/* 9TH CARD: 3x3 GRID COMPLETION — PER-TAXPAYER FISCAL IMPACT */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-[#0c121e] to-[#121927] border border-emerald-500/30 space-y-3 flex flex-col justify-between shadow-[0_0_20px_rgba(16,185,129,0.06)]">
+          <div className="p-5 rounded-2xl bg-linear-to-br from-[#0c121e] to-[#121927] border border-emerald-500/30 space-y-3 flex flex-col justify-between shadow-[0_0_20px_rgba(16,185,129,0.06)]">
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
@@ -497,7 +497,7 @@ export default function FederalBudgetSimulator({ locale }: FederalBudgetSimulato
                     {dict.budgetSimulator.perTaxpayerCard.title}
                   </span>
                 </div>
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shrink-0">
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shrink-0">
                   {dict.budgetSimulator.perTaxpayerCard.badge}
                 </span>
               </div>

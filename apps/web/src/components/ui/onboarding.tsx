@@ -274,7 +274,7 @@ function OnboardingRoot({
     <OnboardingContext.Provider value={contextValue}>
       <div
         className={cn(
-          "bg-white flex flex-col rounded-xl border border-slate-200 p-6 shadow-sm dark:bg-slate-950 dark:border-slate-800",
+          "bg-white flex flex-col rounded-xl border border-slate-200 p-6 shadow-xs dark:bg-slate-950 dark:border-slate-800",
           className
         )}
         data-slot="onboarding"
@@ -379,8 +379,8 @@ function OnboardingHeader({
     <div
       className={cn(
         "flex flex-col gap-1 text-center",
-        "[&_[data-slot=onboarding-title]]:text-slate-950 [&_[data-slot=onboarding-title]]:font-serif [&_[data-slot=onboarding-title]]:text-3xl [&_[data-slot=onboarding-title]]:font-normal dark:[&_[data-slot=onboarding-title]]:text-slate-50",
-        "[&_[data-slot=onboarding-description]]:text-slate-500 [&_[data-slot=onboarding-description]]:text-base dark:[&_[data-slot=onboarding-description]]:text-slate-400",
+        "**:data-[slot=onboarding-title]:text-slate-950 **:data-[slot=onboarding-title]:font-serif **:data-[slot=onboarding-title]:text-3xl **:data-[slot=onboarding-title]:font-normal dark:**:data-[slot=onboarding-title]:text-slate-50",
+        "**:data-[slot=onboarding-description]:text-slate-500 **:data-[slot=onboarding-description]:text-base dark:**:data-[slot=onboarding-description]:text-slate-400",
         className
       )}
       data-slot="onboarding-header"

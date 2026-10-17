@@ -20,7 +20,7 @@ export default function SiteTutorial({ locale }: SiteTutorialProps) {
   const isFr = locale === 'fr';
 
   return (
-    <section className="max-w-4xl mx-auto my-12 bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 relative overflow-hidden">
+    <section className="max-w-4xl mx-auto bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 relative overflow-hidden">
       <Onboarding totalSteps={3} defaultValue={1} className="space-y-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div>

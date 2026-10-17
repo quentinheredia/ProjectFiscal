@@ -134,7 +134,7 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
                 <span className="w-2 h-2 rounded-full bg-blue-400" />
                 <span>{dict.infoHub.brackets.federalTitle}</span>
               </h4>
-              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-sm bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 CRA Federal
               </span>
             </div>
@@ -190,7 +190,7 @@ export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
 
               {/* Active Jurisdiction Badge (Synced from Navbar) */}
               <span
-                className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${activeProvData.badgeBg} ${activeProvData.badgeText} border ${activeProvData.badgeBorder}`}
+                className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-sm ${activeProvData.badgeBg} ${activeProvData.badgeText} border ${activeProvData.badgeBorder}`}
               >
                 📍 {activeProvinceConfig.nameEn} ({activeProvinceConfig.code})
               </span>

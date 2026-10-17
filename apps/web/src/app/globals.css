@@ -1,6 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Class-based dark mode, as in the v3 config (`darkMode: ['class']`); [locale]/layout.tsx sets html.dark. */
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Text-safe brand shades: brand-green is 5.4:1 on white, brand-blue 6.7:1 (WCAG AA). */
+  --color-brand-green: #1b7a43;
+  --color-brand-green-light: #e8f5e9;
+  --color-brand-green-dark: #145a32;
+  --color-brand-blue: #1d4ed8;
+  --color-brand-blue-light: #eff6ff;
+  --color-brand-blue-dark: #1e3a8a;
+
+  /* Original brand accents. They fail AA as text on light surfaces (2.9:1 and 3.2:1 on white):
+     use them only on dark surfaces such as slate-900, or for non-text decoration. */
+  --color-brand-green-accent: #27ae60;
+  --color-brand-blue-accent: #3498db;
+
+  --color-brand-navy: #0f172a;
+  --color-brand-slate: #334155;
+  --color-brand-border: #e2e8f0;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 @layer base {
   :root {
@@ -32,10 +70,12 @@
     background-color: #090d16;
     -webkit-font-smoothing: antialiased;
   }
-}
 
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
+  /* v4 preflight dropped the v3 pointer cursor on buttons; keep it. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 @keyframes gold-spin {

@@ -241,7 +241,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
     <section
       id="brackets-curve"
       aria-label={isRates ? strings.ratesTitle : strings.title}
-      className="max-w-7xl mx-auto my-12 bg-[#0c121e] rounded-2xl border border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6 relative overflow-hidden"
+      className="max-w-7xl mx-auto bg-[#0c121e] rounded-2xl border border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6 relative overflow-hidden"
     >
       {/* Header with view toggle */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-5">
@@ -276,7 +276,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   onClick={() => setActiveView(view)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                     active
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-xs'
                       : 'text-slate-400 hover:text-slate-200 border border-transparent'
                   }`}
                 >
@@ -297,7 +297,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
               {strings.salaryLabel}
             </label>
             <div className="flex items-center gap-1 rounded-lg bg-[#070b12] border border-white/[0.08] px-2.5 py-1 focus-within:border-emerald-500/50">
-              <span className="text-xs text-slate-500" aria-hidden="true">$</span>
+              <span className="text-xs text-slate-400" aria-hidden="true">$</span>
               <input
                 id="tax-curve-salary"
                 type="text"
@@ -310,7 +310,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   if (digits) setSalary(Math.min(INPUT_MAX, Number(digits)));
                 }}
                 onBlur={() => commitSalary(Number(salaryText || 0))}
-                className="w-24 bg-transparent text-right text-sm font-mono font-semibold text-white tabular-nums outline-none"
+                className="w-24 bg-transparent text-right text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
               />
             </div>
           </div>
@@ -346,7 +346,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   aria-label={locale === 'fr' ? p.nameFr : p.nameEn}
                   onClick={() => setSelectedProvinceSlug(p.slug)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
-                    active ? 'bg-white/[0.08] text-white' : 'text-slate-500 hover:text-slate-200'
+                    active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   {p.code}
@@ -382,7 +382,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
           <span className="block text-xl font-bold text-emerald-400 tabular-nums">
             {formatCurrency(current.result.takeHomePayCents / 100, locale)}
           </span>
-          <span className="block text-[11px] text-slate-500 tabular-nums">
+          <span className="block text-[11px] text-slate-400 tabular-nums">
             {fill(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
           </span>
         </div>
@@ -391,7 +391,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
           <span className="block text-xl font-bold text-white tabular-nums">
             {formatPercent(current.averageRate, locale, 1)}
           </span>
-          <span className="block text-[11px] text-slate-500">
+          <span className="block text-[11px] text-slate-400">
             {fill(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
           </span>
         </div>
@@ -400,7 +400,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
           <span className="block text-xl font-bold text-white tabular-nums">
             {formatPercent(marginalRate, locale, 1)}
           </span>
-          <span className="block text-[11px] text-slate-500">
+          <span className="block text-[11px] text-slate-400">
             {fill(strings.keepNext, { amount: formatCurrency(current.next.keptCents / 100, locale) })}
           </span>
         </div>
@@ -448,7 +448,7 @@ function Waterfall({
                 row.kind === 'net' || row.kind === 'gross' ? 'font-semibold text-white' : 'text-slate-300'
               } ${muted ? 'opacity-50' : ''}`}
             >
-              <span className={`w-2 h-2 rounded-sm shrink-0 ${ROW_COLORS[row.kind]}`} aria-hidden="true" />
+              <span className={`w-2 h-2 rounded-xs shrink-0 ${ROW_COLORS[row.kind]}`} aria-hidden="true" />
               <span className="truncate">{row.label}</span>
               {row.sourceUrl && (
                 <a
@@ -456,7 +456,7 @@ function Waterfall({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={fill(strings.sourceLink, { item: row.label })}
-                  className="text-slate-500 hover:text-emerald-300 shrink-0"
+                  className="text-slate-400 hover:text-emerald-300 shrink-0"
                 >
                   <ExternalLink className="w-3 h-3" aria-hidden="true" />
                 </a>
@@ -487,7 +487,7 @@ function Waterfall({
                 {isDeduction ? '−' : ''}
                 {formatCurrency(row.amountCents / 100, locale)}
               </span>
-              <span className="block text-[10px] text-slate-500">
+              <span className="block text-[10px] text-slate-400">
                 {formatPercent(pct(row.amountCents) / 100, locale, 1)} {strings.ofGross}
               </span>
             </span>
@@ -583,11 +583,11 @@ function RateStepChart({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-300">
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-2 rounded-sm bg-amber-400/80" aria-hidden="true" />
+          <span className="w-3 h-2 rounded-xs bg-amber-400/80" aria-hidden="true" />
           {strings.legendTax}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-2 rounded-sm bg-sky-400/80" aria-hidden="true" />
+          <span className="w-3 h-2 rounded-xs bg-sky-400/80" aria-hidden="true" />
           {strings.legendPayroll}
         </span>
         <span className="inline-flex items-center gap-1.5">
@@ -612,7 +612,7 @@ function RateStepChart({
           {yTicks.map((t) => (
             <span
               key={t}
-              className="absolute -left-10 w-8 text-right text-[10px] font-mono text-slate-500 -translate-y-1/2 pointer-events-none"
+              className="absolute -left-10 w-8 text-right text-[10px] font-mono text-slate-400 -translate-y-1/2 pointer-events-none"
               style={{ top: `${toY(t)}%` }}
             >
               {Math.round(t * 100)}%
@@ -659,7 +659,7 @@ function RateStepChart({
           {markers.map((m, i) => (
             <span
               key={m.label}
-              className="absolute -translate-x-1/2 whitespace-nowrap rounded border border-white/[0.1] bg-[#0c121e] px-1.5 py-0.5 text-[10px] font-mono text-slate-300 pointer-events-none"
+              className="absolute -translate-x-1/2 whitespace-nowrap rounded-sm border border-white/[0.1] bg-[#0c121e] px-1.5 py-0.5 text-[10px] font-mono text-slate-300 pointer-events-none"
               style={{
                 left: `${(m.cents / 100 / CURVE_MAX) * 100}%`,
                 top: `${-(markerRowCount - markerRows[i]!) * MARKER_ROW_REM}rem`,
@@ -709,7 +709,7 @@ function RateStepChart({
           {xTicks.map((t) => (
             <span
               key={t}
-              className={`absolute text-[10px] font-mono text-slate-500 ${
+              className={`absolute text-[10px] font-mono text-slate-400 ${
                 t === 0 ? '' : t === CURVE_MAX ? '-translate-x-full' : '-translate-x-1/2'
               }`}
               style={{ left: `${(t / CURVE_MAX) * 100}%` }}
@@ -719,7 +719,7 @@ function RateStepChart({
           ))}
         </div>
       </div>
-      <p className="text-[11px] text-slate-500">{strings.chartNote}</p>
+      <p className="text-[11px] text-slate-400">{strings.chartNote}</p>
     </div>
   );
 }

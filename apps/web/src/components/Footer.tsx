@@ -31,7 +31,7 @@ export default function Footer({ locale }: FooterProps) {
               ? 'Plateforme open source de transparence fiscale et de calcul d’impôt canadien conforme aux normes ARC 2026.'
               : 'Audited Canadian tax engine and fiscal transparency platform built to CRA 2026 statutory specifications.'}
           </p>
-          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             {locale === 'fr' ? 'Moteur ARC 2026.1 validé' : '2026.1 CRA Engine Audited'}
           </span>
         </div>

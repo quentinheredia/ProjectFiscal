@@ -153,16 +153,15 @@ export default function Navbar({ locale }: NavbarProps) {
             onClick={() => setActiveHash('')}
             className="flex items-center gap-2.5 sm:gap-3 group shrink-0"
           >
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0">
-              <Image
-                src="/logo-icon.png"
-                alt="Fiscal Insights Logo"
-                width={40}
-                height={40}
-                priority
-                className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-[0_0_12px_rgba(59,130,246,0.35)] group-hover:scale-105 transition-transform"
-              />
-            </div>
+            {/* Logo emblem; the name next to it is live text, so the image is decorative */}
+            <Image
+              src="/brand/emblem-96.png"
+              alt=""
+              width={40}
+              height={40}
+              priority
+              className="w-9 h-9 sm:w-10 sm:h-10 shrink-0"
+            />
             <div className="flex flex-col">
               <span className="font-extrabold text-white tracking-tight text-base sm:text-lg leading-none">
                 Fiscal<span className="text-emerald-400">Insights</span>
@@ -208,10 +207,10 @@ export default function Navbar({ locale }: NavbarProps) {
             <Link
               href={targetPath}
               className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg text-slate-300 bg-[#161b26] hover:bg-[#1e2536] border border-slate-700/60 hover:text-white transition-all cursor-pointer"
-              aria-label={nav.languageSwitch}
+              hrefLang={targetLocale}
             >
               <Globe className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-12 transition-transform" />
-              <span>{locale === 'en' ? 'FR' : 'EN'}</span>
+              <span lang={targetLocale}>{nav.languageSwitch}</span>
             </Link>
 
             <div className="relative flex items-center" ref={dropdownRef}>
@@ -255,7 +254,7 @@ export default function Navbar({ locale }: NavbarProps) {
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="w-6 text-[10px] font-mono font-bold px-1 py-0.5 rounded bg-slate-800 text-slate-300 text-center">
+                          <span className="w-6 text-[10px] font-mono font-bold px-1 py-0.5 rounded-sm bg-slate-800 text-slate-300 text-center">
                             {prov.code}
                           </span>
                           <span>{provinceName(prov)}</span>
@@ -338,7 +337,7 @@ export default function Navbar({ locale }: NavbarProps) {
         onClick={(e) => {
           if (e.target === e.currentTarget) closeSheet();
         }}
-        className="sheet-in lg:hidden mt-auto mb-0 mx-0 w-full max-w-full max-h-[85dvh] p-0 rounded-t-2xl bg-[#0c121e] text-slate-100 border-t border-white/[0.1] shadow-[0_-12px_40px_rgba(0,0,0,0.7)] backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+        className="sheet-in lg:hidden mt-auto mb-0 mx-0 w-full max-w-full max-h-[85dvh] p-0 rounded-t-2xl bg-[#0c121e] text-slate-100 border-t border-white/[0.1] shadow-[0_-12px_40px_rgba(0,0,0,0.7)] backdrop:bg-black/60 backdrop:backdrop-blur-xs"
       >
         <div className="px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] space-y-6">
           <div className="mx-auto w-10 h-1 rounded-full bg-white/15" aria-hidden="true" />
@@ -404,11 +403,14 @@ export default function Navbar({ locale }: NavbarProps) {
             <Link
               href={targetPath}
               onClick={closeSheet}
+              hrefLang={targetLocale}
               className="flex items-center gap-3 min-h-12 px-1 text-sm text-slate-200 active:text-white"
             >
               <Globe className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               <span className="grow">{nav.language}</span>
-              <span className="text-xs font-semibold text-emerald-300">{nav.languageSwitch}</span>
+              <span lang={targetLocale} className="text-xs font-semibold text-emerald-300">
+                {nav.languageSwitch}
+              </span>
             </Link>
           </section>
         </div>
