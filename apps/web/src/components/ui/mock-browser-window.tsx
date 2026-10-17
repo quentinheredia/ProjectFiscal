@@ -332,7 +332,7 @@ export function BrowserWindow({
         )}
 
         {/* Main Content Area */}
-        <div className={cn("relative min-w-0 flex-1", !isAuto && "h-full")}>
+        <div className={cn("relative min-w-0 flex-1", !isAutoHeight && "h-full")}>
           {children || <div className="absolute inset-0">{children}</div>}
         </div>
 
