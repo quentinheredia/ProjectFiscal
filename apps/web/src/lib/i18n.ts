@@ -2,6 +2,17 @@ export type Locale = 'en' | 'fr';
 
 export const translations = {
   en: {
+    salaryPage: {
+      title: '{amount} After Tax in Ontario (2026)',
+      metaTitle: '{amount} After Tax in Ontario (2026) | Fiscal Insights',
+      metaDescription: 'Breakdown of a {amount} salary in Ontario for 2026: take-home pay, federal and provincial tax, CPP, CPP2 and EI.',
+      summary: 'If you make an annual employment salary of {amount} in Ontario in 2026, your estimated net take-home pay is {net} per year ({monthly}/month or {biweekly} bi-weekly).',
+      takeHome: 'Take-Home Pay',
+      totalIncomeTax: 'Total Income Tax',
+      averageRate: 'Average Tax Rate',
+      marginalRate: 'Marginal Rate',
+      adjustHeading: 'Adjust this calculation or add RRSP/FHSA deductions',
+    },
     footer: {
       tagline: 'Audited Canadian tax engine and fiscal transparency platform built to CRA 2026 statutory specifications.',
       engineBadge: '2026.1 CRA Engine Audited',
@@ -467,6 +478,17 @@ export const translations = {
     disclaimer: 'Disclaimer: Fiscal Insights provides accurate estimates based on published CRA & provincial schedules. This tool is for informational and educational purposes and does not constitute professional tax or legal advice.',
   },
   fr: {
+    salaryPage: {
+      title: '{amount} après impôt en Ontario (2026)',
+      metaTitle: '{amount} après impôt en Ontario (2026) | Fiscal Insights',
+      metaDescription: 'Répartition d’un salaire de {amount} en Ontario en 2026 : salaire net, impôt fédéral et provincial, RPC, RPC2 et AE.',
+      summary: 'Sur un salaire brut de {amount} en Ontario en 2026, votre salaire net annuel estimé est de {net}, soit environ {monthly} par mois ou {biweekly} toutes les deux semaines.',
+      takeHome: 'Salaire net',
+      totalIncomeTax: 'Impôt sur le revenu total',
+      averageRate: 'Taux moyen',
+      marginalRate: 'Taux marginal',
+      adjustHeading: 'Ajustez ce calcul ou ajoutez des déductions REER/CELIAPP',
+    },
     footer: {
       tagline: 'Plateforme open source de transparence fiscale et de calcul d’impôt canadien conforme aux normes ARC 2026.',
       engineBadge: 'Moteur ARC 2026.1 validé',

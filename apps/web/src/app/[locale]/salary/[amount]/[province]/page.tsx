@@ -1,11 +1,17 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { calculateTax, type TaxCalculationResult } from '@fiscal-insights/tax-engine';
+import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
 import Calculator from '@/components/Calculator';
 import CalculatorExtras from '@/components/CalculatorExtras';
-import { SITE_URL, localizedAlternates, resolveLocale } from '@/lib/locale';
-import { calculateTax, formatCentsToDollars } from '@fiscal-insights/tax-engine';
-import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
-import { notFound } from 'next/navigation';
+import { MetricList } from '@/components/mobile/MetricList';
+import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
+import { getDictionary, type Locale } from '@/lib/i18n';
+import { fillTemplate, formatCents, formatCurrency, formatPercent } from '@/lib/format';
+import { LOCALES, SITE_URL, localizedAlternates, resolveLocale } from '@/lib/locale';
+import { AUDIT_BENCHMARK_DOLLARS, SALARY_BENCHMARK_DOLLARS } from '@/features/tax/salary-benchmarks';
+import { PAY_PERIODS_PER_YEAR, perPeriodCents } from '@/features/tax/pay-frequency';
 
 interface SalaryPageProps {
   params: Promise<{
@@ -15,131 +21,110 @@ interface SalaryPageProps {
   }>;
 }
 
-export function generateStaticParams() {
-  const locales = ['en', 'fr'];
-  const salaries = ['80000'];
-  const provinces = ['ontario'];
-  const params: { locale: string; amount: string; province: string }[] = [];
+// Salary pages cover Ontario only, at the benchmark amounts.
+const SALARY_PROVINCE_SLUG = 'ontario';
+const CENTS_PER_DOLLAR = 100;
 
-  for (const locale of locales) {
-    for (const amount of salaries) {
-      for (const province of provinces) {
-        params.push({ locale, amount, province });
-      }
-    }
-  }
-  return params;
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return LOCALES.flatMap((locale) =>
+    SALARY_BENCHMARK_DOLLARS.map((amount) => ({ locale, amount: String(amount), province: SALARY_PROVINCE_SLUG }))
+  );
 }
 
-export async function generateMetadata({
-  params,
-}: SalaryPageProps): Promise<Metadata> {
+/** The benchmark amount a route names, or null when the route is not a salary page. */
+function benchmarkFromParams(amount: string, province: string): number | null {
+  const dollars = Number(amount);
+  const known = SALARY_BENCHMARK_DOLLARS.includes(dollars) && province.toLowerCase() === SALARY_PROVINCE_SLUG;
+  return known ? dollars : null;
+}
+
+function ontarioResult(salaryDollars: number): TaxCalculationResult {
+  return calculateTax(
+    { year: 2026, province: 'ON', employmentIncomeCents: salaryDollars * CENTS_PER_DOLLAR },
+    federal2026,
+    ontario2026
+  );
+}
+
+function salaryPath(dollars: number): string {
+  return `/salary/${dollars}/${SALARY_PROVINCE_SLUG}`;
+}
+
+export async function generateMetadata({ params }: SalaryPageProps): Promise<Metadata> {
   const resolved = await params;
   const locale = resolveLocale(resolved.locale);
-  const amount = resolved.amount;
-  const province = resolved.province;
+  const dollars = benchmarkFromParams(resolved.amount, resolved.province);
+  if (dollars === null) return {};
 
-  if (amount !== '80000' || province.toLowerCase() !== 'ontario') return {};
-
-  const title =
-    locale === 'fr'
-      ? '80 000 $ après impôt en Ontario (2026) | Fiscal Insights'
-      : '$80,000 After Tax in Ontario (2026) | Fiscal Insights';
-
-  const description =
-    locale === 'fr'
-      ? 'Découvrez votre salaire net sur un revenu de 80 000 $ en Ontario en 2026. Répartition détaillée de l’impôt fédéral, provincial, RPC et AE.'
-      : 'Comprehensive breakdown of an $80,000 salary in Ontario for 2026. Calculate exact take-home pay, federal & provincial tax, CPP2 and EI deductions.';
+  const strings = getDictionary(locale).salaryPage;
+  const values = { amount: formatCurrency(dollars, locale) };
+  const title = fillTemplate(strings.metaTitle, values);
+  const description = fillTemplate(strings.metaDescription, values);
 
   return {
     title,
     description,
-    alternates: localizedAlternates(locale, '/salary/80000/ontario'),
-    openGraph: {
-      title,
-      description,
-      url: `${SITE_URL}/${locale}/salary/80000/ontario`,
-    },
+    alternates: localizedAlternates(locale, salaryPath(dollars)),
+    openGraph: { title, description, url: `${SITE_URL}/${locale}${salaryPath(dollars)}` },
   };
+}
+
+function highlights(result: TaxCalculationResult, locale: Locale) {
+  const strings = getDictionary(locale).salaryPage;
+  return [
+    { key: 'net', label: strings.takeHome, value: formatCents(result.takeHomePayCents, locale, 2), emphasis: true },
+    { key: 'tax', label: strings.totalIncomeTax, value: formatCents(result.totalTaxCents, locale, 2) },
+    { key: 'average', label: strings.averageRate, value: formatPercent(result.averageTaxRate, locale) },
+    { key: 'marginal', label: strings.marginalRate, value: formatPercent(result.marginalTaxRate, locale) },
+  ];
 }
 
 export default async function SalaryPage({ params }: SalaryPageProps) {
   const resolved = await params;
   const locale = resolveLocale(resolved.locale);
-  const amount = resolved.amount;
-  const province = resolved.province;
+  const dollars = benchmarkFromParams(resolved.amount, resolved.province);
+  if (dollars === null) notFound();
 
-  if (amount !== '80000' || province.toLowerCase() !== 'ontario') notFound();
-
-  // Compute exact figures statically for $80,000 in Ontario for 2026
-  const result = calculateTax(
-    {
-      year: 2026,
-      province: 'ON',
-      employmentIncomeCents: 8000000, // $80,000
-    },
-    federal2026,
-    ontario2026
-  );
+  const strings = getDictionary(locale).salaryPage;
+  const result = ontarioResult(dollars);
+  const items = highlights(result, locale);
+  const summary = fillTemplate(strings.summary, {
+    amount: formatCurrency(dollars, locale),
+    net: formatCents(result.takeHomePayCents, locale, 2),
+    monthly: formatCents(perPeriodCents(result.takeHomePayCents, 'monthly'), locale, 2),
+    biweekly: formatCents(Math.round(result.takeHomePayCents / PAY_PERIODS_PER_YEAR.biweekly), locale, 2),
+  });
 
   return (
-    <div className="space-y-12 max-w-7xl mx-auto pt-4">
-      {/* Editorial Summary Header */}
-      <section className="bg-[#0c121e] rounded-2xl border border-slate-800/90 shadow-[0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-4">
-        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-          {locale === 'fr'
-            ? '80 000 $ après impôt en Ontario (2026)'
-            : '$80,000 After Tax in Ontario (2026 Salary Breakdown)'}
+    <div className="mx-auto max-w-2xl space-y-10 lg:max-w-7xl lg:space-y-12 lg:pt-4">
+      <section className="space-y-4 rounded-2xl border border-slate-800/90 bg-[#0c121e] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.6)] md:p-6 lg:p-8">
+        <h1 className="text-balance text-[1.875rem] font-black leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
+          {fillTemplate(strings.title, { amount: formatCurrency(dollars, locale) })}
         </h1>
-        <p className="text-base text-slate-400 max-w-3xl leading-relaxed">
-          {locale === 'fr'
-            ? `Sur un salaire brut de 80 000 $ en Ontario en 2026, votre salaire net annuel estimé est de ${formatCentsToDollars(result.takeHomePayCents)}, soit environ ${formatCentsToDollars(Math.round(result.takeHomePayCents / 12))} par mois ou ${formatCentsToDollars(Math.round(result.takeHomePayCents / 26))} toutes les deux semaines.`
-            : `If you make an annual employment salary of $80,000 in Ontario in 2026, your estimated net take-home pay is ${formatCentsToDollars(result.takeHomePayCents)} per year (${formatCentsToDollars(Math.round(result.takeHomePayCents / 12))}/month or ${formatCentsToDollars(Math.round(result.takeHomePayCents / 26))} bi-weekly).`}
-        </p>
+        <p className="max-w-3xl text-pretty text-[15px] leading-relaxed text-slate-400 lg:text-base">{summary}</p>
 
-        {/* Highlight Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-800/80">
-          <div className="bg-[#070b12] p-4 rounded-xl border border-slate-800">
-            <span className="text-xs text-slate-400 block mb-1">Take-Home Pay</span>
-            <span className="text-xl font-black text-emerald-400 tabular-nums">
-              {formatCentsToDollars(result.takeHomePayCents)}
-            </span>
+        <PhoneOnly className="border-t border-slate-800/80">
+          <MetricList metrics={items} />
+        </PhoneOnly>
+        <DesktopOnly>
+          <div className="grid grid-cols-4 gap-4 border-t border-slate-800/80 pt-4">
+            {items.map((item) => (
+              <div key={item.key} className="rounded-xl border border-slate-800 bg-[#070b12] p-4">
+                <span className="mb-1 block text-xs text-slate-400">{item.label}</span>
+                <span className={`text-xl font-black tabular-nums ${item.emphasis ? 'text-emerald-400' : 'text-white'}`}>{item.value}</span>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#070b12] p-4 rounded-xl border border-slate-800">
-            <span className="text-xs text-slate-400 block mb-1">Total Income Tax</span>
-            <span className="text-xl font-bold text-white tabular-nums">
-              {formatCentsToDollars(result.totalTaxCents)}
-            </span>
-          </div>
-          <div className="bg-[#070b12] p-4 rounded-xl border border-slate-800">
-            <span className="text-xs text-slate-400 block mb-1">Average Tax Rate</span>
-            <span className="text-xl font-bold text-white tabular-nums">
-              {(result.averageTaxRate * 100).toFixed(1)}%
-            </span>
-          </div>
-          <div className="bg-[#070b12] p-4 rounded-xl border border-slate-800">
-            <span className="text-xs text-slate-400 block mb-1">Marginal Rate</span>
-            <span className="text-xl font-bold text-emerald-400 tabular-nums">
-              {(result.marginalTaxRate * 100).toFixed(1)}%
-            </span>
-          </div>
-        </div>
+        </DesktopOnly>
       </section>
 
-      {/* Interactive Calculator prefilled at $80,000 in BrowserWindow */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-lg font-bold text-white">
-            Adjust this calculation or add RRSP/FHSA deductions
-          </h2>
-        </div>
+        <h2 className="px-1 text-lg font-bold text-white">{strings.adjustHeading}</h2>
         <div className="space-y-10">
-          <Calculator
-            locale={locale}
-            initialProvince="ON"
-            initialSalaryDollars={80000}
-          />
-          <CalculatorExtras locale={locale} />
+          <Calculator locale={locale} initialProvince="ON" initialSalaryDollars={dollars} />
+          {dollars === AUDIT_BENCHMARK_DOLLARS && <CalculatorExtras locale={locale} />}
         </div>
       </section>
     </div>
