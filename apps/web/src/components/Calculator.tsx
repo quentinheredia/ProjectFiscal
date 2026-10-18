@@ -13,7 +13,7 @@ import {
   getProvincialRules,
 } from '@fiscal-insights/tax-data';
 import { Locale, getDictionary } from '@/lib/i18n';
-import { FEDERAL_SPENDING_CATEGORIES } from '@/lib/spending';
+import { allocateFederalTax, spendingBarWidth } from '@/features/tax/spending';
 import {
   ChevronDown,
   ChevronUp,
@@ -565,8 +565,7 @@ function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: numbe
 
       {/* 10 Federal Spending Envelopes inside clean responsive grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
-        {FEDERAL_SPENDING_CATEGORIES.map((cat) => {
-          const allocatedCents = Math.round((federalTaxCents * cat.percentage) / 100);
+        {allocateFederalTax(federalTaxCents).map(({ category: cat, allocatedCents }) => {
           return (
             <div
               key={cat.id}
@@ -584,7 +583,7 @@ function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: numbe
                 {formatCentsToDollars(allocatedCents)}
               </div>
               <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
-                <div style={{ width: `${Math.min(100, cat.percentage * 4)}%` }} className="bg-emerald-500 h-full rounded-full" />
+                <div style={{ width: `${spendingBarWidth(cat)}%` }} className="bg-emerald-500 h-full rounded-full" />
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">
                 {locale === 'fr' ? cat.descriptionFr : cat.descriptionEn}
