@@ -2,6 +2,22 @@ export type Locale = 'en' | 'fr';
 
 export const translations = {
   en: {
+    payFrequency: {
+      label: {
+        annual: 'Annual',
+        monthly: 'Monthly',
+        biweekly: 'Bi-weekly',
+        weekly: 'Weekly',
+        hourly: 'Hourly',
+      },
+      short: {
+        annual: 'Year',
+        monthly: 'Month',
+        biweekly: '2 wk',
+        weekly: 'Week',
+        hourly: 'Hour',
+      },
+    },
     siteTitle: 'Fiscal Insights — Canadian Tax Calculator & Spending Transparency',
     siteDescription: 'Accurate, transparent Canadian income tax calculator with step-by-step math breakdowns and federal spending transparency.',
     nav: {
@@ -66,6 +82,9 @@ export const translations = {
         totalTax: 'Total Taxes & Deductions',
         effectiveRate: 'Average Tax Rate',
         marginalRate: 'Marginal Tax Rate',
+        totalTaxCaption: 'Federal + Provincial + CPP/EI',
+        effectiveRateCaption: 'Total tax as % of gross salary',
+        marginalRateCaption: 'Tax bracket on next $1 earned',
       },
       breakdown: {
         netPay: 'Take-Home Pay',
@@ -96,6 +115,7 @@ export const translations = {
         defense: 'National Defence & Security',
         fiscal: 'Fiscal Transfers & Programs',
         debt: 'Public Debt Charges',
+        shareOfBudget: '{percent}% of federal budget',
       },
       budgetCallout: {
         summary: 'Total Federal Spending: ~$586 Billion (45% locked-in statutory transfers, 40% discretionary operations).',
@@ -105,12 +125,28 @@ export const translations = {
         title: 'Why the Legacy Calculator Lost Trust',
         subtitle: 'On an $80,000 Ontario salary, the old calculator had two major canceling errors:',
         fedError: 'Federal tax was ~$1,080 too high (used obsolete pre-2025 15% brackets).',
+        fedErrorTitle: '1. Federal Error',
+        provErrorTitle: '2. Provincial Error',
         provError: 'Ontario tax was ~$900 too low (completely omitted Ontario Health Premium of $750.00).',
         conclusion: 'Fiscal Insights solves this with line-by-line statutory audits.',
       },
       ctaButton: 'Launch Full Calculator for this Province',
       ctaSecondary: 'Try Custom Scenarios',
       clientSideGuarantee: 'Calculations run 100% locally in your browser with zero network requests.',
+      phone: {
+        scenariosLabel: 'Preset scenarios',
+        salaryChipsLabel: 'Common salaries',
+        frequencyLabel: 'Pay frequency',
+        rrspSwitch: 'Deduct $8,000 to an RRSP or FHSA',
+        averageRate: 'Average rate',
+        marginalRate: 'Marginal rate',
+        ofGross: '{percent} of gross',
+        spendingTitle: 'Where your federal tax goes',
+        topPrograms: 'Your largest five federal programs',
+        seeAllPrograms: 'See all {count} programs',
+        tracesTitle: 'How each line is calculated',
+        comparisonTitle: 'Audit vs. legacy site',
+      },
     },
     onboarding: {
       badge: 'Interactive Walkthrough',
@@ -399,6 +435,22 @@ export const translations = {
     disclaimer: 'Disclaimer: Fiscal Insights provides accurate estimates based on published CRA & provincial schedules. This tool is for informational and educational purposes and does not constitute professional tax or legal advice.',
   },
   fr: {
+    payFrequency: {
+      label: {
+        annual: 'Annuel',
+        monthly: 'Mensuel',
+        biweekly: 'Aux deux semaines',
+        weekly: 'Hebdomadaire',
+        hourly: 'Horaire',
+      },
+      short: {
+        annual: 'Année',
+        monthly: 'Mois',
+        biweekly: '2 sem.',
+        weekly: 'Semaine',
+        hourly: 'Heure',
+      },
+    },
     siteTitle: 'Fiscal Insights — Calculateur d’impôt canadien et transparence budgétaire',
     siteDescription: 'Calculateur d’impôt sur le revenu canadien précis et transparent avec formules détaillées et répartition des dépenses publiques.',
     nav: {
@@ -463,6 +515,9 @@ export const translations = {
         totalTax: 'Impôts et retenues totaux',
         effectiveRate: 'Taux effectif moyen',
         marginalRate: 'Taux marginal d’imposition',
+        totalTaxCaption: 'Fédéral + provincial + RPC/AE',
+        effectiveRateCaption: 'Impôt total en % du salaire brut',
+        marginalRateCaption: 'Taux sur le prochain dollar gagné',
       },
       breakdown: {
         netPay: 'Salaire net',
@@ -493,6 +548,7 @@ export const translations = {
         defense: 'Défense nationale et sécurité',
         fiscal: 'Transferts fiscaux et programmes',
         debt: 'Frais de la dette publique',
+        shareOfBudget: '{percent} % du budget fédéral',
       },
       budgetCallout: {
         summary: 'Dépenses fédérales totales : ~586 milliards $ (45 % de transferts légaux obligatoires, 40 % d’opérations discrétionnaires).',
@@ -502,12 +558,28 @@ export const translations = {
         title: 'Pourquoi l’ancien site perdait la confiance',
         subtitle: 'Pour un salaire de 80 000 $ en Ontario, l’ancien outil comportait deux erreurs majeures de compensation :',
         fedError: 'L’impôt fédéral était trop élevé d’environ 1 080 $ (barèmes obsolètes à 15 % d’avant 2025).',
+        fedErrorTitle: '1. Erreur fédérale',
+        provErrorTitle: '2. Erreur provinciale',
         provError: 'L’impôt ontarien était sous-évalué de 900 $ (omission totale de la Contribution-santé de 750,00 $).',
         conclusion: 'Fiscal Insights résout cela grâce à un audit rigoureux ligne par ligne.',
       },
       ctaButton: 'Lancer le calculateur complet pour cette province',
       ctaSecondary: 'Essayer un scénario personnalisé',
       clientSideGuarantee: 'Les calculs s’exécutent à 100 % localement dans votre navigateur, sans appel réseau.',
+      phone: {
+        scenariosLabel: 'Scénarios préconfigurés',
+        salaryChipsLabel: 'Salaires courants',
+        frequencyLabel: 'Fréquence de paie',
+        rrspSwitch: 'Déduire 8 000 $ dans un REER ou un CELIAPP',
+        averageRate: 'Taux moyen',
+        marginalRate: 'Taux marginal',
+        ofGross: '{percent} du brut',
+        spendingTitle: 'Où va votre impôt fédéral',
+        topPrograms: 'Vos cinq principaux programmes fédéraux',
+        seeAllPrograms: 'Voir les {count} programmes',
+        tracesTitle: 'Le calcul de chaque ligne',
+        comparisonTitle: 'Audit et ancien site',
+      },
     },
     onboarding: {
       badge: 'Tutoriel interactif',
