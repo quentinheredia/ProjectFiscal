@@ -16,6 +16,9 @@ export const viewport: Viewport = {
   colorScheme: 'dark',
 };
 
+// Only /en and /fr exist. Any other first segment, such as a browser's automatic /favicon.ico request, is a 404.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return localeParams();
 }
