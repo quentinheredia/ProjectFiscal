@@ -18,8 +18,5 @@
   },
   "devDependencies": {
     "typescript": "^5.7.3"
-  },
-  "dependencies": {
-    "github": "^14.0.0"
   }
 }
