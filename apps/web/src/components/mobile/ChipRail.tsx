@@ -9,8 +9,8 @@ interface ChipRailProps {
 }
 
 /**
- * A single row of chips that scrolls sideways instead of wrapping. It bleeds to the screen edge
- * (the page gutter is 16 px) and fades at both ends so a cut-off chip reads as "more to the side".
+ * A single row of chips that scrolls sideways instead of wrapping. It bleeds through a 16 px gutter
+ * and fades at the trailing edge so a cut-off chip reads as "more to the side".
  */
 export function ChipRail({ label, children, className }: ChipRailProps) {
   return (
@@ -18,8 +18,8 @@ export function ChipRail({ label, children, className }: ChipRailProps) {
       role="group"
       aria-label={label}
       className={cn(
-        '-mx-4 flex snap-x snap-proximity gap-2 overflow-x-auto overscroll-x-contain px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-        '[mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]',
+        '-mx-4 flex snap-x snap-proximity scroll-px-4 gap-2 overflow-x-auto overscroll-x-contain px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        '[mask-image:linear-gradient(to_right,black_calc(100%-32px),transparent)]',
         className
       )}
     >
