@@ -12,6 +12,7 @@ import { useProvince, PROVINCES_LIST } from '@/context/ProvinceContext';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { fillTemplate, formatCurrency, formatPercent, formatThousands } from '@/lib/format';
 import { ExternalLink, Layers, TrendingUp } from 'lucide-react';
+import { ROW_COLORS, buildWaterfallRows, toWaterfallSlices, type TaxCurveStrings, type WaterfallRow } from '@/features/tax/waterfall';
 
 interface TaxCurveAnalyticsProps {
   locale: Locale;
@@ -30,32 +31,12 @@ const NEXT_STEP_CENTS = 10000;
 const MARKER_GAP_PERCENT = 14;
 const MARKER_ROW_REM = 1.25;
 
-type Strings = ReturnType<typeof getDictionary>['taxCurve'];
-
-type RowKind = 'gross' | 'payroll' | 'federal' | 'provincial' | 'net';
-
-interface WaterfallRow {
-  key: string;
-  kind: RowKind;
-  label: string;
-  amountCents: number;
-  sourceUrl?: string;
-}
-
 interface CurveSample {
   salary: number;
   taxRate: number; // income tax on the next dollar
   payrollRate: number; // CPP/QPP, EI and QPIP on the next dollar
   averageRate: number; // all deductions / salary
 }
-
-const ROW_COLORS: Record<RowKind, string> = {
-  gross: 'bg-slate-400/70',
-  payroll: 'bg-sky-400',
-  federal: 'bg-amber-400',
-  provincial: 'bg-orange-400',
-  net: 'bg-emerald-400',
-};
 
 function payrollCents(result: TaxCalculationResult): number {
   return result.cpp.totalCents + result.ei.employeeCents + (result.qpip?.totalCents ?? 0);
@@ -78,83 +59,6 @@ function nextDollar(salaryCents: number, base: TaxCalculationResult, fed: Federa
     payrollRate: Math.max(0, (payrollCents(next) - payrollCents(base)) / NEXT_STEP_CENTS),
     keptCents: next.takeHomePayCents - base.takeHomePayCents,
   };
-}
-
-function buildRows(
-  result: TaxCalculationResult,
-  fed: FederalRuleSet,
-  prov: ProvincialRuleSet,
-  strings: Strings,
-  provinceName: string
-): WaterfallRow[] {
-  const quebec = prov.quebec;
-  const plan = quebec ? quebec.qpp : fed.cpp;
-  const surtaxCents = result.provincial.surtaxCents ?? 0;
-  const healthPremiumCents = result.provincial.healthPremiumCents ?? 0;
-
-  const rows: WaterfallRow[] = [
-    { key: 'gross', kind: 'gross', label: strings.gross, amountCents: result.totalIncomeCents },
-    {
-      key: 'pension',
-      kind: 'payroll',
-      label: quebec ? strings.qpp : strings.cpp,
-      amountCents: result.cpp.totalCents,
-      sourceUrl: plan.baseEmployeeRate.source,
-    },
-    {
-      key: 'ei',
-      kind: 'payroll',
-      label: strings.ei,
-      amountCents: result.ei.employeeCents,
-      sourceUrl: quebec ? fed.ei.quebecRate.source : fed.ei.rate.source,
-    },
-  ];
-  if (quebec && result.qpip) {
-    rows.push({
-      key: 'qpip',
-      kind: 'payroll',
-      label: strings.qpip,
-      amountCents: result.qpip.totalCents,
-      sourceUrl: quebec.qpip.employeeRate.source,
-    });
-  }
-  rows.push(
-    {
-      key: 'federal',
-      kind: 'federal',
-      label: strings.federalTax,
-      amountCents: result.federal.netFederalTaxCents,
-      sourceUrl: fed.brackets[0]!.rate.source,
-    },
-    {
-      key: 'provincial',
-      kind: 'provincial',
-      label: fillTemplate(strings.provincialTax, { province: provinceName }),
-      // Surtax and Health Premium get their own rows; reductions and credits stay netted in here.
-      amountCents: result.provincial.netProvincialTaxCents - surtaxCents - healthPremiumCents,
-      sourceUrl: prov.brackets[0]!.rate.source,
-    }
-  );
-  if (prov.ontarioSurtax) {
-    rows.push({
-      key: 'surtax',
-      kind: 'provincial',
-      label: strings.surtax,
-      amountCents: surtaxCents,
-      sourceUrl: prov.ontarioSurtax.tier1ThresholdCents.source,
-    });
-  }
-  if (prov.ontarioHealthPremium) {
-    rows.push({
-      key: 'healthPremium',
-      kind: 'provincial',
-      label: strings.healthPremium,
-      amountCents: healthPremiumCents,
-      sourceUrl: prov.ontarioHealthPremium.tiers.source,
-    });
-  }
-  rows.push({ key: 'net', kind: 'net', label: strings.takeHome, amountCents: result.takeHomePayCents });
-  return rows;
 }
 
 export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
@@ -183,7 +87,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
   }, [salary, rules]);
 
   const rows = useMemo(
-    () => buildRows(current.result, rules.fed, rules.prov, strings, provinceName),
+    () => buildWaterfallRows(current.result, rules.fed, rules.prov, strings, provinceName),
     [current.result, rules, strings, provinceName]
   );
 
@@ -394,29 +298,19 @@ function Waterfall({
 }: {
   rows: WaterfallRow[];
   grossCents: number;
-  strings: Strings;
+  strings: TaxCurveStrings;
   locale: Locale;
 }) {
-  const pct = (cents: number) => (grossCents > 0 ? (cents / grossCents) * 100 : 0);
-  let remainingCents = grossCents;
-
   return (
     <ol className="space-y-2.5" aria-label={strings.title}>
-      {rows.map((row) => {
-        const isDeduction = row.kind !== 'gross' && row.kind !== 'net';
-        const before = remainingCents;
-        if (isDeduction) remainingCents -= row.amountCents;
-        const after = remainingCents;
-
+      {toWaterfallSlices(rows, grossCents).map(({ row, isDeduction, sharePercent, sliceLeftPercent, sliceWidthPercent, remainingPercent }) => {
         // Deduction rows show what is left in a faint fill and the slice removed in colour.
-        const sliceLeft = isDeduction ? pct(after) : 0;
-        const sliceWidth = isDeduction ? pct(before - after) : pct(row.amountCents);
         const muted = isDeduction && row.amountCents === 0;
 
         return (
           <li
             key={row.key}
-            className={`grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[12rem_minmax(0,1fr)_8rem] items-center gap-x-4 gap-y-1.5 ${
+            className={`grid grid-cols-[12rem_minmax(0,1fr)_8rem] items-center gap-x-4 gap-y-1.5 ${
               row.kind === 'net' ? 'pt-2.5 border-t border-white/[0.06]' : ''
             }`}
           >
@@ -440,32 +334,29 @@ function Waterfall({
               )}
             </span>
 
-            <div
-              className="relative h-6 sm:h-7 rounded-md bg-white/[0.03] overflow-hidden col-span-2 sm:col-span-1 order-3 sm:order-none"
-              aria-hidden="true"
-            >
+            <div className="relative h-7 rounded-md bg-white/[0.03] overflow-hidden" aria-hidden="true">
               {isDeduction && (
                 <div
                   className="absolute inset-y-0 left-0 bg-emerald-400/[0.07] transition-[width] duration-300 motion-reduce:transition-none"
-                  style={{ width: `${pct(after)}%` }}
+                  style={{ width: `${remainingPercent}%` }}
                 />
               )}
               <div
                 className={`absolute inset-y-0 rounded-[3px] transition-[left,width] duration-300 motion-reduce:transition-none ${ROW_COLORS[row.kind]}`}
                 style={{
-                  left: `${sliceLeft}%`,
-                  width: row.amountCents > 0 ? `max(2px, ${sliceWidth}%)` : '0',
+                  left: `${sliceLeftPercent}%`,
+                  width: row.amountCents > 0 ? `max(2px, ${sliceWidthPercent}%)` : '0',
                 }}
               />
             </div>
 
             <span className={`text-right tabular-nums font-mono ${muted ? 'opacity-50' : ''}`}>
-              <span className={`block text-xs sm:text-sm ${row.kind === 'net' ? 'text-emerald-400 font-bold' : 'text-white'}`}>
+              <span className={`block text-sm ${row.kind === 'net' ? 'text-emerald-400 font-bold' : 'text-white'}`}>
                 {isDeduction ? '−' : ''}
                 {formatCurrency(row.amountCents / 100, locale)}
               </span>
               <span className="block text-[10px] text-slate-400">
-                {formatPercent(pct(row.amountCents) / 100, locale, 1)} {strings.ofGross}
+                {formatPercent(sharePercent / 100, locale, 1)} {strings.ofGross}
               </span>
             </span>
           </li>
@@ -503,7 +394,7 @@ function RateStepChart({
   fed: FederalRuleSet;
   prov: ProvincialRuleSet;
   provinceName: string;
-  strings: Strings;
+  strings: TaxCurveStrings;
   locale: Locale;
 }) {
   const [hover, setHover] = useState<number | null>(null);
