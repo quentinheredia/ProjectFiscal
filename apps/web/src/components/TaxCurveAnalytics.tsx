@@ -10,6 +10,7 @@ import {
 } from '@fiscal-insights/tax-data';
 import { useProvince, PROVINCES_LIST } from '@/context/ProvinceContext';
 import { Locale, getDictionary } from '@/lib/i18n';
+import { fillTemplate, formatCurrency, formatPercent, formatThousands } from '@/lib/format';
 import { ExternalLink, Layers, TrendingUp } from 'lucide-react';
 
 interface TaxCurveAnalyticsProps {
@@ -55,30 +56,6 @@ const ROW_COLORS: Record<RowKind, string> = {
   provincial: 'bg-orange-400',
   net: 'bg-emerald-400',
 };
-
-function fill(template: string, values: Record<string, string>): string {
-  return template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
-}
-
-function formatCurrency(amount: number, locale: Locale, digits = 0): string {
-  return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(amount);
-}
-
-function formatPercent(val: number, locale: Locale, digits = 1): string {
-  const formatted = (val * 100).toFixed(digits).replace('.', locale === 'fr' ? ',' : '.');
-  return locale === 'fr' ? `${formatted} %` : `${formatted}%`;
-}
-
-function formatThousands(amount: number, locale: Locale): string {
-  const k = Math.round(amount / 100) / 10;
-  const text = String(k).replace('.', locale === 'fr' ? ',' : '.');
-  return locale === 'fr' ? `${text} k$` : `$${text}k`;
-}
 
 function payrollCents(result: TaxCalculationResult): number {
   return result.cpp.totalCents + result.ei.employeeCents + (result.qpip?.totalCents ?? 0);
@@ -152,7 +129,7 @@ function buildRows(
     {
       key: 'provincial',
       kind: 'provincial',
-      label: fill(strings.provincialTax, { province: provinceName }),
+      label: fillTemplate(strings.provincialTax, { province: provinceName }),
       // Surtax and Health Premium get their own rows; reductions and credits stay netted in here.
       amountCents: result.provincial.netProvincialTaxCents - surtaxCents - healthPremiumCents,
       sourceUrl: prov.brackets[0]!.rate.source,
@@ -250,7 +227,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {isRates ? strings.ratesTitle : strings.title}
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-            {fill(isRates ? strings.ratesDescription : strings.description, headerValues)}
+            {fillTemplate(isRates ? strings.ratesDescription : strings.description, headerValues)}
           </p>
         </div>
 
@@ -383,7 +360,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {formatCurrency(current.result.takeHomePayCents / 100, locale)}
           </span>
           <span className="block text-[11px] text-slate-400 tabular-nums">
-            {fill(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
+            {fillTemplate(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
           </span>
         </div>
         <div className="p-5 sm:p-6 space-y-1">
@@ -392,7 +369,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {formatPercent(current.averageRate, locale, 1)}
           </span>
           <span className="block text-[11px] text-slate-400">
-            {fill(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
+            {fillTemplate(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
           </span>
         </div>
         <div className="p-5 sm:p-6 space-y-1">
@@ -401,7 +378,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {formatPercent(marginalRate, locale, 1)}
           </span>
           <span className="block text-[11px] text-slate-400">
-            {fill(strings.keepNext, { amount: formatCurrency(current.next.keptCents / 100, locale) })}
+            {fillTemplate(strings.keepNext, { amount: formatCurrency(current.next.keptCents / 100, locale) })}
           </span>
         </div>
       </div>
@@ -455,7 +432,7 @@ function Waterfall({
                   href={row.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={fill(strings.sourceLink, { item: row.label })}
+                  aria-label={fillTemplate(strings.sourceLink, { item: row.label })}
                   className="text-slate-400 hover:text-emerald-300 shrink-0"
                 >
                   <ExternalLink className="w-3 h-3" aria-hidden="true" />
@@ -600,7 +577,7 @@ function RateStepChart({
         <div
           ref={plotRef}
           role="img"
-          aria-label={fill(strings.chartLabel, { province: provinceName })}
+          aria-label={fillTemplate(strings.chartLabel, { province: provinceName })}
           className="relative h-64 sm:h-72 cursor-crosshair touch-none"
           onPointerMove={(e) => setHover(indexAt(e.clientX))}
           onPointerLeave={() => setHover(null)}
@@ -665,7 +642,7 @@ function RateStepChart({
                 top: `${-(markerRowCount - markerRows[i]!) * MARKER_ROW_REM}rem`,
               }}
             >
-              {fill(m.label, { amount: formatThousands(m.cents / 100, locale) })}
+              {fillTemplate(m.label, { amount: formatThousands(m.cents / 100, locale) })}
             </span>
           ))}
 
@@ -683,21 +660,21 @@ function RateStepChart({
                 style={{ left: `${Math.min(85, Math.max(15, (hovered.salary / CURVE_MAX) * 100))}%` }}
               >
                 <span className="block font-mono text-slate-400">
-                  {fill(strings.tooltipSalary, { amount: formatCurrency(hovered.salary, locale) })}
+                  {fillTemplate(strings.tooltipSalary, { amount: formatCurrency(hovered.salary, locale) })}
                 </span>
                 <span className="block text-sm font-semibold text-white">
-                  {fill(strings.tooltipMarginal, {
+                  {fillTemplate(strings.tooltipMarginal, {
                     rate: formatPercent(hovered.taxRate + hovered.payrollRate, locale, 1),
                   })}
                 </span>
                 <span className="block">
-                  {fill(strings.tooltipSplit, {
+                  {fillTemplate(strings.tooltipSplit, {
                     tax: formatPercent(hovered.taxRate, locale, 1),
                     payroll: formatPercent(hovered.payrollRate, locale, 1),
                   })}
                 </span>
                 <span className="block text-slate-400">
-                  {fill(strings.tooltipAverage, { rate: formatPercent(hovered.averageRate, locale, 1) })}
+                  {fillTemplate(strings.tooltipAverage, { rate: formatPercent(hovered.averageRate, locale, 1) })}
                 </span>
               </div>
             </>
