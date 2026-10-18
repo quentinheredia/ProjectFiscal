@@ -15,7 +15,7 @@ Surfaces: `TaxInformationHub` on the home page (the nav "Brackets" target, `#bra
 | --- | --- |
 | Brackets | `BracketLadder`: a Federal and Provincial `SegmentedControl` (provincial follows the selected province); each bracket is a row with the rate large on the left, the income range on the right, and a rate bar; the citation once under the list. |
 | Rates explainer | Marginal versus average and RRSP and FHSA become two `Disclosure`s with the existing copy. |
-| Payroll ceilings | Three `MetricRow`s (YMPE, YAMPE, EI maximum) with the description in a `Disclosure`. |
+| Payroll ceilings | One `MetricList` (YMPE, YAMPE, EI maximum) with the description in a `Disclosure`. |
 | Legacy audit | `AuditComparisonPhone`: one card per line with old figure (struck, rose) and new figure (emerald) side by side and the impact text below; the net line highlighted; "Inspect full audit" as a full-width link. |
 | FAQ | `Disclosure` per question; fixes the missing `aria-expanded` and `aria-controls` by using native `<details>`. |
 

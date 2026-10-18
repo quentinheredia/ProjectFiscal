@@ -3,6 +3,7 @@
 Branch: `feat/mobile-ui-menu` (from `feat/mobile-ui-brackets-audit`)
 
 ## 1. Refactor
+- [ ] Move the menu sheet onto the shared `BottomSheet` from phase 1, removing the navbar's own dialog and scroll-lock code.
 - [ ] Split `Navbar.tsx` into `SiteHeader`, `DesktopDock`, `ProvinceDropdown`, `MobileTabBar` and `MenuSheet`, each under 150 lines.
 - [ ] Add `navigation/nav-items.ts`: one list of destinations (id, href builder, label keys, icon) used by the dock, the tab bar and the sheet.
 - [ ] Add `navigation/useActiveSection.ts`: the active tab from the route, plus an IntersectionObserver on `#brackets` on the home page, replacing the `hashchange`-only logic.

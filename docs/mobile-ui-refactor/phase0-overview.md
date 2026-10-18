@@ -65,7 +65,7 @@ Built once in phase 1 and reused by every later phase. Each one is standalone: n
 | `Disclosure` | `<details>`-based expandable row with a summary line; native keyboard and screen reader support. |
 | `BottomSheet` | Modal `<dialog>` sheet with handle, title, close button, `overscroll-behavior: contain`, safe-area padding. Extracted from the navbar. |
 | `MoneyInput` | Text input with `inputMode="numeric"`, digit filtering, thousands formatting on blur, `autoComplete="off"`, large type. |
-| `MetricRow` | Label, value and caption on one row; replaces 2 x 3 metric grids. |
+| `MetricList` | Label, value and caption on one row per metric, as a description list; replaces 2 x 3 metric grids. |
 | `StackedBar` | Proportional bar with an accessible legend list; one implementation for the three current copies. |
 | `SectionHeading` | Phone section title and optional one-line lead, no eyebrow. |
 | `StickySummaryBar` | Slim bar pinned under the header, shown once its anchor scrolls away (IntersectionObserver, no scroll listeners). |
