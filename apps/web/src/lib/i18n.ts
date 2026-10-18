@@ -797,6 +797,10 @@ export const translations = {
   },
 } as const;
 
+// The French dictionary must have every key the English one has, so a missing translation fails typecheck.
+type DictionaryShape<T> = { readonly [K in keyof T]: T[K] extends string ? string : DictionaryShape<T[K]> };
+translations.fr satisfies DictionaryShape<typeof translations.en>;
+
 export function getDictionary(locale: Locale) {
   return translations[locale] || translations.en;
 }
