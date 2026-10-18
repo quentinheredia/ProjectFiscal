@@ -12,6 +12,8 @@ import { useProvince, PROVINCES_LIST } from '@/context/ProvinceContext';
 import { Locale, getDictionary } from '@/lib/i18n';
 import { fillTemplate, formatCurrency, formatPercent, formatThousands } from '@/lib/format';
 import { ExternalLink, Layers, TrendingUp } from 'lucide-react';
+import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
+import WaterfallPhone from '@/components/home/WaterfallPhone';
 import { ROW_COLORS, buildWaterfallRows, toWaterfallSlices, type TaxCurveStrings, type WaterfallRow } from '@/features/tax/waterfall';
 
 interface TaxCurveAnalyticsProps {
@@ -122,24 +124,24 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
     <section
       id="brackets-curve"
       aria-label={isRates ? strings.ratesTitle : strings.title}
-      className="max-w-7xl mx-auto bg-[#0c121e] rounded-2xl border border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6 relative overflow-hidden"
+      className="max-w-2xl lg:max-w-7xl mx-auto bg-[#0c121e] rounded-2xl border border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.6)] p-4 md:p-6 lg:p-8 space-y-5 lg:space-y-6 relative overflow-hidden"
     >
       {/* Header with view toggle */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h3 className="text-2xl font-bold text-white tracking-tight">
+          <h3 className="text-2xl font-bold text-white tracking-tight text-balance">
             {isRates ? strings.ratesTitle : strings.title}
           </h3>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+          <p className="text-sm text-slate-400 mt-1 max-w-2xl text-pretty">
             {fillTemplate(isRates ? strings.ratesDescription : strings.description, headerValues)}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <div
             role="tablist"
             aria-label={strings.viewLabel}
-            className="inline-flex items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08] shadow-inner"
+            className="flex w-full lg:inline-flex lg:w-auto items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08] shadow-inner"
           >
             {(
               [
@@ -155,7 +157,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setActiveView(view)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`inline-flex flex-1 lg:flex-none justify-center min-h-11 lg:min-h-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] lg:text-xs font-semibold transition-colors cursor-pointer ${
                     active
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-xs'
                       : 'text-slate-400 hover:text-slate-200 border border-transparent'
@@ -174,10 +176,10 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
       <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-8">
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <label htmlFor="tax-curve-salary" className="text-xs font-semibold text-slate-300">
+            <label htmlFor="tax-curve-salary" className="text-[13px] lg:text-xs font-semibold text-slate-300">
               {strings.salaryLabel}
             </label>
-            <div className="flex items-center gap-1 rounded-lg bg-[#070b12] border border-white/[0.08] px-2.5 py-1 focus-within:border-emerald-500/50">
+            <div className="flex min-h-11 lg:min-h-0 items-center gap-1 rounded-lg bg-[#070b12] border border-white/[0.08] px-3 lg:px-2.5 py-1 focus-within:border-emerald-500/50">
               <span className="text-xs text-slate-400" aria-hidden="true">$</span>
               <input
                 id="tax-curve-salary"
@@ -191,7 +193,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   if (digits) setSalary(Math.min(INPUT_MAX, Number(digits)));
                 }}
                 onBlur={() => commitSalary(Number(salaryText || 0))}
-                className="w-24 bg-transparent text-right text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
+                className="w-28 lg:w-24 bg-transparent text-right text-base lg:text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
               />
             </div>
           </div>
@@ -203,18 +205,18 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             step={SLIDER_STEP}
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, salary))}
             onChange={(e) => commitSalary(Number(e.target.value))}
-            className="w-full accent-emerald-400 cursor-pointer"
+            className="w-full h-8 accent-emerald-400 cursor-pointer"
           />
         </div>
 
         <div className="space-y-2">
-          <span id="tax-curve-province" className="block text-xs font-semibold text-slate-300">
+          <span id="tax-curve-province" className="block text-[13px] lg:text-xs font-semibold text-slate-300">
             {strings.provinceLabel}
           </span>
           <div
             role="radiogroup"
             aria-labelledby="tax-curve-province"
-            className="inline-flex items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
+            className="flex w-full md:inline-flex md:w-auto items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
           >
             {PROVINCES_LIST.map((p) => {
               const active = p.code === selectedProvince.code;
@@ -226,7 +228,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   aria-checked={active}
                   aria-label={locale === 'fr' ? p.nameFr : p.nameEn}
                   onClick={() => setSelectedProvinceSlug(p.slug)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
+                  className={`flex-1 md:flex-none min-h-11 lg:min-h-0 px-3 py-1.5 rounded-lg text-[13px] lg:text-xs font-mono font-semibold transition-colors cursor-pointer ${
                     active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
@@ -250,15 +252,22 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
           locale={locale}
         />
       ) : (
-        <Waterfall rows={rows} grossCents={grossCents} strings={strings} locale={locale} />
+        <>
+          <PhoneOnly>
+            <WaterfallPhone rows={rows} grossCents={grossCents} strings={strings} locale={locale} />
+          </PhoneOnly>
+          <DesktopOnly>
+            <Waterfall rows={rows} grossCents={grossCents} strings={strings} locale={locale} />
+          </DesktopOnly>
+        </>
       )}
 
       {/* Summary strip, shared by both views */}
       <div
         aria-live="polite"
-        className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-6 sm:-mx-8 -mb-6 sm:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
+        className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-4 md:-mx-6 lg:-mx-8 -mb-4 md:-mb-6 lg:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
       >
-        <div className="p-5 sm:p-6 space-y-1">
+        <div className="p-4 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.takeHome}</span>
           <span className="block text-xl font-bold text-emerald-400 tabular-nums">
             {formatCurrency(current.result.takeHomePayCents / 100, locale)}
@@ -267,7 +276,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {fillTemplate(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
           </span>
         </div>
-        <div className="p-5 sm:p-6 space-y-1">
+        <div className="p-4 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.averageRate}</span>
           <span className="block text-xl font-bold text-white tabular-nums">
             {formatPercent(current.averageRate, locale, 1)}
@@ -276,7 +285,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             {fillTemplate(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
           </span>
         </div>
-        <div className="p-5 sm:p-6 space-y-1">
+        <div className="p-4 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.marginalRate}</span>
           <span className="block text-xl font-bold text-white tabular-nums">
             {formatPercent(marginalRate, locale, 1)}
