@@ -1,134 +1,131 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Locale, getDictionary } from '@/lib/i18n';
 import { CheckCircle2 } from 'lucide-react';
+import { Locale, getDictionary } from '@/lib/i18n';
+import { fillTemplate, formatCurrency } from '@/lib/format';
+import { PROVINCES, provinceName } from '@/lib/provinces';
+import { AUDIT_BENCHMARK_DOLLARS, SALARY_BENCHMARK_DOLLARS, salaryPageHref } from '@/features/tax/salary-benchmarks';
+import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
+import { Disclosure } from '@/components/mobile/Disclosure';
 
 interface FooterProps {
   locale: Locale;
 }
 
+interface FooterLink {
+  href: string;
+  label: string;
+  highlight?: boolean;
+}
+
+interface FooterGroup {
+  title: string;
+  links?: FooterLink[];
+  facts?: string[];
+}
+
+function footerGroups(locale: Locale): FooterGroup[] {
+  const strings = getDictionary(locale).footer;
+  return [
+    {
+      title: strings.calculators,
+      links: PROVINCES.map((p) => ({ href: `/${locale}/calculator/${p.slug}`, label: `${provinceName(p, locale)} (${p.form})` })),
+    },
+    {
+      title: strings.benchmarks,
+      links: SALARY_BENCHMARK_DOLLARS.map((amount) => ({
+        href: salaryPageHref(locale, amount),
+        label:
+          amount === AUDIT_BENCHMARK_DOLLARS
+            ? strings.auditCase
+            : fillTemplate(strings.salaryBreakdown, { amount: formatCurrency(amount, locale) }),
+        highlight: amount === AUDIT_BENCHMARK_DOLLARS,
+      })),
+    },
+    {
+      title: strings.standards,
+      facts: [strings.clientSide, strings.integerCents, strings.noTracking, strings.citations],
+    },
+  ];
+}
+
+function Brand({ locale }: { locale: Locale }) {
+  const strings = getDictionary(locale).footer;
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Image src="/brand/emblem-96.png" alt="" width={28} height={28} className="h-7 w-7" />
+        <span className="text-sm font-extrabold text-white">
+          Fiscal<span className="text-emerald-400">Insights</span>
+        </span>
+      </div>
+      <p className="text-[13px] leading-relaxed text-slate-400">{strings.tagline}</p>
+      <span className="inline-block rounded-sm border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-xs font-semibold text-emerald-400">
+        {strings.engineBadge}
+      </span>
+    </div>
+  );
+}
+
+function GroupItems({ group, tall }: { group: FooterGroup; tall: boolean }) {
+  return (
+    <ul className={tall ? 'space-y-0.5' : 'space-y-1.5'}>
+      {group.links?.map((link) => (
+        <li key={link.href}>
+          <Link
+            href={link.href}
+            className={`${tall ? 'flex min-h-11 items-center' : ''} ${
+              link.highlight ? 'font-medium text-emerald-400' : 'text-slate-400 hover:text-emerald-400'
+            } transition-colors`}
+          >
+            {link.label}
+          </Link>
+        </li>
+      ))}
+      {group.facts?.map((fact) => (
+        <li key={fact} className={`flex items-center gap-1.5 text-slate-300 ${tall ? 'min-h-9' : ''}`}>
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" aria-hidden="true" />
+          <span>{fact}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function Footer({ locale }: FooterProps) {
   const dict = getDictionary(locale);
+  const groups = footerGroups(locale);
 
   return (
-    <footer className="pt-12 border-t border-slate-800/80 space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
-        {/* Column 1: Brand & Integrity */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/logo-icon.png"
-              alt="Fiscal Insights Logo"
-              width={24}
-              height={24}
-              className="w-6 h-6 object-contain"
-            />
-            <span className="font-bold text-white text-sm">Fiscal Insights</span>
-          </div>
-          <p className="text-slate-400 text-xs leading-relaxed">
-            {locale === 'fr'
-              ? 'Plateforme open source de transparence fiscale et de calcul d’impôt canadien conforme aux normes ARC 2026.'
-              : 'Audited Canadian tax engine and fiscal transparency platform built to CRA 2026 statutory specifications.'}
-          </p>
-          <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            {locale === 'fr' ? 'Moteur ARC 2026.1 validé' : '2026.1 CRA Engine Audited'}
-          </span>
+    <footer className="mx-auto max-w-7xl space-y-8 border-t border-slate-800/80 pt-10">
+      <PhoneOnly className="mx-auto max-w-2xl space-y-4 text-sm">
+        <Brand locale={locale} />
+        <div className="divide-y divide-white/[0.06] border-y border-white/[0.06]">
+          {groups.map((group) => (
+            <Disclosure key={group.title} summary={<span className="font-semibold text-white">{group.title}</span>}>
+              <GroupItems group={group} tall />
+            </Disclosure>
+          ))}
         </div>
+      </PhoneOnly>
 
-        {/* Column 2: Provincial Calculators */}
-        <div className="space-y-2.5">
-          <span className="font-bold text-white uppercase tracking-wider text-[11px] font-mono">
-            {locale === 'fr' ? 'Calculateurs' : 'Calculators'}
-          </span>
-          <ul className="space-y-1.5 text-slate-400">
-            <li>
-              <Link href={`/${locale}/calculator/ontario`} className="hover:text-emerald-400 transition-colors">
-                Ontario (ON428)
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/calculator/quebec`} className="hover:text-emerald-400 transition-colors">
-                Québec (TP-1)
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/calculator/british-columbia`} className="hover:text-emerald-400 transition-colors">
-                British Columbia (BC428)
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/calculator/alberta`} className="hover:text-emerald-400 transition-colors">
-                Alberta (AB428)
-              </Link>
-            </li>
-          </ul>
+      <DesktopOnly>
+        <div className="grid grid-cols-4 gap-8 text-xs">
+          <Brand locale={locale} />
+          {groups.map((group) => (
+            <div key={group.title} className="space-y-2.5">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-white">{group.title}</span>
+              <GroupItems group={group} tall={false} />
+            </div>
+          ))}
         </div>
+      </DesktopOnly>
 
-        {/* Column 3: Fast-Track Benchmarks */}
-        <div className="space-y-2.5">
-          <span className="font-bold text-white uppercase tracking-wider text-[11px] font-mono">
-            {locale === 'fr' ? 'Repères d’audit' : 'Audit Benchmarks'}
-          </span>
-          <ul className="space-y-1.5 text-slate-400">
-            <li>
-              <Link href={`/${locale}/salary/80000/ontario`} className="text-emerald-400 hover:underline flex items-center gap-1 font-medium">
-                <span>$80,000 Audit Case</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/salary/50000/ontario`} className="hover:text-emerald-400 transition-colors">
-                $50,000 Fast-Track
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/salary/100000/ontario`} className="hover:text-emerald-400 transition-colors">
-                $100,000 Fast-Track
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${locale}/salary/150000/ontario`} className="hover:text-emerald-400 transition-colors">
-                $150,000 Fast-Track
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Column 4: Architecture & Integrity */}
-        <div className="space-y-2.5">
-          <span className="font-bold text-white uppercase tracking-wider text-[11px] font-mono">
-            {locale === 'fr' ? 'Normes & Intégrité' : 'Standards & Privacy'}
-          </span>
-          <ul className="space-y-1.5 text-slate-400">
-            <li className="flex items-center gap-1 text-slate-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>100% Client-Side Pure</span>
-            </li>
-            <li className="flex items-center gap-1 text-slate-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Integer-Cents Math</span>
-            </li>
-            <li className="flex items-center gap-1 text-slate-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Zero Remote Tracking</span>
-            </li>
-            <li className="flex items-center gap-1 text-slate-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Schedule 1 Citations</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Legal Disclaimer & Copyright */}
-      <div className="pt-6 border-t border-slate-800/60 text-center text-xs text-slate-500 leading-relaxed max-w-4xl mx-auto space-y-2">
+      <div className="mx-auto max-w-4xl space-y-2 border-t border-slate-800/60 pt-6 text-center text-xs leading-relaxed text-slate-500">
         <p>{dict.disclaimer}</p>
-        <p className="text-[11px] text-slate-600 font-mono">
-          © 2026 Fiscal Insights. Canadian Tax Transparency Initiative.
-        </p>
+        <p className="font-mono text-slate-500">{dict.footer.copyright}</p>
       </div>
     </footer>
   );
 }
-
