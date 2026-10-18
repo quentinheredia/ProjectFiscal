@@ -2,6 +2,20 @@ export type Locale = 'en' | 'fr';
 
 export const translations = {
   en: {
+    footer: {
+      tagline: 'Audited Canadian tax engine and fiscal transparency platform built to CRA 2026 statutory specifications.',
+      engineBadge: '2026.1 CRA Engine Audited',
+      calculators: 'Calculators',
+      benchmarks: 'Audit Benchmarks',
+      standards: 'Standards & Privacy',
+      auditCase: '$80,000 Audit Case',
+      salaryBreakdown: '{amount} Breakdown',
+      clientSide: '100% Client-Side',
+      integerCents: 'Integer-Cents Math',
+      noTracking: 'Zero Remote Tracking',
+      citations: 'Schedule 1 Citations',
+      copyright: '© 2026 Fiscal Insights. Canadian Tax Transparency Initiative.',
+    },
     payFrequency: {
       label: {
         annual: 'Annual',
@@ -53,6 +67,7 @@ export const translations = {
       ctaPrimary: 'Launch Ontario Calculator',
       ctaSecondary: 'How It Works',
       ctaExploreProvinces: 'Explore Provinces',
+      ctaCalculateProvince: 'Calculate {province} Taxes',
       trustItem1: '46+ Audited CRA CI Test Cases',
       trustItem3: '2026 CPP2 & Indexation Live',
     },
@@ -199,6 +214,7 @@ export const translations = {
       title: 'Choose Your Province Calculator',
       subtitle: 'Jump into audited provincial calculators with tailored tax brackets, local credits, and statutory surtaxes.',
       viewAll: 'View all provincial schedules',
+      benchmarkTag: 'Benchmark',
       ontario: {
         name: 'Ontario (ON)',
         badge: 'Form ON428 & Health Premium',
@@ -325,6 +341,7 @@ export const translations = {
     },
     bottomCta: {
       badge: 'Zero Tracking · Instant Browser Execution',
+      exactCent: 'Exact to the cent',
       title: 'Ready to calculate your exact 2026 take-home pay?',
       subtitle: 'Experience Canada’s most accurate, transparent, and private income tax calculator. Free, audited, and open.',
       button: 'Launch Ontario Calculator Now',
@@ -435,6 +452,20 @@ export const translations = {
     disclaimer: 'Disclaimer: Fiscal Insights provides accurate estimates based on published CRA & provincial schedules. This tool is for informational and educational purposes and does not constitute professional tax or legal advice.',
   },
   fr: {
+    footer: {
+      tagline: 'Plateforme open source de transparence fiscale et de calcul d’impôt canadien conforme aux normes ARC 2026.',
+      engineBadge: 'Moteur ARC 2026.1 validé',
+      calculators: 'Calculateurs',
+      benchmarks: 'Repères d’audit',
+      standards: 'Normes et intégrité',
+      auditCase: 'Cas d’audit à 80 000 $',
+      salaryBreakdown: 'Répartition pour {amount}',
+      clientSide: '100 % côté client',
+      integerCents: 'Calcul en cents entiers',
+      noTracking: 'Aucun suivi à distance',
+      citations: 'Citations de l’annexe 1',
+      copyright: '© 2026 Fiscal Insights. Initiative canadienne de transparence fiscale.',
+    },
     payFrequency: {
       label: {
         annual: 'Annuel',
@@ -486,6 +517,7 @@ export const translations = {
       ctaPrimary: 'Lancer le calculateur Ontario',
       ctaSecondary: 'Comment ça fonctionne',
       ctaExploreProvinces: 'Explorer les provinces',
+      ctaCalculateProvince: 'Calculer les impôts ({province})',
       trustItem1: 'Plus de 46 vecteurs de tests audités en CI',
       trustItem3: 'Bonification RPC2 et indexation 2026 actives',
     },
@@ -632,6 +664,7 @@ export const translations = {
       title: 'Choisissez votre calculateur provincial',
       subtitle: 'Accédez directement aux calculateurs audités avec barèmes personnalisés, primes de santé et surtaxes locales.',
       viewAll: 'Voir tous les barèmes provinciaux',
+      benchmarkTag: 'Référence',
       ontario: {
         name: 'Ontario (ON)',
         badge: 'Formulaire ON428 & Contribution-santé',
@@ -758,6 +791,7 @@ export const translations = {
     },
     bottomCta: {
       badge: 'Zéro pistage · Calcul instantané dans le navigateur',
+      exactCent: 'Précision au centime',
       title: 'Prêt à calculer votre salaire net exact pour 2026 ?',
       subtitle: 'Découvrez le calculateur d’impôt canadien le plus précis, transparent et respectueux de votre vie privée. Gratuit et vérifié.',
       button: 'Lancer le calculateur Ontario maintenant',
