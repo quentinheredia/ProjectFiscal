@@ -2,7 +2,10 @@
 
 import React from 'react';
 import { Locale, getDictionary } from '@/lib/i18n';
-import { useProvince, ProvinceSlug } from '@/context/ProvinceContext';
+import { useProvince } from '@/context/ProvinceContext';
+import { PROVINCES, provinceName } from '@/lib/provinces';
+import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
+import HowItWorksPhone from '@/components/home/HowItWorksPhone';
 import {
   MapPin,
   FileCheck2,
@@ -18,15 +21,13 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
   const dict = getDictionary(locale);
   const { selectedProvince: globalProvince, setSelectedProvinceSlug } = useProvince();
 
-  const provinces = [
-    { code: 'ON', slug: 'ontario', name: 'Ontario', form: 'ON428' },
-    { code: 'QC', slug: 'quebec', name: 'Québec', form: 'TP-1' },
-    { code: 'BC', slug: 'british-columbia', name: 'British Columbia', form: 'BC428' },
-    { code: 'AB', slug: 'alberta', name: 'Alberta', form: 'AB428' },
-  ];
 
   return (
-    <section className="max-w-7xl mx-auto my-14 space-y-10" id="how-it-works">
+    <section className="max-w-7xl mx-auto my-14" id="how-it-works">
+      <PhoneOnly className="mx-auto max-w-2xl">
+        <HowItWorksPhone locale={locale} />
+      </PhoneOnly>
+      <DesktopOnly className="space-y-10">
       {/* Section Header with clean sans-serif typography */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
@@ -62,14 +63,14 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
 
             {/* Interactive Province Selector (Only visual artifact on this column) */}
             <div className="grid grid-cols-2 gap-2 pt-1">
-              {provinces.map((p) => {
+              {PROVINCES.map((p) => {
                 const isSelected = globalProvince.code === p.code;
                 return (
                   <button
                     key={p.code}
                     type="button"
-                    onClick={() => setSelectedProvinceSlug(p.slug as ProvinceSlug)}
-                    className={`px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all cursor-pointer border ${
+                    onClick={() => setSelectedProvinceSlug(p.slug)}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold text-left transition-colors cursor-pointer border ${
                       isSelected
                         ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
                         : 'bg-[#070b12] border-white/[0.06] text-slate-400 hover:text-white hover:border-slate-700'
@@ -79,7 +80,7 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
                       <span>{p.code}</span>
                       <span className="text-[10px] font-mono text-slate-500">{p.form}</span>
                     </div>
-                    <div className="text-[11px] text-slate-300 font-normal truncate mt-0.5">{p.name}</div>
+                    <div className="text-[11px] text-slate-300 font-normal truncate mt-0.5">{provinceName(p, locale)}</div>
                   </button>
                 );
               })}
@@ -209,6 +210,7 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
         </div>
 
       </div>
+      </DesktopOnly>
     </section>
   );
 }
