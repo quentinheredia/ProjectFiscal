@@ -2,7 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import { Locale, getDictionary } from '@/lib/i18n';
+import { getDictionary } from '@/lib/i18n';
+import { SITE_URL, localeParams, localizedAlternates, resolveLocale } from '@/lib/locale';
 import {
   CheckCircle2,
   Layers,
@@ -21,31 +22,24 @@ interface HomePageProps {
 }
 
 export function generateStaticParams() {
-  return [{ locale: 'en' }, { locale: 'fr' }];
+  return localeParams();
 }
 
 export async function generateMetadata({
   params,
 }: HomePageProps): Promise<Metadata> {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
   const dict = getDictionary(locale);
 
   return {
     title: dict.siteTitle,
     description: dict.siteDescription,
-    alternates: {
-      canonical: `https://fiscal-insights.ca/${locale}`,
-      languages: {
-        'en-CA': 'https://fiscal-insights.ca/en',
-        'fr-CA': 'https://fiscal-insights.ca/fr',
-        'x-default': 'https://fiscal-insights.ca/en',
-      },
-    },
+    alternates: localizedAlternates(locale),
     openGraph: {
       title: dict.siteTitle,
       description: dict.siteDescription,
-      url: `https://fiscal-insights.ca/${locale}`,
+      url: `${SITE_URL}/${locale}`,
       siteName: 'Fiscal Insights',
       locale: locale === 'fr' ? 'fr_CA' : 'en_CA',
       type: 'website',
@@ -55,7 +49,7 @@ export async function generateMetadata({
 
 export default async function HomePage({ params }: HomePageProps) {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
   const dict = getDictionary(locale);
 
   // Structured Data (JSON-LD) for WebApplication
