@@ -3,30 +3,32 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { federal2026, ontario2026, quebec2026, britishColumbia2026, alberta2026 } from '@fiscal-insights/tax-data';
+import { federal2026, getProvincialRules } from '@fiscal-insights/tax-data';
 import { useProvince } from '@/context/ProvinceContext';
 import type { Dictionary, Locale } from '@/lib/i18n';
 import { fillTemplate } from '@/lib/format';
-import { provinceName, type ProvinceSlug } from '@/lib/provinces';
+import { PROVINCES, provinceName, type ProvinceConfig } from '@/lib/provinces';
 import { toBracketRows } from '@/features/brackets/bracket-rows';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
 import { SegmentedControl } from '@/components/mobile/SegmentedControl';
 import { BracketLadder, BracketTable } from './BracketTable';
 
-const PROVINCIAL_RULES: Record<ProvinceSlug, typeof ontario2026> = {
-  ontario: ontario2026,
-  quebec: quebec2026,
-  'british-columbia': britishColumbia2026,
-  alberta: alberta2026,
-};
+const SCHEDULE_YEAR = 2026;
 
-// Each province keeps one accent so its schedule is recognisable across views.
-const PROVINCE_TONE: Record<ProvinceSlug, { dot: string; text: string; badge: string }> = {
-  ontario: { dot: 'bg-amber-400', text: 'text-amber-400', badge: 'border-amber-500/40 bg-amber-500/15 text-amber-300' },
-  quebec: { dot: 'bg-indigo-400', text: 'text-indigo-400', badge: 'border-indigo-500/40 bg-indigo-500/15 text-indigo-300' },
-  'british-columbia': { dot: 'bg-teal-400', text: 'text-teal-400', badge: 'border-teal-500/40 bg-teal-500/15 text-teal-300' },
-  alberta: { dot: 'bg-sky-400', text: 'text-sky-400', badge: 'border-sky-500/40 bg-sky-500/15 text-sky-300' },
-};
+// Accents assigned in list order, so each jurisdiction keeps one colour across views however many there are.
+const TONES = [
+  { dot: 'bg-amber-400', text: 'text-amber-400', badge: 'border-amber-500/40 bg-amber-500/15 text-amber-300' },
+  { dot: 'bg-indigo-400', text: 'text-indigo-400', badge: 'border-indigo-500/40 bg-indigo-500/15 text-indigo-300' },
+  { dot: 'bg-teal-400', text: 'text-teal-400', badge: 'border-teal-500/40 bg-teal-500/15 text-teal-300' },
+  { dot: 'bg-sky-400', text: 'text-sky-400', badge: 'border-sky-500/40 bg-sky-500/15 text-sky-300' },
+  { dot: 'bg-rose-400', text: 'text-rose-400', badge: 'border-rose-500/40 bg-rose-500/15 text-rose-300' },
+  { dot: 'bg-lime-400', text: 'text-lime-400', badge: 'border-lime-500/40 bg-lime-500/15 text-lime-300' },
+] as const;
+
+function toneOf(province: ProvinceConfig) {
+  const index = Math.max(0, PROVINCES.findIndex((p) => p.code === province.code));
+  return TONES[index % TONES.length]!;
+}
 
 type Schedule = 'federal' | 'provincial';
 
@@ -39,11 +41,11 @@ interface BracketsSectionProps {
 export default function BracketsSection({ locale, strings }: BracketsSectionProps) {
   const { selectedProvince: province } = useProvince();
   const [schedule, setSchedule] = useState<Schedule>('federal');
-  const tone = PROVINCE_TONE[province.slug];
+  const tone = toneOf(province);
   const name = provinceName(province, locale);
   const citation = locale === 'fr' ? province.citationFr : province.citationEn;
   const federalRows = toBracketRows(federal2026.brackets);
-  const provincialRows = toBracketRows(PROVINCIAL_RULES[province.slug].brackets);
+  const provincialRows = toBracketRows(getProvincialRules(province.code, SCHEDULE_YEAR).brackets);
   const provincialTitle = fillTemplate(strings.provincialTitle, { province: name, form: province.form });
 
   const calculateLink = (

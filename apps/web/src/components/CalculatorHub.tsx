@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import type { Locale } from '@/lib/i18n';
+import type { Dictionary, Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
-import { formatCurrency } from '@/lib/format';
+import { fillTemplate, formatCurrency } from '@/lib/format';
+import { PROVINCES, provinceName, type ProvinceConfig, type ProvinceSlug } from '@/lib/provinces';
 import { AUDIT_BENCHMARK_DOLLARS, salaryBenchmarks } from '@/features/tax/salary-benchmarks';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
 import ProvinceHubPhone from '@/components/home/ProvinceHubPhone';
@@ -18,51 +19,45 @@ interface CalculatorHubProps {
   locale: Locale;
 }
 
+type HubStrings = Dictionary['hub'];
+type HubCopyKey = 'ontario' | 'quebec' | 'bc' | 'alberta';
+
+// Jurisdictions with hand-written hub copy; any other one gets the generic template.
+const HUB_COPY: Partial<Record<ProvinceSlug, HubCopyKey>> = {
+  ontario: 'ontario',
+  quebec: 'quebec',
+  'british-columbia': 'bc',
+  alberta: 'alberta',
+};
+
+const BADGE_TONES = [
+  'bg-emerald-950/70 text-emerald-400 border-emerald-500/30',
+  'bg-blue-950/70 text-blue-400 border-blue-500/30',
+  'bg-amber-950/70 text-amber-400 border-amber-500/30',
+] as const;
+
+interface HubCard {
+  province: ProvinceConfig;
+  name: string;
+  badge: string;
+  desc: string;
+  cta: string;
+  badgeColor: string;
+}
+
+function hubCard(province: ProvinceConfig, index: number, hub: HubStrings, locale: Locale): HubCard {
+  const key = HUB_COPY[province.slug];
+  const name = provinceName(province, locale);
+  const values = { province: name, form: province.form };
+  const copy = key
+    ? hub[key]
+    : { name: `${name} (${province.code})`, badge: fillTemplate(hub.genericBadge, values), desc: fillTemplate(hub.genericDesc, values), cta: fillTemplate(hub.genericCta, values) };
+  return { province, ...copy, badgeColor: BADGE_TONES[index % BADGE_TONES.length]! };
+}
+
 export default function CalculatorHub({ locale }: CalculatorHubProps) {
   const dict = useDictionary();
-
-  const provinces = [
-    {
-      id: 'ontario',
-      code: 'ON',
-      name: dict.hub.ontario.name,
-      badge: dict.hub.ontario.badge,
-      desc: dict.hub.ontario.desc,
-      href: `/${locale}/calculator/ontario`,
-      cta: dict.hub.ontario.cta,
-      badgeColor: 'bg-emerald-950/70 text-emerald-400 border-emerald-500/30',
-    },
-    {
-      id: 'quebec',
-      code: 'QC',
-      name: dict.hub.quebec.name,
-      badge: dict.hub.quebec.badge,
-      desc: dict.hub.quebec.desc,
-      href: `/${locale}/calculator/quebec`,
-      cta: dict.hub.quebec.cta,
-      badgeColor: 'bg-blue-950/70 text-blue-400 border-blue-500/30',
-    },
-    {
-      id: 'british-columbia',
-      code: 'BC',
-      name: dict.hub.bc.name,
-      badge: dict.hub.bc.badge,
-      desc: dict.hub.bc.desc,
-      href: `/${locale}/calculator/british-columbia`,
-      cta: dict.hub.bc.cta,
-      badgeColor: 'bg-emerald-950/70 text-emerald-400 border-emerald-500/30',
-    },
-    {
-      id: 'alberta',
-      code: 'AB',
-      name: dict.hub.alberta.name,
-      badge: dict.hub.alberta.badge,
-      desc: dict.hub.alberta.desc,
-      href: `/${locale}/calculator/alberta`,
-      cta: dict.hub.alberta.cta,
-      badgeColor: 'bg-amber-950/70 text-amber-400 border-amber-500/30',
-    },
-  ];
+  const provinces = PROVINCES.map((province, index) => hubCard(province, index, dict.hub, locale));
 
   const benchmarks = salaryBenchmarks(locale);
 
@@ -86,7 +81,7 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 border border-white/[0.08] rounded-2xl overflow-hidden bg-[#0a0f1a]/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_10px_30px_-10px_rgba(0,0,0,0.5)]">
         {provinces.map((prov, idx) => (
           <div
-            key={prov.id}
+            key={prov.province.slug}
             className={`p-6 sm:p-8 space-y-5 transition-colors duration-300 flex flex-col justify-between hover:bg-white/[0.02] ${
               idx % 2 === 0 ? 'md:border-r border-white/[0.07]' : ''
             } ${idx >= 2 ? 'border-t border-white/[0.07]' : 'border-t md:border-t-0 border-white/[0.07] first:border-t-0'}`}
@@ -95,7 +90,7 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-[#070b12] border border-white/[0.08] flex items-center justify-center font-bold text-xs text-white">
-                    {prov.code}
+                    {prov.province.code}
                   </div>
                   <h3 className="text-xl font-bold text-white tracking-tight">{prov.name}</h3>
                 </div>
@@ -114,7 +109,7 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
                 <span>{locale === 'fr' ? 'Barèmes 2026 audités' : '2026 Audited Rules'}</span>
               </span>
               <Link
-                href={prov.href}
+                href={`/${locale}/calculator/${prov.province.slug}`}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.25)] transition-colors cursor-pointer"
               >
                 <span>{prov.cta}</span>
