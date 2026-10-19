@@ -31,16 +31,20 @@ test('the result updates as the income changes', async ({ page }) => {
   await expect(result).toContainText('$');
   const before = await result.innerText();
 
-  await page.getByLabel(en.calculator.employmentIncome).fill('100000');
+  // Desktop renders a number field, phones a numeric text field; only the visible one has a role.
+  const income = new RegExp(`^${en.calculator.employmentIncome}`);
+  await page.getByRole('spinbutton', { name: income }).or(page.getByRole('textbox', { name: income })).fill('100000');
   await expect(result).not.toHaveText(before);
   expect(errors).toEqual([]);
 });
 
-test('every year and province combination renders or is disabled', async ({ page }) => {
+// The desktop form uses a select and year buttons; e2e/mobile-calculator.spec.ts covers the phone form.
+test('every year and province combination renders or is disabled', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop form');
   const errors = trackPageErrors(page);
   await page.goto('/en/calculator/ontario');
   const yearGroup = page.getByRole('group', { name: en.calculator.filingYear });
-  const province = page.getByLabel(en.calculator.province);
+  const province = page.getByRole('combobox', { name: en.calculator.province });
   const result = page.getByRole('status');
 
   for (const year of ['2026', '2025']) {
