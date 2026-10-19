@@ -13,6 +13,9 @@ export interface NavItem {
   Icon: LucideIcon;
 }
 
+/** The one icon for the budget simulator, on the nav and on every button that leads to it. */
+export const SimulatorIcon = Play;
+
 /** Hash of the home page section the Brackets tab points at. */
 export const BRACKETS_ANCHOR = 'brackets';
 
@@ -21,7 +24,7 @@ export function navItems(locale: Locale, provinceSlug: ProvinceSlug, nav: Dictio
   return [
     { id: 'home', href: `/${locale}`, label: nav.home, shortLabel: nav.home, Icon: Home },
     { id: 'calculator', href: `/${locale}/calculator/${provinceSlug}`, label: nav.taxCalculator, shortLabel: nav.calculator, Icon: Calculator },
-    { id: 'simulator', href: `/${locale}/simulator`, label: nav.budgetSimulator, shortLabel: nav.simulatorShort, Icon: Play },
+    { id: 'simulator', href: `/${locale}/simulator`, label: nav.budgetSimulator, shortLabel: nav.simulatorShort, Icon: SimulatorIcon },
     { id: 'brackets', href: `/${locale}#${BRACKETS_ANCHOR}`, label: nav.bracketsAudit, shortLabel: nav.bracketsShort, Icon: Table2 },
     { id: 'audit', href: salaryPageHref(locale, AUDIT_BENCHMARK_DOLLARS), label: nav.auditBenchmark, shortLabel: nav.auditBenchmark, Icon: FileCheck2 },
   ];

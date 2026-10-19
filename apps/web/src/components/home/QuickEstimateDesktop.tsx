@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
-import { ArrowRight, ShieldCheck, FileCheck2, PieChart, CheckCircle2, Scale, Calculator, Sliders } from 'lucide-react';
+import { ArrowRight, ShieldCheck, FileCheck2, PieChart, CheckCircle2, Scale, Calculator } from 'lucide-react';
+import { SimulatorIcon } from '@/components/navigation/nav-items';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents, formatThousands } from '@/lib/format';
@@ -264,7 +265,7 @@ export default function QuickEstimateDesktop({ locale, model }: QuickEstimateDes
                   href={`/${locale}/simulator`}
                   className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0 cursor-pointer"
                 >
-                  <Sliders className="w-3.5 h-3.5" aria-hidden="true" />
+                  <SimulatorIcon className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>{dict.simulation.budgetCallout.cta}</span>
                   <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </Link>

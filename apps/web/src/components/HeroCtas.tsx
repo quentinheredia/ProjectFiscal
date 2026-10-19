@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useProvince } from '@/context/ProvinceContext';
 import { Calculator } from 'lucide-react';
+import { SimulatorIcon } from '@/components/navigation/nav-items';
 
 interface HeroCtasProps {
   locale: 'en' | 'fr';
@@ -34,6 +35,7 @@ export default function HeroCtas({ locale, exploreProvincesText }: HeroCtasProps
         href={`/${locale}/simulator`}
         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs text-blue-300 hover:text-white bg-blue-950/40 hover:bg-blue-900/50 border border-blue-500/30 transition-all cursor-pointer"
       >
+        <SimulatorIcon className="w-3.5 h-3.5" aria-hidden="true" />
         <span>{isFr ? 'Simulateur budgétaire' : 'Federal Budget Simulator'}</span>
       </Link>
 
