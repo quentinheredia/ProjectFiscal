@@ -10,7 +10,11 @@ import {
 } from '@fiscal-insights/tax-data';
 import { useProvince, PROVINCES_LIST } from '@/context/ProvinceContext';
 import { Locale, getDictionary } from '@/lib/i18n';
+import { fillTemplate, formatCurrency, formatPercent, formatThousands } from '@/lib/format';
 import { ExternalLink, Layers, TrendingUp } from 'lucide-react';
+import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
+import WaterfallPhone from '@/components/home/WaterfallPhone';
+import { ROW_COLORS, buildWaterfallRows, toWaterfallSlices, type TaxCurveStrings, type WaterfallRow } from '@/features/tax/waterfall';
 
 interface TaxCurveAnalyticsProps {
   locale: Locale;
@@ -29,55 +33,11 @@ const NEXT_STEP_CENTS = 10000;
 const MARKER_GAP_PERCENT = 14;
 const MARKER_ROW_REM = 1.25;
 
-type Strings = ReturnType<typeof getDictionary>['taxCurve'];
-
-type RowKind = 'gross' | 'payroll' | 'federal' | 'provincial' | 'net';
-
-interface WaterfallRow {
-  key: string;
-  kind: RowKind;
-  label: string;
-  amountCents: number;
-  sourceUrl?: string;
-}
-
 interface CurveSample {
   salary: number;
   taxRate: number; // income tax on the next dollar
   payrollRate: number; // CPP/QPP, EI and QPIP on the next dollar
   averageRate: number; // all deductions / salary
-}
-
-const ROW_COLORS: Record<RowKind, string> = {
-  gross: 'bg-slate-400/70',
-  payroll: 'bg-sky-400',
-  federal: 'bg-amber-400',
-  provincial: 'bg-orange-400',
-  net: 'bg-emerald-400',
-};
-
-function fill(template: string, values: Record<string, string>): string {
-  return template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
-}
-
-function formatCurrency(amount: number, locale: Locale, digits = 0): string {
-  return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(amount);
-}
-
-function formatPercent(val: number, locale: Locale, digits = 1): string {
-  const formatted = (val * 100).toFixed(digits).replace('.', locale === 'fr' ? ',' : '.');
-  return locale === 'fr' ? `${formatted} %` : `${formatted}%`;
-}
-
-function formatThousands(amount: number, locale: Locale): string {
-  const k = Math.round(amount / 100) / 10;
-  const text = String(k).replace('.', locale === 'fr' ? ',' : '.');
-  return locale === 'fr' ? `${text} k$` : `$${text}k`;
 }
 
 function payrollCents(result: TaxCalculationResult): number {
@@ -101,83 +61,6 @@ function nextDollar(salaryCents: number, base: TaxCalculationResult, fed: Federa
     payrollRate: Math.max(0, (payrollCents(next) - payrollCents(base)) / NEXT_STEP_CENTS),
     keptCents: next.takeHomePayCents - base.takeHomePayCents,
   };
-}
-
-function buildRows(
-  result: TaxCalculationResult,
-  fed: FederalRuleSet,
-  prov: ProvincialRuleSet,
-  strings: Strings,
-  provinceName: string
-): WaterfallRow[] {
-  const quebec = prov.quebec;
-  const plan = quebec ? quebec.qpp : fed.cpp;
-  const surtaxCents = result.provincial.surtaxCents ?? 0;
-  const healthPremiumCents = result.provincial.healthPremiumCents ?? 0;
-
-  const rows: WaterfallRow[] = [
-    { key: 'gross', kind: 'gross', label: strings.gross, amountCents: result.totalIncomeCents },
-    {
-      key: 'pension',
-      kind: 'payroll',
-      label: quebec ? strings.qpp : strings.cpp,
-      amountCents: result.cpp.totalCents,
-      sourceUrl: plan.baseEmployeeRate.source,
-    },
-    {
-      key: 'ei',
-      kind: 'payroll',
-      label: strings.ei,
-      amountCents: result.ei.employeeCents,
-      sourceUrl: quebec ? fed.ei.quebecRate.source : fed.ei.rate.source,
-    },
-  ];
-  if (quebec && result.qpip) {
-    rows.push({
-      key: 'qpip',
-      kind: 'payroll',
-      label: strings.qpip,
-      amountCents: result.qpip.totalCents,
-      sourceUrl: quebec.qpip.employeeRate.source,
-    });
-  }
-  rows.push(
-    {
-      key: 'federal',
-      kind: 'federal',
-      label: strings.federalTax,
-      amountCents: result.federal.netFederalTaxCents,
-      sourceUrl: fed.brackets[0]!.rate.source,
-    },
-    {
-      key: 'provincial',
-      kind: 'provincial',
-      label: fill(strings.provincialTax, { province: provinceName }),
-      // Surtax and Health Premium get their own rows; reductions and credits stay netted in here.
-      amountCents: result.provincial.netProvincialTaxCents - surtaxCents - healthPremiumCents,
-      sourceUrl: prov.brackets[0]!.rate.source,
-    }
-  );
-  if (prov.ontarioSurtax) {
-    rows.push({
-      key: 'surtax',
-      kind: 'provincial',
-      label: strings.surtax,
-      amountCents: surtaxCents,
-      sourceUrl: prov.ontarioSurtax.tier1ThresholdCents.source,
-    });
-  }
-  if (prov.ontarioHealthPremium) {
-    rows.push({
-      key: 'healthPremium',
-      kind: 'provincial',
-      label: strings.healthPremium,
-      amountCents: healthPremiumCents,
-      sourceUrl: prov.ontarioHealthPremium.tiers.source,
-    });
-  }
-  rows.push({ key: 'net', kind: 'net', label: strings.takeHome, amountCents: result.takeHomePayCents });
-  return rows;
 }
 
 export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
@@ -206,7 +89,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
   }, [salary, rules]);
 
   const rows = useMemo(
-    () => buildRows(current.result, rules.fed, rules.prov, strings, provinceName),
+    () => buildWaterfallRows(current.result, rules.fed, rules.prov, strings, provinceName),
     [current.result, rules, strings, provinceName]
   );
 
@@ -241,24 +124,24 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
     <section
       id="brackets-curve"
       aria-label={isRates ? strings.ratesTitle : strings.title}
-      className="max-w-7xl mx-auto bg-[#0c121e] rounded-2xl border border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.6)] p-6 sm:p-8 space-y-6 relative overflow-hidden"
+      className="max-w-2xl lg:max-w-7xl mx-auto bg-[#0c121e] rounded-2xl border border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_4px_24px_rgba(0,0,0,0.6)] p-4 md:p-6 lg:p-8 space-y-5 lg:space-y-6 relative overflow-hidden"
     >
       {/* Header with view toggle */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h3 className="text-2xl font-bold text-white tracking-tight">
+          <h3 className="text-2xl font-bold text-white tracking-tight text-balance">
             {isRates ? strings.ratesTitle : strings.title}
           </h3>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-            {fill(isRates ? strings.ratesDescription : strings.description, headerValues)}
+          <p className="text-sm text-slate-400 mt-1 max-w-2xl text-pretty">
+            {fillTemplate(isRates ? strings.ratesDescription : strings.description, headerValues)}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <div
             role="tablist"
             aria-label={strings.viewLabel}
-            className="inline-flex items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08] shadow-inner"
+            className="flex w-full lg:inline-flex lg:w-auto items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08] shadow-inner"
           >
             {(
               [
@@ -274,7 +157,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setActiveView(view)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`inline-flex flex-1 lg:flex-none justify-center min-h-11 lg:min-h-0 items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] lg:text-xs font-semibold transition-colors cursor-pointer ${
                     active
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-xs'
                       : 'text-slate-400 hover:text-slate-200 border border-transparent'
@@ -293,10 +176,10 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
       <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-8">
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <label htmlFor="tax-curve-salary" className="text-xs font-semibold text-slate-300">
+            <label htmlFor="tax-curve-salary" className="text-[13px] lg:text-xs font-semibold text-slate-300">
               {strings.salaryLabel}
             </label>
-            <div className="flex items-center gap-1 rounded-lg bg-[#070b12] border border-white/[0.08] px-2.5 py-1 focus-within:border-emerald-500/50">
+            <div className="flex min-h-11 lg:min-h-0 items-center gap-1 rounded-lg bg-[#070b12] border border-white/[0.08] px-3 lg:px-2.5 py-1 focus-within:border-emerald-500/50">
               <span className="text-xs text-slate-400" aria-hidden="true">$</span>
               <input
                 id="tax-curve-salary"
@@ -310,7 +193,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   if (digits) setSalary(Math.min(INPUT_MAX, Number(digits)));
                 }}
                 onBlur={() => commitSalary(Number(salaryText || 0))}
-                className="w-24 bg-transparent text-right text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
+                className="w-28 lg:w-24 bg-transparent text-right text-base lg:text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
               />
             </div>
           </div>
@@ -322,18 +205,18 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             step={SLIDER_STEP}
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, salary))}
             onChange={(e) => commitSalary(Number(e.target.value))}
-            className="w-full accent-emerald-400 cursor-pointer"
+            className="w-full h-8 accent-emerald-400 cursor-pointer"
           />
         </div>
 
         <div className="space-y-2">
-          <span id="tax-curve-province" className="block text-xs font-semibold text-slate-300">
+          <span id="tax-curve-province" className="block text-[13px] lg:text-xs font-semibold text-slate-300">
             {strings.provinceLabel}
           </span>
           <div
             role="radiogroup"
             aria-labelledby="tax-curve-province"
-            className="inline-flex items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
+            className="flex w-full md:inline-flex md:w-auto items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
           >
             {PROVINCES_LIST.map((p) => {
               const active = p.code === selectedProvince.code;
@@ -345,7 +228,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   aria-checked={active}
                   aria-label={locale === 'fr' ? p.nameFr : p.nameEn}
                   onClick={() => setSelectedProvinceSlug(p.slug)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
+                  className={`flex-1 md:flex-none min-h-11 lg:min-h-0 px-3 py-1.5 rounded-lg text-[13px] lg:text-xs font-mono font-semibold transition-colors cursor-pointer ${
                     active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
@@ -369,39 +252,46 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
           locale={locale}
         />
       ) : (
-        <Waterfall rows={rows} grossCents={grossCents} strings={strings} locale={locale} />
+        <>
+          <PhoneOnly>
+            <WaterfallPhone rows={rows} grossCents={grossCents} strings={strings} locale={locale} />
+          </PhoneOnly>
+          <DesktopOnly>
+            <Waterfall rows={rows} grossCents={grossCents} strings={strings} locale={locale} />
+          </DesktopOnly>
+        </>
       )}
 
       {/* Summary strip, shared by both views */}
       <div
         aria-live="polite"
-        className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-6 sm:-mx-8 -mb-6 sm:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
+        className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-4 md:-mx-6 lg:-mx-8 -mb-4 md:-mb-6 lg:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
       >
-        <div className="p-5 sm:p-6 space-y-1">
+        <div className="p-4 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.takeHome}</span>
           <span className="block text-xl font-bold text-emerald-400 tabular-nums">
             {formatCurrency(current.result.takeHomePayCents / 100, locale)}
           </span>
           <span className="block text-[11px] text-slate-400 tabular-nums">
-            {fill(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
+            {fillTemplate(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
           </span>
         </div>
-        <div className="p-5 sm:p-6 space-y-1">
+        <div className="p-4 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.averageRate}</span>
           <span className="block text-xl font-bold text-white tabular-nums">
             {formatPercent(current.averageRate, locale, 1)}
           </span>
           <span className="block text-[11px] text-slate-400">
-            {fill(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
+            {fillTemplate(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
           </span>
         </div>
-        <div className="p-5 sm:p-6 space-y-1">
+        <div className="p-4 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.marginalRate}</span>
           <span className="block text-xl font-bold text-white tabular-nums">
             {formatPercent(marginalRate, locale, 1)}
           </span>
           <span className="block text-[11px] text-slate-400">
-            {fill(strings.keepNext, { amount: formatCurrency(current.next.keptCents / 100, locale) })}
+            {fillTemplate(strings.keepNext, { amount: formatCurrency(current.next.keptCents / 100, locale) })}
           </span>
         </div>
       </div>
@@ -417,29 +307,19 @@ function Waterfall({
 }: {
   rows: WaterfallRow[];
   grossCents: number;
-  strings: Strings;
+  strings: TaxCurveStrings;
   locale: Locale;
 }) {
-  const pct = (cents: number) => (grossCents > 0 ? (cents / grossCents) * 100 : 0);
-  let remainingCents = grossCents;
-
   return (
     <ol className="space-y-2.5" aria-label={strings.title}>
-      {rows.map((row) => {
-        const isDeduction = row.kind !== 'gross' && row.kind !== 'net';
-        const before = remainingCents;
-        if (isDeduction) remainingCents -= row.amountCents;
-        const after = remainingCents;
-
+      {toWaterfallSlices(rows, grossCents).map(({ row, isDeduction, sharePercent, sliceLeftPercent, sliceWidthPercent, remainingPercent }) => {
         // Deduction rows show what is left in a faint fill and the slice removed in colour.
-        const sliceLeft = isDeduction ? pct(after) : 0;
-        const sliceWidth = isDeduction ? pct(before - after) : pct(row.amountCents);
         const muted = isDeduction && row.amountCents === 0;
 
         return (
           <li
             key={row.key}
-            className={`grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[12rem_minmax(0,1fr)_8rem] items-center gap-x-4 gap-y-1.5 ${
+            className={`grid grid-cols-[12rem_minmax(0,1fr)_8rem] items-center gap-x-4 gap-y-1.5 ${
               row.kind === 'net' ? 'pt-2.5 border-t border-white/[0.06]' : ''
             }`}
           >
@@ -455,7 +335,7 @@ function Waterfall({
                   href={row.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={fill(strings.sourceLink, { item: row.label })}
+                  aria-label={fillTemplate(strings.sourceLink, { item: row.label })}
                   className="text-slate-400 hover:text-emerald-300 shrink-0"
                 >
                   <ExternalLink className="w-3 h-3" aria-hidden="true" />
@@ -463,32 +343,29 @@ function Waterfall({
               )}
             </span>
 
-            <div
-              className="relative h-6 sm:h-7 rounded-md bg-white/[0.03] overflow-hidden col-span-2 sm:col-span-1 order-3 sm:order-none"
-              aria-hidden="true"
-            >
+            <div className="relative h-7 rounded-md bg-white/[0.03] overflow-hidden" aria-hidden="true">
               {isDeduction && (
                 <div
                   className="absolute inset-y-0 left-0 bg-emerald-400/[0.07] transition-[width] duration-300 motion-reduce:transition-none"
-                  style={{ width: `${pct(after)}%` }}
+                  style={{ width: `${remainingPercent}%` }}
                 />
               )}
               <div
                 className={`absolute inset-y-0 rounded-[3px] transition-[left,width] duration-300 motion-reduce:transition-none ${ROW_COLORS[row.kind]}`}
                 style={{
-                  left: `${sliceLeft}%`,
-                  width: row.amountCents > 0 ? `max(2px, ${sliceWidth}%)` : '0',
+                  left: `${sliceLeftPercent}%`,
+                  width: row.amountCents > 0 ? `max(2px, ${sliceWidthPercent}%)` : '0',
                 }}
               />
             </div>
 
             <span className={`text-right tabular-nums font-mono ${muted ? 'opacity-50' : ''}`}>
-              <span className={`block text-xs sm:text-sm ${row.kind === 'net' ? 'text-emerald-400 font-bold' : 'text-white'}`}>
+              <span className={`block text-sm ${row.kind === 'net' ? 'text-emerald-400 font-bold' : 'text-white'}`}>
                 {isDeduction ? '−' : ''}
                 {formatCurrency(row.amountCents / 100, locale)}
               </span>
               <span className="block text-[10px] text-slate-400">
-                {formatPercent(pct(row.amountCents) / 100, locale, 1)} {strings.ofGross}
+                {formatPercent(sharePercent / 100, locale, 1)} {strings.ofGross}
               </span>
             </span>
           </li>
@@ -526,7 +403,7 @@ function RateStepChart({
   fed: FederalRuleSet;
   prov: ProvincialRuleSet;
   provinceName: string;
-  strings: Strings;
+  strings: TaxCurveStrings;
   locale: Locale;
 }) {
   const [hover, setHover] = useState<number | null>(null);
@@ -600,7 +477,7 @@ function RateStepChart({
         <div
           ref={plotRef}
           role="img"
-          aria-label={fill(strings.chartLabel, { province: provinceName })}
+          aria-label={fillTemplate(strings.chartLabel, { province: provinceName })}
           className="relative h-64 sm:h-72 cursor-crosshair touch-none"
           onPointerMove={(e) => setHover(indexAt(e.clientX))}
           onPointerLeave={() => setHover(null)}
@@ -665,7 +542,7 @@ function RateStepChart({
                 top: `${-(markerRowCount - markerRows[i]!) * MARKER_ROW_REM}rem`,
               }}
             >
-              {fill(m.label, { amount: formatThousands(m.cents / 100, locale) })}
+              {fillTemplate(m.label, { amount: formatThousands(m.cents / 100, locale) })}
             </span>
           ))}
 
@@ -683,21 +560,21 @@ function RateStepChart({
                 style={{ left: `${Math.min(85, Math.max(15, (hovered.salary / CURVE_MAX) * 100))}%` }}
               >
                 <span className="block font-mono text-slate-400">
-                  {fill(strings.tooltipSalary, { amount: formatCurrency(hovered.salary, locale) })}
+                  {fillTemplate(strings.tooltipSalary, { amount: formatCurrency(hovered.salary, locale) })}
                 </span>
                 <span className="block text-sm font-semibold text-white">
-                  {fill(strings.tooltipMarginal, {
+                  {fillTemplate(strings.tooltipMarginal, {
                     rate: formatPercent(hovered.taxRate + hovered.payrollRate, locale, 1),
                   })}
                 </span>
                 <span className="block">
-                  {fill(strings.tooltipSplit, {
+                  {fillTemplate(strings.tooltipSplit, {
                     tax: formatPercent(hovered.taxRate, locale, 1),
                     payroll: formatPercent(hovered.payrollRate, locale, 1),
                   })}
                 </span>
                 <span className="block text-slate-400">
-                  {fill(strings.tooltipAverage, { rate: formatPercent(hovered.averageRate, locale, 1) })}
+                  {fillTemplate(strings.tooltipAverage, { rate: formatPercent(hovered.averageRate, locale, 1) })}
                 </span>
               </div>
             </>

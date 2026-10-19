@@ -64,6 +64,28 @@
     --ring: 152 76% 40%;
   }
 
+  /* The site is dark only: native controls, scrollbars and autofill follow. */
+  html {
+    color-scheme: dark;
+  }
+
+  /* Taps fire at once (no double-tap zoom wait) and show the app's own pressed states, not a grey flash. */
+  a,
+  button,
+  input,
+  select,
+  label,
+  summary,
+  [role='button'] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  select {
+    background-color: #070b12;
+    color: #f1f5f9;
+  }
+
   body {
     font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #f1f5f9;

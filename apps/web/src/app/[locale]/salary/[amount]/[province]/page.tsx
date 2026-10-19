@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Calculator from '@/components/Calculator';
 import CalculatorExtras from '@/components/CalculatorExtras';
-import { Locale } from '@/lib/i18n';
+import { SITE_URL, localizedAlternates, resolveLocale } from '@/lib/locale';
 import { calculateTax, formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { federal2026, ontario2026 } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
@@ -35,7 +35,7 @@ export async function generateMetadata({
   params,
 }: SalaryPageProps): Promise<Metadata> {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
   const amount = resolved.amount;
   const province = resolved.province;
 
@@ -54,25 +54,18 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: {
-      canonical: `https://fiscal-insights.ca/${locale}/salary/80000/ontario`,
-      languages: {
-        'en-CA': 'https://fiscal-insights.ca/en/salary/80000/ontario',
-        'fr-CA': 'https://fiscal-insights.ca/fr/salary/80000/ontario',
-        'x-default': 'https://fiscal-insights.ca/en/salary/80000/ontario',
-      },
-    },
+    alternates: localizedAlternates(locale, '/salary/80000/ontario'),
     openGraph: {
       title,
       description,
-      url: `https://fiscal-insights.ca/${locale}/salary/80000/ontario`,
+      url: `${SITE_URL}/${locale}/salary/80000/ontario`,
     },
   };
 }
 
 export default async function SalaryPage({ params }: SalaryPageProps) {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
   const amount = resolved.amount;
   const province = resolved.province;
 

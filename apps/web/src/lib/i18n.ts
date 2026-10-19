@@ -2,6 +2,36 @@ export type Locale = 'en' | 'fr';
 
 export const translations = {
   en: {
+    footer: {
+      tagline: 'Audited Canadian tax engine and fiscal transparency platform built to CRA 2026 statutory specifications.',
+      engineBadge: '2026.1 CRA Engine Audited',
+      calculators: 'Calculators',
+      benchmarks: 'Audit Benchmarks',
+      standards: 'Standards & Privacy',
+      auditCase: '$80,000 Audit Case',
+      salaryBreakdown: '{amount} Breakdown',
+      clientSide: '100% Client-Side',
+      integerCents: 'Integer-Cents Math',
+      noTracking: 'Zero Remote Tracking',
+      citations: 'Schedule 1 Citations',
+      copyright: '© 2026 Fiscal Insights. Canadian Tax Transparency Initiative.',
+    },
+    payFrequency: {
+      label: {
+        annual: 'Annual',
+        monthly: 'Monthly',
+        biweekly: 'Bi-weekly',
+        weekly: 'Weekly',
+        hourly: 'Hourly',
+      },
+      short: {
+        annual: 'Year',
+        monthly: 'Month',
+        biweekly: '2 wk',
+        weekly: 'Week',
+        hourly: 'Hour',
+      },
+    },
     siteTitle: 'Fiscal Insights — Canadian Tax Calculator & Spending Transparency',
     siteDescription: 'Accurate, transparent Canadian income tax calculator with step-by-step math breakdowns and federal spending transparency.',
     nav: {
@@ -37,6 +67,7 @@ export const translations = {
       ctaPrimary: 'Launch Ontario Calculator',
       ctaSecondary: 'How It Works',
       ctaExploreProvinces: 'Explore Provinces',
+      ctaCalculateProvince: 'Calculate {province} Taxes',
       trustItem1: '46+ Audited CRA CI Test Cases',
       trustItem3: '2026 CPP2 & Indexation Live',
     },
@@ -66,6 +97,9 @@ export const translations = {
         totalTax: 'Total Taxes & Deductions',
         effectiveRate: 'Average Tax Rate',
         marginalRate: 'Marginal Tax Rate',
+        totalTaxCaption: 'Federal + Provincial + CPP/EI',
+        effectiveRateCaption: 'Total tax as % of gross salary',
+        marginalRateCaption: 'Tax bracket on next $1 earned',
       },
       breakdown: {
         netPay: 'Take-Home Pay',
@@ -96,6 +130,7 @@ export const translations = {
         defense: 'National Defence & Security',
         fiscal: 'Fiscal Transfers & Programs',
         debt: 'Public Debt Charges',
+        shareOfBudget: '{percent}% of federal budget',
       },
       budgetCallout: {
         summary: 'Total Federal Spending: ~$586 Billion (45% locked-in statutory transfers, 40% discretionary operations).',
@@ -105,12 +140,28 @@ export const translations = {
         title: 'Why the Legacy Calculator Lost Trust',
         subtitle: 'On an $80,000 Ontario salary, the old calculator had two major canceling errors:',
         fedError: 'Federal tax was ~$1,080 too high (used obsolete pre-2025 15% brackets).',
+        fedErrorTitle: '1. Federal Error',
+        provErrorTitle: '2. Provincial Error',
         provError: 'Ontario tax was ~$900 too low (completely omitted Ontario Health Premium of $750.00).',
         conclusion: 'Fiscal Insights solves this with line-by-line statutory audits.',
       },
       ctaButton: 'Launch Full Calculator for this Province',
       ctaSecondary: 'Try Custom Scenarios',
       clientSideGuarantee: 'Calculations run 100% locally in your browser with zero network requests.',
+      phone: {
+        scenariosLabel: 'Preset scenarios',
+        salaryChipsLabel: 'Common salaries',
+        frequencyLabel: 'Pay frequency',
+        rrspSwitch: 'Deduct $8,000 to an RRSP or FHSA',
+        averageRate: 'Average rate',
+        marginalRate: 'Marginal rate',
+        ofGross: '{percent} of gross',
+        spendingTitle: 'Where your federal tax goes',
+        topPrograms: 'Your largest five federal programs',
+        seeAllPrograms: 'See all {count} programs',
+        tracesTitle: 'How each line is calculated',
+        comparisonTitle: 'Audit vs. legacy site',
+      },
     },
     onboarding: {
       badge: 'Interactive Walkthrough',
@@ -163,6 +214,7 @@ export const translations = {
       title: 'Choose Your Province Calculator',
       subtitle: 'Jump into audited provincial calculators with tailored tax brackets, local credits, and statutory surtaxes.',
       viewAll: 'View all provincial schedules',
+      benchmarkTag: 'Benchmark',
       ontario: {
         name: 'Ontario (ON)',
         badge: 'Form ON428 & Health Premium',
@@ -289,6 +341,7 @@ export const translations = {
     },
     bottomCta: {
       badge: 'Zero Tracking · Instant Browser Execution',
+      exactCent: 'Exact to the cent',
       title: 'Ready to calculate your exact 2026 take-home pay?',
       subtitle: 'Experience Canada’s most accurate, transparent, and private income tax calculator. Free, audited, and open.',
       button: 'Launch Ontario Calculator Now',
@@ -399,6 +452,36 @@ export const translations = {
     disclaimer: 'Disclaimer: Fiscal Insights provides accurate estimates based on published CRA & provincial schedules. This tool is for informational and educational purposes and does not constitute professional tax or legal advice.',
   },
   fr: {
+    footer: {
+      tagline: 'Plateforme open source de transparence fiscale et de calcul d’impôt canadien conforme aux normes ARC 2026.',
+      engineBadge: 'Moteur ARC 2026.1 validé',
+      calculators: 'Calculateurs',
+      benchmarks: 'Repères d’audit',
+      standards: 'Normes et intégrité',
+      auditCase: 'Cas d’audit à 80 000 $',
+      salaryBreakdown: 'Répartition pour {amount}',
+      clientSide: '100 % côté client',
+      integerCents: 'Calcul en cents entiers',
+      noTracking: 'Aucun suivi à distance',
+      citations: 'Citations de l’annexe 1',
+      copyright: '© 2026 Fiscal Insights. Initiative canadienne de transparence fiscale.',
+    },
+    payFrequency: {
+      label: {
+        annual: 'Annuel',
+        monthly: 'Mensuel',
+        biweekly: 'Aux deux semaines',
+        weekly: 'Hebdomadaire',
+        hourly: 'Horaire',
+      },
+      short: {
+        annual: 'Année',
+        monthly: 'Mois',
+        biweekly: '2 sem.',
+        weekly: 'Semaine',
+        hourly: 'Heure',
+      },
+    },
     siteTitle: 'Fiscal Insights — Calculateur d’impôt canadien et transparence budgétaire',
     siteDescription: 'Calculateur d’impôt sur le revenu canadien précis et transparent avec formules détaillées et répartition des dépenses publiques.',
     nav: {
@@ -434,6 +517,7 @@ export const translations = {
       ctaPrimary: 'Lancer le calculateur Ontario',
       ctaSecondary: 'Comment ça fonctionne',
       ctaExploreProvinces: 'Explorer les provinces',
+      ctaCalculateProvince: 'Calculer les impôts ({province})',
       trustItem1: 'Plus de 46 vecteurs de tests audités en CI',
       trustItem3: 'Bonification RPC2 et indexation 2026 actives',
     },
@@ -463,6 +547,9 @@ export const translations = {
         totalTax: 'Impôts et retenues totaux',
         effectiveRate: 'Taux effectif moyen',
         marginalRate: 'Taux marginal d’imposition',
+        totalTaxCaption: 'Fédéral + provincial + RPC/AE',
+        effectiveRateCaption: 'Impôt total en % du salaire brut',
+        marginalRateCaption: 'Taux sur le prochain dollar gagné',
       },
       breakdown: {
         netPay: 'Salaire net',
@@ -493,6 +580,7 @@ export const translations = {
         defense: 'Défense nationale et sécurité',
         fiscal: 'Transferts fiscaux et programmes',
         debt: 'Frais de la dette publique',
+        shareOfBudget: '{percent} % du budget fédéral',
       },
       budgetCallout: {
         summary: 'Dépenses fédérales totales : ~586 milliards $ (45 % de transferts légaux obligatoires, 40 % d’opérations discrétionnaires).',
@@ -502,12 +590,28 @@ export const translations = {
         title: 'Pourquoi l’ancien site perdait la confiance',
         subtitle: 'Pour un salaire de 80 000 $ en Ontario, l’ancien outil comportait deux erreurs majeures de compensation :',
         fedError: 'L’impôt fédéral était trop élevé d’environ 1 080 $ (barèmes obsolètes à 15 % d’avant 2025).',
+        fedErrorTitle: '1. Erreur fédérale',
+        provErrorTitle: '2. Erreur provinciale',
         provError: 'L’impôt ontarien était sous-évalué de 900 $ (omission totale de la Contribution-santé de 750,00 $).',
         conclusion: 'Fiscal Insights résout cela grâce à un audit rigoureux ligne par ligne.',
       },
       ctaButton: 'Lancer le calculateur complet pour cette province',
       ctaSecondary: 'Essayer un scénario personnalisé',
       clientSideGuarantee: 'Les calculs s’exécutent à 100 % localement dans votre navigateur, sans appel réseau.',
+      phone: {
+        scenariosLabel: 'Scénarios préconfigurés',
+        salaryChipsLabel: 'Salaires courants',
+        frequencyLabel: 'Fréquence de paie',
+        rrspSwitch: 'Déduire 8 000 $ dans un REER ou un CELIAPP',
+        averageRate: 'Taux moyen',
+        marginalRate: 'Taux marginal',
+        ofGross: '{percent} du brut',
+        spendingTitle: 'Où va votre impôt fédéral',
+        topPrograms: 'Vos cinq principaux programmes fédéraux',
+        seeAllPrograms: 'Voir les {count} programmes',
+        tracesTitle: 'Le calcul de chaque ligne',
+        comparisonTitle: 'Audit et ancien site',
+      },
     },
     onboarding: {
       badge: 'Tutoriel interactif',
@@ -560,6 +664,7 @@ export const translations = {
       title: 'Choisissez votre calculateur provincial',
       subtitle: 'Accédez directement aux calculateurs audités avec barèmes personnalisés, primes de santé et surtaxes locales.',
       viewAll: 'Voir tous les barèmes provinciaux',
+      benchmarkTag: 'Référence',
       ontario: {
         name: 'Ontario (ON)',
         badge: 'Formulaire ON428 & Contribution-santé',
@@ -686,6 +791,7 @@ export const translations = {
     },
     bottomCta: {
       badge: 'Zéro pistage · Calcul instantané dans le navigateur',
+      exactCent: 'Précision au centime',
       title: 'Prêt à calculer votre salaire net exact pour 2026 ?',
       subtitle: 'Découvrez le calculateur d’impôt canadien le plus précis, transparent et respectueux de votre vie privée. Gratuit et vérifié.',
       button: 'Lancer le calculateur Ontario maintenant',
@@ -796,6 +902,10 @@ export const translations = {
     disclaimer: 'Avertissement : Fiscal Insights fournit des estimations fiables fondées sur les lois fiscales en vigueur. Cet outil est destiné à des fins éducatives et ne constitue pas un avis fiscal ou juridique professionnel.',
   },
 } as const;
+
+// The French dictionary must have every key the English one has, so a missing translation fails typecheck.
+type DictionaryShape<T> = { readonly [K in keyof T]: T[K] extends string ? string : DictionaryShape<T[K]> };
+translations.fr satisfies DictionaryShape<typeof translations.en>;
 
 export function getDictionary(locale: Locale) {
   return translations[locale] || translations.en;

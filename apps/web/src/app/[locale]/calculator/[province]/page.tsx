@@ -4,11 +4,13 @@ import Link from 'next/link';
 import Calculator from '@/components/Calculator';
 import NewsletterForm from '@/components/NewsletterForm';
 import Footer from '@/components/Footer';
-import { Locale, getDictionary } from '@/lib/i18n';
+import { getDictionary } from '@/lib/i18n';
 import { getProvincialRules } from '@fiscal-insights/tax-data';
 import { notFound } from 'next/navigation';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { ArrowRight } from 'lucide-react';
+import { PROVINCES, findProvinceBySlug } from '@/lib/provinces';
+import { LOCALES, SITE_URL, localizedAlternates, resolveLocale } from '@/lib/locale';
 
 interface ProvincePageProps {
   params: Promise<{
@@ -17,99 +19,48 @@ interface ProvincePageProps {
   }>;
 }
 
-const SUPPORTED_PROVINCES: Record<
-  string,
-  {
-    code: 'ON' | 'QC' | 'BC' | 'AB';
-    nameEn: string;
-    nameFr: string;
-    formName: string;
-  }
-> = {
-  ontario: {
-    code: 'ON',
-    nameEn: 'Ontario',
-    nameFr: 'l’Ontario',
-    formName: 'Form ON428',
-  },
-  quebec: {
-    code: 'QC',
-    nameEn: 'Québec',
-    nameFr: 'le Québec',
-    formName: 'Form TP-1',
-  },
-  'british-columbia': {
-    code: 'BC',
-    nameEn: 'British Columbia',
-    nameFr: 'la Colombie-Britannique',
-    formName: 'Form BC428',
-  },
-  alberta: {
-    code: 'AB',
-    nameEn: 'Alberta',
-    nameFr: 'l’Alberta',
-    formName: 'Form AB428',
-  },
-};
-
 export function generateStaticParams() {
-  const locales = ['en', 'fr'];
-  const provinces = Object.keys(SUPPORTED_PROVINCES);
-  const params: { locale: string; province: string }[] = [];
-
-  for (const locale of locales) {
-    for (const province of provinces) {
-      params.push({ locale, province });
-    }
-  }
-  return params;
+  return LOCALES.flatMap((locale) => PROVINCES.map((p) => ({ locale, province: p.slug })));
 }
 
 export async function generateMetadata({
   params,
 }: ProvincePageProps): Promise<Metadata> {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
   const provinceSlug = resolved.province.toLowerCase();
-  const config = SUPPORTED_PROVINCES[provinceSlug];
+  const config = findProvinceBySlug(provinceSlug);
 
   if (!config) return {};
 
   const title =
     locale === 'fr'
-      ? `Calculateur d’impôt de ${config.nameFr} 2026 | Fiscal Insights`
+      ? `Calculateur d’impôt de ${config.nameFrWithArticle} 2026 | Fiscal Insights`
       : `${config.nameEn} Income Tax Calculator 2026 | Fiscal Insights`;
 
   const description =
     locale === 'fr'
-      ? `Calculez votre impôt de ${config.nameFr} 2026 avec les barèmes officiels, crédits locaux et cotisations.`
-      : `Accurate 2026 ${config.nameEn} income tax calculator with official ${config.formName} tax brackets and provincial tax rules.`;
+      ? `Calculez votre impôt de ${config.nameFrWithArticle} 2026 avec les barèmes officiels, crédits locaux et cotisations.`
+      : `Accurate 2026 ${config.nameEn} income tax calculator with official Form ${config.form} tax brackets and provincial tax rules.`;
 
   return {
     title,
     description,
-    alternates: {
-      canonical: `https://fiscal-insights.ca/${locale}/calculator/${provinceSlug}`,
-      languages: {
-        'en-CA': `https://fiscal-insights.ca/en/calculator/${provinceSlug}`,
-        'fr-CA': `https://fiscal-insights.ca/fr/calculator/${provinceSlug}`,
-        'x-default': `https://fiscal-insights.ca/en/calculator/${provinceSlug}`,
-      },
-    },
+    alternates: localizedAlternates(locale, `/calculator/${config.slug}`),
     openGraph: {
       title,
       description,
-      url: `https://fiscal-insights.ca/${locale}/calculator/${provinceSlug}`,
+      url: `${SITE_URL}/${locale}/calculator/${config.slug}`,
     },
   };
 }
 
 export default async function ProvincePage({ params }: ProvincePageProps) {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
   const dict = getDictionary(locale);
   const provinceSlug = resolved.province.toLowerCase();
-  const config = SUPPORTED_PROVINCES[provinceSlug];
+  const config = findProvinceBySlug(provinceSlug);
 
   if (!config) notFound();
 
@@ -136,12 +87,12 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
       <section className="text-center max-w-4xl mx-auto space-y-3 pt-18">
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
           {locale === 'fr'
-            ? `Calculateur d’impôt sur le revenu de ${config.nameFr} 2026`
+            ? `Calculateur d’impôt sur le revenu de ${config.nameFrWithArticle} 2026`
             : `${config.nameEn} Income Tax Calculator 2026`}
         </h1>
         <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
           {locale === 'fr'
-            ? `Explorez les tranches d’imposition de ${config.nameFr} pour 2026 et calculez votre paie nette exacte.`
+            ? `Explorez les tranches d’imposition de ${config.nameFrWithArticle} pour 2026 et calculez votre paie nette exacte.`
             : `Calculate your exact net pay in ${config.nameEn} with current 2026 provincial brackets and statutory payroll deductions.`}
         </p>
       </section>
@@ -157,17 +108,17 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">
               {locale === 'fr'
-                ? `Barèmes d’imposition de ${config.nameFr} (2026)`
+                ? `Barèmes d’imposition de ${config.nameFrWithArticle} (2026)`
                 : `${config.nameEn} 2026 Tax Brackets & Rates`}
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               {locale === 'fr'
-                ? `Taux officiels issus du formulaire provincial ${config.formName}.`
-                : `Official provincial rates based on ${config.formName} guidelines.`}
+                ? `Taux officiels issus du formulaire provincial ${config.form}.`
+                : `Official provincial rates based on Form ${config.form} guidelines.`}
             </p>
           </div>
           <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit">
-            {config.formName}
+            Form {config.form}
           </span>
         </div>
 
@@ -194,7 +145,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
                       {(b.rate.value * 100).toFixed(2)}%
                     </td>
                     <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
-                      {config.formName}
+                      Form {config.form}
                     </td>
                   </tr>
                 );

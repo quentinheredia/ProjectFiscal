@@ -2,7 +2,8 @@ import '../globals.css';
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import Navbar from '@/components/Navbar';
-import { Locale, getDictionary } from '@/lib/i18n';
+import { getDictionary } from '@/lib/i18n';
+import { SITE_URL, localeParams, localizedAlternates, resolveLocale } from '@/lib/locale';
 import BackgroundGuides from '@/components/BackgroundGuides';
 import { ProvinceProvider } from '@/context/ProvinceContext';
 
@@ -11,10 +12,15 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#090d16',
+  colorScheme: 'dark',
 };
 
+// Only /en and /fr exist. Any other first segment, such as a browser's automatic /favicon.ico request, is a 404.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
-  return [{ locale: 'en' }, { locale: 'fr' }];
+  return localeParams();
 }
 
 export async function generateMetadata({
@@ -23,24 +29,17 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
   const dict = getDictionary(locale);
 
   return {
     title: dict.siteTitle,
     description: dict.siteDescription,
-    alternates: {
-      canonical: `https://fiscal-insights.ca/${locale}`,
-      languages: {
-        'en-CA': 'https://fiscal-insights.ca/en',
-        'fr-CA': 'https://fiscal-insights.ca/fr',
-        'x-default': 'https://fiscal-insights.ca/en',
-      },
-    },
+    alternates: localizedAlternates(locale),
     openGraph: {
       title: dict.siteTitle,
       description: dict.siteDescription,
-      url: `https://fiscal-insights.ca/${locale}`,
+      url: `${SITE_URL}/${locale}`,
       siteName: 'Fiscal Insights',
       locale: locale === 'fr' ? 'fr_CA' : 'en_CA',
       type: 'website',
@@ -57,7 +56,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const resolved = await params;
-  const locale: Locale = resolved.locale === 'fr' ? 'fr' : 'en';
+  const locale = resolveLocale(resolved.locale);
 
   return (
     <html lang={locale === 'fr' ? 'fr-CA' : 'en-CA'} className="dark" suppressHydrationWarning>

@@ -1,31 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { DEFAULT_PROVINCE, PROVINCES, findProvinceBySlug, type ProvinceConfig, type ProvinceSlug } from '@/lib/provinces';
 
-export type ProvinceSlug = 'ontario' | 'quebec' | 'british-columbia' | 'alberta';
-
-export interface ProvinceConfig {
-  slug: ProvinceSlug;
-  code: 'ON' | 'QC' | 'BC' | 'AB';
-  nameEn: string;
-  nameFr: string;
-  form: string;
-}
-
-export const DEFAULT_PROVINCE: ProvinceConfig = {
-  slug: 'ontario',
-  code: 'ON',
-  nameEn: 'Ontario',
-  nameFr: 'Ontario',
-  form: 'ON428',
-};
-
-export const PROVINCES_LIST: ProvinceConfig[] = [
-  DEFAULT_PROVINCE,
-  { slug: 'quebec', code: 'QC', nameEn: 'Québec', nameFr: 'Québec', form: 'TP-1' },
-  { slug: 'british-columbia', code: 'BC', nameEn: 'British Columbia', nameFr: 'Colombie-Britannique', form: 'BC428' },
-  { slug: 'alberta', code: 'AB', nameEn: 'Alberta', nameFr: 'Alberta', form: 'AB428' },
-];
+export { DEFAULT_PROVINCE, PROVINCES as PROVINCES_LIST };
+export type { ProvinceConfig, ProvinceSlug };
 
 interface ProvinceContextType {
   selectedProvince: ProvinceConfig;
@@ -35,10 +14,11 @@ interface ProvinceContextType {
 const ProvinceContext = createContext<ProvinceContextType | null>(null);
 
 const STORAGE_KEY = 'fiscal_insights_selected_province';
+const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
 export function ProvinceProvider({
   children,
-  initialSlug = 'ontario',
+  initialSlug = DEFAULT_PROVINCE.slug,
 }: {
   children: React.ReactNode;
   initialSlug?: ProvinceSlug;
@@ -47,12 +27,10 @@ export function ProvinceProvider({
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY) as ProvinceSlug | null;
-      if (stored && PROVINCES_LIST.some((p) => p.slug === stored)) {
-        setSelectedSlug(stored);
-      }
+      const stored = findProvinceBySlug(localStorage.getItem(STORAGE_KEY) ?? '');
+      if (stored) setSelectedSlug(stored.slug);
     } catch {
-      // Ignore localStorage exceptions (private mode, SSR)
+      // Storage can be unavailable (private mode); the default province stands.
     }
   }, []);
 
@@ -60,14 +38,13 @@ export function ProvinceProvider({
     setSelectedSlug(slug);
     try {
       localStorage.setItem(STORAGE_KEY, slug);
-      document.cookie = `fiscal_province=${slug}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `fiscal_province=${slug}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
     } catch {
-      // Ignore storage errors
+      // Storage can be unavailable; the choice still applies for this visit.
     }
   };
 
-  const selectedProvince: ProvinceConfig =
-    PROVINCES_LIST.find((p) => p.slug === selectedSlug) ?? DEFAULT_PROVINCE;
+  const selectedProvince = findProvinceBySlug(selectedSlug) ?? DEFAULT_PROVINCE;
 
   return (
     <ProvinceContext.Provider value={{ selectedProvince, setSelectedProvinceSlug }}>
@@ -76,14 +53,11 @@ export function ProvinceProvider({
   );
 }
 
-export function useProvince() {
-  const context = useContext(ProvinceContext);
-  if (!context) {
-    // Return safe default if rendered outside provider
-    return {
-      selectedProvince: DEFAULT_PROVINCE,
-      setSelectedProvinceSlug: () => {},
-    };
-  }
-  return context;
+const FALLBACK_CONTEXT: ProvinceContextType = {
+  selectedProvince: DEFAULT_PROVINCE,
+  setSelectedProvinceSlug: () => {},
+};
+
+export function useProvince(): ProvinceContextType {
+  return useContext(ProvinceContext) ?? FALLBACK_CONTEXT;
 }

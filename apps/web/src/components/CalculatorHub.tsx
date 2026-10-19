@@ -3,6 +3,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { Locale, getDictionary } from '@/lib/i18n';
+import { formatCurrency } from '@/lib/format';
+import { AUDIT_BENCHMARK_DOLLARS, salaryBenchmarks } from '@/features/tax/salary-benchmarks';
+import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
+import ProvinceHubPhone from '@/components/home/ProvinceHubPhone';
 import {
   ArrowRight,
   ShieldCheck,
@@ -59,16 +63,14 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
     },
   ];
 
-  const salaryFastTracks = [
-    { amount: 50000, label: '$50,000', href: `/${locale}/salary/50000/ontario` },
-    { amount: 80000, label: '$80,000 (Benchmark)', href: `/${locale}/salary/80000/ontario` },
-    { amount: 100000, label: '$100,000', href: `/${locale}/salary/100000/ontario` },
-    { amount: 120000, label: '$120,000', href: `/${locale}/salary/120000/ontario` },
-    { amount: 150000, label: '$150,000', href: `/${locale}/salary/150000/ontario` },
-  ];
+  const benchmarks = salaryBenchmarks(locale);
 
   return (
-    <section className="max-w-7xl mx-auto my-14 space-y-8" id="provinces">
+    <section className="max-w-7xl mx-auto my-14" id="provinces">
+      <PhoneOnly className="mx-auto max-w-2xl">
+        <ProvinceHubPhone locale={locale} benchmarks={benchmarks} />
+      </PhoneOnly>
+      <DesktopOnly className="space-y-8">
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
@@ -84,7 +86,7 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
         {provinces.map((prov, idx) => (
           <div
             key={prov.id}
-            className={`p-6 sm:p-8 space-y-5 transition-all duration-300 flex flex-col justify-between hover:bg-white/[0.02] ${
+            className={`p-6 sm:p-8 space-y-5 transition-colors duration-300 flex flex-col justify-between hover:bg-white/[0.02] ${
               idx % 2 === 0 ? 'md:border-r border-white/[0.07]' : ''
             } ${idx >= 2 ? 'border-t border-white/[0.07]' : 'border-t md:border-t-0 border-white/[0.07] first:border-t-0'}`}
           >
@@ -112,7 +114,7 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
               </span>
               <Link
                 href={prov.href}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.25)] transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.25)] transition-colors cursor-pointer"
               >
                 <span>{prov.cta}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -132,18 +134,22 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {salaryFastTracks.map((item) => (
+          {benchmarks.map(({ amountDollars, href }) => (
             <Link
-              key={item.amount}
-              href={item.href}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#070b12] text-slate-300 hover:text-white border border-white/[0.08] hover:border-emerald-500/40 hover:bg-[#0e1624] transition-all cursor-pointer tabular-nums"
+              key={amountDollars}
+              href={href}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#070b12] text-slate-300 hover:text-white border border-white/[0.08] hover:border-emerald-500/40 hover:bg-[#0e1624] transition-colors cursor-pointer tabular-nums"
             >
-              <span>{item.label}</span>
-              <ArrowRight className="w-3 h-3 text-slate-500" />
+              <span>
+                {formatCurrency(amountDollars, locale)}
+                {amountDollars === AUDIT_BENCHMARK_DOLLARS && ` (${dict.hub.benchmarkTag})`}
+              </span>
+              <ArrowRight className="w-3 h-3 text-slate-500" aria-hidden="true" />
             </Link>
           ))}
         </div>
       </div>
+      </DesktopOnly>
     </section>
   );
 }
