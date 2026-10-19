@@ -70,10 +70,14 @@ test('every year and province combination renders or is disabled', async ({ page
   expect(errors).toEqual([]);
 });
 
-test('the Ontario province page renders its bracket table', async ({ page }) => {
+test('the Ontario province page renders its bracket schedule', async ({ page, isMobile }) => {
   await page.goto('/en/calculator/ontario');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ontario Income Tax Calculator 2026');
-  await expect(page.getByRole('table').filter({ hasText: 'ON428' })).toBeVisible();
+  // A table on desktop; a ladder with the citation under it on phones and tablets.
+  const schedule = isMobile
+    ? page.getByText('Form ON428, Part A').filter({ visible: true })
+    : page.getByRole('table').filter({ hasText: 'ON428' });
+  await expect(schedule).toBeVisible();
   await expect(page.getByRole('status')).toContainText('$');
 });
 
