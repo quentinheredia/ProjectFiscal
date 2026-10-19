@@ -34,7 +34,7 @@ export default function HeroCtas({ locale, exploreProvincesText }: HeroCtasProps
         href={`/${locale}/simulator`}
         className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs text-blue-300 hover:text-white bg-blue-950/40 hover:bg-blue-900/50 border border-blue-500/30 transition-all cursor-pointer"
       >
-        <span>{isFr ? '🏛️ Simulateur budgétaire' : '🏛️ Federal Budget Simulator'}</span>
+        <span>{isFr ? 'Simulateur budgétaire' : 'Federal Budget Simulator'}</span>
       </Link>
 
       {/* Elevated Glass Explore Provinces CTA */}
