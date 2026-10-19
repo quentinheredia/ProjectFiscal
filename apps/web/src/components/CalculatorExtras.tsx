@@ -81,7 +81,7 @@ export default function CalculatorExtras({ locale }: { locale: Locale }) {
             {dict.newsletter.description}
           </p>
         </div>
-        <NewsletterForm locale={locale} />
+        <NewsletterForm />
       </section>
 
       {/* LEGAL & STATUTORY DISCLAIMER */}

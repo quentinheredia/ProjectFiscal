@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { useProvince } from '@/context/ProvinceContext';
 import { PROVINCES, provinceName } from '@/lib/provinces';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
@@ -18,7 +19,7 @@ interface InteractiveOnboardingProps {
 }
 
 export default function InteractiveOnboarding({ locale }: InteractiveOnboardingProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const { selectedProvince: globalProvince, setSelectedProvinceSlug } = useProvince();
 
 

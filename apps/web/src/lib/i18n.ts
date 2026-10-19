@@ -959,6 +959,9 @@ export const translations = {
 type DictionaryShape<T> = { readonly [K in keyof T]: T[K] extends string ? string : DictionaryShape<T[K]> };
 translations.fr satisfies DictionaryShape<typeof translations.en>;
 
+/** The strings of one locale. */
+export type Dictionary = DictionaryShape<typeof translations.en>;
+
 export function getDictionary(locale: Locale) {
   return translations[locale] || translations.en;
 }

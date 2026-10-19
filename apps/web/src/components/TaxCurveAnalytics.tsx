@@ -9,7 +9,8 @@ import {
   type ProvincialRuleSet,
 } from '@fiscal-insights/tax-data';
 import { useProvince, PROVINCES_LIST } from '@/context/ProvinceContext';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCurrency, formatPercent, formatThousands } from '@/lib/format';
 import { ExternalLink, Layers, TrendingUp } from 'lucide-react';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
@@ -68,7 +69,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
   const [activeView, setActiveView] = useState<'waterfall' | 'rates'>('waterfall');
   const [salary, setSalary] = useState(DEFAULT_SALARY);
   const [salaryText, setSalaryText] = useState(String(DEFAULT_SALARY));
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const strings = dict.taxCurve;
   const provinceName = locale === 'fr' ? selectedProvince.nameFr : selectedProvince.nameEn;
   const isRates = activeView === 'rates';

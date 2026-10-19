@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import {
   RotateCcw,
   Sliders,
@@ -174,7 +175,7 @@ const BASELINE_TOTAL = BUDGET_ENVELOPES.reduce((acc, curr) => acc + curr.baselin
 const CANADIAN_INCOME_TAX_FILERS = 20_500_000; // ~20.5M individual taxpayers in Canada
 
 export default function FederalBudgetSimulator({ locale }: FederalBudgetSimulatorProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
 
   // Initialize envelope allocations with their baseline values
   const [allocations, setAllocations] = useState<Record<string, number>>(() => {

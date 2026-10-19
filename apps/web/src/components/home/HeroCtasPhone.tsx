@@ -4,13 +4,14 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Calculator } from 'lucide-react';
 import { useProvince } from '@/context/ProvinceContext';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate } from '@/lib/format';
 import { provinceName } from '@/lib/provinces';
 
 /** One full-width primary action for the selected province, with the simulator as a quieter link. */
 export default function HeroCtasPhone({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const { selectedProvince } = useProvince();
 
   return (

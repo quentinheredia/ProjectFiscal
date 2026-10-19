@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatCentsToDollars, type ExplanationTraceItem } from '@fiscal-insights/tax-engine';
 import { ChevronDown, ChevronUp, ExternalLink, Layers, PieChart, Sliders, ArrowRight } from 'lucide-react';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatThousands } from '@/lib/format';
 import { PROVINCES } from '@/lib/provinces';
 import { ALL_PAY_FREQUENCIES } from '@/features/tax/pay-frequency';
@@ -25,7 +26,7 @@ interface CalculatorDesktopProps {
 const percentOf = (ratio: number) => (ratio * 100).toFixed(1);
 
 export default function CalculatorDesktop({ locale, model }: CalculatorDesktopProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { result, shares } = model;
   const scaled = (cents: number) => formatCentsToDollars(model.perPeriod(cents));
@@ -293,7 +294,7 @@ export default function CalculatorDesktop({ locale, model }: CalculatorDesktopPr
 
 // Every result line with its formula and source; collapsed until clicked.
 function TraceList({ traces, locale }: { traces: ExplanationTraceItem[]; locale: Locale }) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const [expandedTraceId, setExpandedTraceId] = useState<string | null>(null);
 
   return (
@@ -361,7 +362,7 @@ function TraceList({ traces, locale }: { traces: ExplanationTraceItem[]; locale:
 
 // The user's federal tax split across spending categories.
 function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: number; locale: Locale }) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
 
   return (
     <section className="space-y-6 pt-4">

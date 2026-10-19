@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { ArrowRight, ShieldCheck, FileCheck2, PieChart, CheckCircle2, Scale, Calculator, Sliders } from 'lucide-react';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { formatCents, formatThousands } from '@/lib/format';
 import { allocateFederalTax, spendingBarWidth } from '@/features/tax/spending';
 import {
@@ -25,7 +26,7 @@ interface QuickEstimateDesktopProps {
 const percentText = (ratio: number) => `${(ratio * 100).toFixed(1)}%`;
 
 export default function QuickEstimateDesktop({ locale, model }: QuickEstimateDesktopProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const [activeTab, setActiveTab] = useState<InspectorTab>('spending');
   const { result, shares, perPeriod, province } = model;
   const scaled = (cents: number) => formatCentsToDollars(perPeriod(cents));

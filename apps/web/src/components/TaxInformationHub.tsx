@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { useProvince, PROVINCES_LIST, ProvinceSlug, DEFAULT_PROVINCE } from '@/context/ProvinceContext';
 import {
   federal2026,
@@ -81,7 +82,7 @@ const PROVINCIAL_DATA: Record<
 };
 
 export default function TaxInformationHub({ locale }: TaxInformationHubProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const { selectedProvince } = useProvince();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 

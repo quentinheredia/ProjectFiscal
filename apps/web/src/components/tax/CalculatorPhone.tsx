@@ -3,7 +3,8 @@
 import React, { useRef } from 'react';
 import { ExternalLink } from 'lucide-react';
 import type { ExplanationTraceItem } from '@fiscal-insights/tax-engine';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents, formatPercent, formatThousands } from '@/lib/format';
 import { PROVINCES, provinceName } from '@/lib/provinces';
 import { ALL_PAY_FREQUENCIES } from '@/features/tax/pay-frequency';
@@ -41,7 +42,7 @@ const COLORS = {
 const CARD = 'rounded-2xl border border-white/[0.08] bg-[#0c121e]';
 
 function TraceListPhone({ traces, locale }: { traces: ExplanationTraceItem[]; locale: Locale }) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   return (
     <div className="divide-y divide-white/[0.06]">
       {traces.map((trace) => (
@@ -79,7 +80,7 @@ function TraceListPhone({ traces, locale }: { traces: ExplanationTraceItem[]; lo
 
 /** The province calculator on phones: inputs, then the answer with a sticky repeat, then the detail. */
 export default function CalculatorPhone({ locale, model }: CalculatorPhoneProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const phone = dict.calculator.phone;
   const resultRef = useRef<HTMLDivElement>(null);
   const { result, shares } = model;

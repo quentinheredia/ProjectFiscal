@@ -1,9 +1,9 @@
 import type { TaxCalculationResult } from '@fiscal-insights/tax-engine';
 import type { FederalRuleSet, ProvincialRuleSet } from '@fiscal-insights/tax-data';
-import type { getDictionary } from '@/lib/i18n';
+import type { Dictionary } from '@/lib/i18n';
 import { fillTemplate } from '@/lib/format';
 
-export type TaxCurveStrings = ReturnType<typeof getDictionary>['taxCurve'];
+export type TaxCurveStrings = Dictionary['taxCurve'];
 
 export type RowKind = 'gross' | 'payroll' | 'federal' | 'provincial' | 'net';
 

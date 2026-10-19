@@ -247,7 +247,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
             {dict.newsletter.description}
           </p>
         </div>
-        <NewsletterForm locale={locale} />
+        <NewsletterForm />
       </section>
 
       {/* 7. UNIFIED SITE FOOTER */}
