@@ -50,5 +50,5 @@ The tax information hub (brackets, ceilings, audit, FAQ) is phase 4.
 
 ## Found along the way
 - `/favicon.ico` (requested by every browser) matched `[locale]` and returned a 500. The locale layout now sets `dynamicParams = false`, so unknown first segments are 404s.
-- Both languages' dictionaries ship to every client page. Splitting them per locale is the next JS saving; it is out of scope for this refactor.
+- Both languages' dictionaries shipped to every client page; phase 2 moves them server-side.
 - Salary benchmark links other than $80,000 (`/salary/50000/ontario` and three more) return 404 because only the $80,000 page is generated. Phase 2 generalizes the salary page.

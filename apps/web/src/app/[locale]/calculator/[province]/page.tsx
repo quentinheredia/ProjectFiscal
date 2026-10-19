@@ -77,20 +77,20 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-16">
+    <div className="w-full max-w-7xl mx-auto lg:px-8 lg:py-8 space-y-12 lg:space-y-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       {/* 1. COMPACT PAGE HEADER */}
-      <section className="text-center max-w-4xl mx-auto space-y-3 pt-18">
-        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+      <section className="text-center max-w-4xl mx-auto space-y-3 lg:pt-18">
+        <h1 className="text-[1.875rem] leading-tight md:text-4xl lg:text-5xl font-black text-white tracking-tight text-balance">
           {locale === 'fr'
             ? `Calculateur d’impôt sur le revenu de ${config.nameFrWithArticle} 2026`
             : `${config.nameEn} Income Tax Calculator 2026`}
         </h1>
-        <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
+        <p className="text-[15px] lg:text-base text-slate-400 max-w-2xl mx-auto text-pretty">
           {locale === 'fr'
             ? `Explorez les tranches d’imposition de ${config.nameFrWithArticle} pour 2026 et calculez votre paie nette exacte.`
             : `Calculate your exact net pay in ${config.nameEn} with current 2026 provincial brackets and statutory payroll deductions.`}
@@ -103,7 +103,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
       </section>
 
       {/* 4. PROVINCIAL 2026 TAX BRACKETS & RATES (Open Canvas De-Boxed) */}
-      <section className="space-y-4 pt-4 border-t border-white/[0.08]">
+      <section className="mx-auto max-w-2xl lg:max-w-none space-y-4 pt-4 border-t border-white/[0.08]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">
@@ -166,7 +166,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
       </section>
 
       {/* 5. THE REBUILD DIFFERENCE: ACCURACY VERIFIED (Audit Verification Table) */}
-      <section className="space-y-4 pt-4 border-t border-white/[0.08]">
+      <section className="mx-auto max-w-2xl lg:max-w-none space-y-4 pt-4 border-t border-white/[0.08]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-3">
           <div>
             <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
@@ -235,7 +235,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
       </section>
 
       {/* 6. NEWSLETTER CAPTURE CARD */}
-      <section className="bg-linear-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-6 sm:p-8 space-y-4 border border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+      <section className="mx-auto max-w-2xl lg:max-w-none bg-linear-to-b from-[#111625] to-[#090d16] text-white rounded-2xl p-5 md:p-6 lg:p-8 space-y-4 border border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
         <div className="max-w-2xl space-y-2">
           <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
             {dict.newsletter.badge}
@@ -247,7 +247,7 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
             {dict.newsletter.description}
           </p>
         </div>
-        <NewsletterForm locale={locale} />
+        <NewsletterForm />
       </section>
 
       {/* 7. UNIFIED SITE FOOTER */}

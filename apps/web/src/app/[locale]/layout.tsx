@@ -6,6 +6,7 @@ import { getDictionary } from '@/lib/i18n';
 import { SITE_URL, localeParams, localizedAlternates, resolveLocale } from '@/lib/locale';
 import BackgroundGuides from '@/components/BackgroundGuides';
 import { ProvinceProvider } from '@/context/ProvinceContext';
+import { DictionaryProvider } from '@/lib/dictionary-context';
 
 // viewport-fit=cover lets the mobile tab bar pad itself clear of the home indicator.
 export const viewport: Viewport = {
@@ -64,13 +65,15 @@ export default async function LocaleLayout({
         className="min-h-screen flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0 bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300"
         suppressHydrationWarning
       >
-        <ProvinceProvider>
-          <BackgroundGuides />
-          <Navbar locale={locale} />
-          <main className="relative z-10 grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-            {children}
-          </main>
-        </ProvinceProvider>
+        <DictionaryProvider dictionary={getDictionary(locale)}>
+          <ProvinceProvider>
+            <BackgroundGuides />
+            <Navbar locale={locale} />
+            <main className="relative z-10 grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+              {children}
+            </main>
+          </ProvinceProvider>
+        </DictionaryProvider>
       </body>
     </html>
   );

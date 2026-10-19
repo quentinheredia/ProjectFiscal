@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents } from '@/lib/format';
 import { allocateFederalTaxByShare, spendingBarWidth, type SpendingAllocation } from '@/features/tax/spending';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
@@ -35,7 +36,7 @@ function SpendingRow({ allocation, locale }: { allocation: SpendingAllocation; l
 
 /** The visitor's federal tax by program: the largest five inline, every program in a sheet. */
 export function SpendingListPhone({ federalTaxCents, locale }: SpendingListPhoneProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const [sheetOpen, setSheetOpen] = useState(false);
   const allocations = allocateFederalTaxByShare(federalTaxCents);
 

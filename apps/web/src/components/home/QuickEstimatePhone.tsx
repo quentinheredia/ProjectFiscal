@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Calculator, CheckCircle2, ShieldCheck } from 'lucide-react';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents, formatPercent, formatThousands } from '@/lib/format';
 import {
   QUICK_FREQUENCIES,
@@ -47,7 +48,7 @@ function RrspSwitch({ checked, onChange, label }: { checked: boolean; onChange: 
 
 /** The home page's quick estimate on phones: inputs first, the answer straight under them, detail on demand. */
 export default function QuickEstimatePhone({ locale, model }: QuickEstimatePhoneProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const phone = dict.simulation.phone;
   const { result, shares, perPeriod, province } = model;
   const money = (annualCents: number) => formatCents(perPeriod(annualCents), locale, 2);

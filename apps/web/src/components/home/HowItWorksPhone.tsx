@@ -3,7 +3,8 @@
 import React from 'react';
 import { CheckCircle2, FileCheck2, Lock, MapPin, type LucideIcon } from 'lucide-react';
 import { useProvince } from '@/context/ProvinceContext';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { PROVINCES, provinceName } from '@/lib/provinces';
 import { SectionHeading } from '@/components/mobile/SectionHeading';
 
@@ -46,7 +47,7 @@ function StepCard({ icon: Icon, step, children }: { icon: LucideIcon; step: Step
 
 /** "How it works" as a sideways rail of three cards, the next one peeking in from the edge. */
 export default function HowItWorksPhone({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
   const { selectedProvince, setSelectedProvinceSlug } = useProvince();
 
   return (

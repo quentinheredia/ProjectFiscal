@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { formatCurrency } from '@/lib/format';
 import { PROVINCES, provinceName } from '@/lib/provinces';
 import { ChipRail } from '@/components/mobile/ChipRail';
@@ -14,7 +17,7 @@ export interface SalaryBenchmark {
 
 /** Province calculators as four tappable tiles, then salary benchmarks in a sideways rail. */
 export default function ProvinceHubPhone({ locale, benchmarks }: { locale: Locale; benchmarks: readonly SalaryBenchmark[] }) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
 
   return (
     <div className="space-y-5">

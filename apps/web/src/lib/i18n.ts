@@ -2,6 +2,17 @@ export type Locale = 'en' | 'fr';
 
 export const translations = {
   en: {
+    salaryPage: {
+      title: '{amount} After Tax in Ontario (2026)',
+      metaTitle: '{amount} After Tax in Ontario (2026) | Fiscal Insights',
+      metaDescription: 'Breakdown of a {amount} salary in Ontario for 2026: take-home pay, federal and provincial tax, CPP, CPP2 and EI.',
+      summary: 'If you make an annual employment salary of {amount} in Ontario in 2026, your estimated net take-home pay is {net} per year ({monthly}/month or {biweekly} bi-weekly).',
+      takeHome: 'Take-Home Pay',
+      totalIncomeTax: 'Total Income Tax',
+      averageRate: 'Average Tax Rate',
+      marginalRate: 'Marginal Rate',
+      adjustHeading: 'Adjust this calculation or add RRSP/FHSA deductions',
+    },
     footer: {
       tagline: 'Audited Canadian tax engine and fiscal transparency platform built to CRA 2026 statutory specifications.',
       engineBadge: '2026.1 CRA Engine Audited',
@@ -364,6 +375,13 @@ export const translations = {
       },
       advancedToggleShow: '+ More income and deductions',
       advancedToggleHide: '- Fewer options',
+      currencySuffix: '($ CAD)',
+      fhsaLimit: '(Max $8,000/yr)',
+      phone: {
+        moreIncome: 'More income and deductions',
+        backToResult: 'Back to your take-home pay',
+        tracesLead: 'Tap a line to see its formula and official source.',
+      },
       yearUnavailable: 'Not available for this province yet',
       provinceUnavailable: 'not yet available for {year}',
     },
@@ -383,12 +401,20 @@ export const translations = {
       },
       tracesTitle: 'Calculation Trace & Math Formulas',
       tracesSubtitle: 'Click any line to see the exact formula, line reference, and official CRA schedule.',
+      averageRateCaption: 'Total tax / Gross salary',
+      marginalRateCaption: 'Tax on next $1 earned',
+      ofGross: '{percent}% of gross',
+      totalTaxShare: '{percent}% total tax',
+      grossLabel: 'Gross: {amount}',
+      formulaLabel: 'Formula: {formula}',
+      sourceLink: 'Official CRA / Provincial Schedule Source',
     },
     spending: {
       badge: 'Public Accounts of Canada',
       title: 'Where Your Federal Taxes Go',
       subtitle: 'Based on the latest Public Accounts of Canada, here is how your estimated federal contribution is allocated across federal public programs.',
       sourceNote: 'Source: Public Accounts of Canada, Receiver General for Canada.',
+      yourContribution: 'Your Federal Contribution',
     },
     newsletter: {
       badge: 'Stay Ahead of Tax Changes',
@@ -452,6 +478,17 @@ export const translations = {
     disclaimer: 'Disclaimer: Fiscal Insights provides accurate estimates based on published CRA & provincial schedules. This tool is for informational and educational purposes and does not constitute professional tax or legal advice.',
   },
   fr: {
+    salaryPage: {
+      title: '{amount} après impôt en Ontario (2026)',
+      metaTitle: '{amount} après impôt en Ontario (2026) | Fiscal Insights',
+      metaDescription: 'Répartition d’un salaire de {amount} en Ontario en 2026 : salaire net, impôt fédéral et provincial, RPC, RPC2 et AE.',
+      summary: 'Sur un salaire brut de {amount} en Ontario en 2026, votre salaire net annuel estimé est de {net}, soit environ {monthly} par mois ou {biweekly} toutes les deux semaines.',
+      takeHome: 'Salaire net',
+      totalIncomeTax: 'Impôt sur le revenu total',
+      averageRate: 'Taux moyen',
+      marginalRate: 'Taux marginal',
+      adjustHeading: 'Ajustez ce calcul ou ajoutez des déductions REER/CELIAPP',
+    },
     footer: {
       tagline: 'Plateforme open source de transparence fiscale et de calcul d’impôt canadien conforme aux normes ARC 2026.',
       engineBadge: 'Moteur ARC 2026.1 validé',
@@ -814,6 +851,13 @@ export const translations = {
       },
       advancedToggleShow: '+ Plus de revenus et déductions',
       advancedToggleHide: '- Moins d’options',
+      currencySuffix: '($ CA)',
+      fhsaLimit: '(max. 8 000 $/an)',
+      phone: {
+        moreIncome: 'Autres revenus et déductions',
+        backToResult: 'Revenir à votre salaire net',
+        tracesLead: 'Touchez une ligne pour voir sa formule et sa source officielle.',
+      },
       yearUnavailable: 'Pas encore offert pour cette province',
       provinceUnavailable: 'pas encore offert pour {year}',
     },
@@ -833,12 +877,20 @@ export const translations = {
       },
       tracesTitle: 'Formules de calcul et traçabilité',
       tracesSubtitle: 'Cliquez sur chaque étape pour consulter la formule exacte et l’annexe officielle de l’ARC.',
+      averageRateCaption: 'Impôt total / salaire brut',
+      marginalRateCaption: 'Impôt sur le prochain dollar gagné',
+      ofGross: '{percent} % du brut',
+      totalTaxShare: '{percent} % d’impôts au total',
+      grossLabel: 'Brut : {amount}',
+      formulaLabel: 'Formule : {formula}',
+      sourceLink: 'Source officielle (ARC ou province)',
     },
     spending: {
       badge: 'Comptes publics du Canada',
       title: 'Où va votre impôt fédéral',
       subtitle: 'D’après les derniers Comptes publics du Canada, voici comment votre contribution fédérale est répartie entre les différents programmes publics.',
       sourceNote: 'Source : Comptes publics du Canada, Receveur général du Canada.',
+      yourContribution: 'Votre contribution fédérale',
     },
     newsletter: {
       badge: 'Anticipez les changements fiscaux',
@@ -906,6 +958,9 @@ export const translations = {
 // The French dictionary must have every key the English one has, so a missing translation fails typecheck.
 type DictionaryShape<T> = { readonly [K in keyof T]: T[K] extends string ? string : DictionaryShape<T[K]> };
 translations.fr satisfies DictionaryShape<typeof translations.en>;
+
+/** The strings of one locale. */
+export type Dictionary = DictionaryShape<typeof translations.en>;
 
 export function getDictionary(locale: Locale) {
   return translations[locale] || translations.en;

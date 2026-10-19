@@ -163,7 +163,7 @@ export default async function HomePage({ params }: HomePageProps) {
                 </p>
               </div>
               <div>
-                <NewsletterForm locale={locale} />
+                <NewsletterForm />
               </div>
             </div>
           </div>

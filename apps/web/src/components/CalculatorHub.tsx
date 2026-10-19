@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import { formatCurrency } from '@/lib/format';
 import { AUDIT_BENCHMARK_DOLLARS, salaryBenchmarks } from '@/features/tax/salary-benchmarks';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
@@ -18,7 +19,7 @@ interface CalculatorHubProps {
 }
 
 export default function CalculatorHub({ locale }: CalculatorHubProps) {
-  const dict = getDictionary(locale);
+  const dict = useDictionary();
 
   const provinces = [
     {

@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Locale, getDictionary } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import NeumorphButton from '@/components/ui/neumorph-button';
 
 // UI only for Phase 0: submitting does nothing until double opt-in is wired up.
-export default function NewsletterForm({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export default function NewsletterForm() {
+  const dict = useDictionary();
 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="max-w-xl space-y-3 pt-2">

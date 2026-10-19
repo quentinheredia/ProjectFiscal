@@ -4,7 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Locale, getDictionary } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/lib/dictionary-context';
 import {
   Play,
   Table2,
@@ -28,7 +29,7 @@ interface NavbarProps {
 export default function Navbar({ locale }: NavbarProps) {
   const pathname = usePathname() || `/${locale}`;
   const router = useRouter();
-  const nav = getDictionary(locale).nav;
+  const nav = useDictionary().nav;
   const [provOpen, setProvOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeHash, setActiveHash] = useState('');
