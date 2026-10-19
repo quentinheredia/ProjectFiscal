@@ -6,6 +6,8 @@ import { ArrowRight, Calculator, CheckCircle2, ShieldCheck } from 'lucide-react'
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents, formatPercent, formatThousands } from '@/lib/format';
+import { federal2026 } from '@fiscal-insights/tax-data';
+import { payrollCeilings } from '@/features/brackets/payroll-ceilings';
 import {
   QUICK_FREQUENCIES,
   QUICK_PRESETS,
@@ -147,7 +149,7 @@ export default function QuickEstimatePhone({ locale, model }: QuickEstimatePhone
               [
                 [dict.simulation.traceHighlights.line42000, dict.simulation.traceHighlights.line42000Desc, 'CRA T1 Schedule 1, Part B'],
                 [`${dict.simulation.traceHighlights.lineProv} (${province.code})`, dict.simulation.traceHighlights.lineProvDesc, `Form ${province.form}`],
-                [dict.simulation.traceHighlights.lineCpp2, dict.simulation.traceHighlights.lineCpp2Desc, 'Schedule 8 / CPP2'],
+                [dict.simulation.traceHighlights.lineCpp2, fillTemplate(dict.simulation.traceHighlights.lineCpp2Desc, payrollCeilings(federal2026, locale).cpp2), 'Schedule 8 / CPP2'],
               ] as const
             ).map(([title, description, reference]) => (
               <li key={title} className="space-y-1">
