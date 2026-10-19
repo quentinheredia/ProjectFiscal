@@ -39,9 +39,9 @@ export default async function SimulatorPage({ params }: SimulatorPageProps) {
   const locale = resolveLocale(resolved.locale);
 
   return (
-    <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+    <div className="mx-auto w-full max-w-2xl lg:max-w-7xl lg:px-8 lg:py-12">
       <FederalBudgetSimulator locale={locale} />
-    </main>
+    </div>
   );
 }
 
