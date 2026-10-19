@@ -80,6 +80,12 @@ export function BottomSheet({ open, onClose, title, closeLabel, children, classN
     <dialog
       ref={dialogRef}
       aria-labelledby={titleId}
+      // Escape fires `cancel`. React closes the dialog through `open`, so the DOM and state never disagree
+      // (the native `close` event arrives a task later and could undo a quick reopen).
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       onClose={onClose}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
