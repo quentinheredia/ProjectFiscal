@@ -1,15 +1,23 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import { translations } from '../src/lib/i18n';
 import { expectThumbSizedTargets } from './phone';
 
 const nav = translations.en.nav;
 
-function openMenuFromTabBar(page: Page) {
-  return page.getByRole('navigation', { name: nav.mobileNavLabel }).getByRole('button', { name: nav.menu }).click();
-}
-
 function menu(page: Page) {
   return page.getByRole('dialog', { name: nav.menuTitle });
+}
+
+// The server-rendered button exists before React hydrates; a tap that early does nothing, so retry until the sheet opens.
+async function openMenuWith(page: Page, trigger: Locator) {
+  await expect(async () => {
+    await trigger.click();
+    await expect(menu(page)).toBeVisible({ timeout: 1000 });
+  }).toPass();
+}
+
+function openMenuFromTabBar(page: Page) {
+  return openMenuWith(page, page.getByRole('navigation', { name: nav.mobileNavLabel }).getByRole('button', { name: nav.menu }));
 }
 
 test.describe('menu on a phone', () => {
@@ -21,8 +29,7 @@ test.describe('menu on a phone', () => {
     await page.keyboard.press('Escape');
     await expect(menu(page)).toBeHidden();
 
-    await page.getByRole('button', { name: new RegExp(`^${nav.changeProvince}`) }).click();
-    await expect(menu(page)).toBeVisible();
+    await openMenuWith(page, page.getByRole('button', { name: new RegExp(`^${nav.changeProvince}`) }));
     await menu(page).getByRole('button', { name: nav.close }).click();
     await expect(menu(page)).toBeHidden();
   });
