@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatCentsToDollars, type ExplanationTraceItem } from '@fiscal-insights/tax-engine';
-import { ChevronDown, ChevronUp, ExternalLink, Layers, PieChart, Sliders, ArrowRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink, Layers, PieChart, ArrowRight } from 'lucide-react';
+import { SimulatorIcon } from '@/components/navigation/nav-items';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatThousands } from '@/lib/format';
@@ -408,7 +409,7 @@ function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: numbe
           href={`/${locale}/simulator`}
           className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0 cursor-pointer"
         >
-          <Sliders className="w-3.5 h-3.5" aria-hidden="true" />
+          <SimulatorIcon className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{dict.simulation.budgetCallout.cta}</span>
           <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
         </Link>

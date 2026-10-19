@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Calculator } from 'lucide-react';
+import { SimulatorIcon } from '@/components/navigation/nav-items';
 import { useProvince } from '@/context/ProvinceContext';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
@@ -27,6 +28,7 @@ export default function HeroCtasPhone({ locale }: { locale: Locale }) {
         href={`/${locale}/simulator`}
         className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold text-blue-300 active:text-white focus-visible:outline-2 focus-visible:outline-emerald-400"
       >
+        <SimulatorIcon className="h-4 w-4" aria-hidden="true" />
         {dict.nav.budgetSimulator}
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Link>

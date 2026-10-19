@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { SimulatorIcon } from '@/components/navigation/nav-items';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents } from '@/lib/format';
@@ -74,6 +75,7 @@ export function SpendingListPhone({ federalTaxCents, locale }: SpendingListPhone
             href={`/${locale}/simulator`}
             className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white active:bg-blue-500"
           >
+            <SimulatorIcon className="h-4 w-4" aria-hidden="true" />
             {dict.nav.budgetSimulator}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
