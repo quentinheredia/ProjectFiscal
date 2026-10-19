@@ -6,7 +6,9 @@ import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
 import { ArrowRight, ShieldCheck, FileCheck2, PieChart, CheckCircle2, Scale, Calculator, Sliders } from 'lucide-react';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
-import { formatCents, formatThousands } from '@/lib/format';
+import { fillTemplate, formatCents, formatThousands } from '@/lib/format';
+import { federal2026 } from '@fiscal-insights/tax-data';
+import { payrollCeilings } from '@/features/brackets/payroll-ceilings';
 import { allocateFederalTax, spendingBarWidth } from '@/features/tax/spending';
 import {
   QUICK_FREQUENCIES,
@@ -290,7 +292,7 @@ export default function QuickEstimateDesktop({ locale, model }: QuickEstimateDes
               </div>
               <div className="p-5 space-y-1.5">
                 <span className="font-bold text-white block">{dict.simulation.traceHighlights.lineCpp2}</span>
-                <p className="text-slate-400 text-[11px] leading-relaxed">{dict.simulation.traceHighlights.lineCpp2Desc}</p>
+                <p className="text-slate-400 text-[11px] leading-relaxed">{fillTemplate(dict.simulation.traceHighlights.lineCpp2Desc, payrollCeilings(federal2026, locale).cpp2)}</p>
                 <span className="inline-block text-[10px] font-mono text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-500/20">
                   Schedule 8 / CPP2 Ceiling
                 </span>
