@@ -59,9 +59,9 @@ export default function BracketsSection({ locale, strings }: BracketsSectionProp
   return (
     <div id="brackets" className="space-y-6 scroll-mt-20">
       <div>
-        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">{strings.badge}</span>
+        <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider hidden lg:block">{strings.badge}</span>
         <h3 className="text-2xl font-bold text-white tracking-tight mt-1 text-balance">{strings.title}</h3>
-        <p className="text-sm text-slate-400 mt-1 max-w-3xl">{strings.subtitle}</p>
+        <p className="hidden lg:block text-sm text-slate-400 mt-1 max-w-3xl">{strings.subtitle}</p>
       </div>
 
       <PhoneOnly className="space-y-4">

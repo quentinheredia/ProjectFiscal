@@ -27,7 +27,7 @@ export default function ProvinceHubPhone({ locale, benchmarks }: { locale: Local
           <li key={province.slug}>
             <Link
               href={`/${locale}/calculator/${province.slug}`}
-              className="flex min-h-28 flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0c121e] p-4 active:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+              className="flex min-h-24 flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0c121e] p-4 active:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
             >
               <span className="flex items-center justify-between">
                 <span className="rounded-md border border-white/[0.08] bg-[#070b12] px-2 py-1 text-xs font-bold text-white">{province.code}</span>

@@ -58,7 +58,7 @@ export default function QuickEstimatePhone({ locale, model }: QuickEstimatePhone
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c121e]">
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="space-y-3 p-4 md:space-y-4 md:p-6">
         <ChipRail label={phone.scenariosLabel}>
           {QUICK_PRESETS.map((preset) => (
             <Chip key={preset.id} selected={model.presetId === preset.id} onClick={() => model.selectPreset(preset)}>
@@ -116,7 +116,6 @@ export default function QuickEstimatePhone({ locale, model }: QuickEstimatePhone
 
         <MetricList
           metrics={[
-            { key: 'takeHome', label: dict.simulation.breakdown.netPay, caption: ofGross(shares.takeHome), value: money(result.takeHomePayCents), dotClass: SEGMENT_COLORS.takeHome },
             { key: 'federal', label: dict.simulation.breakdown.federal, caption: ofGross(shares.federal), value: money(result.federal.netFederalTaxCents), dotClass: SEGMENT_COLORS.federal },
             { key: 'provincial', label: dict.simulation.breakdown.provincial, caption: ofGross(shares.provincial), value: money(result.provincial.netProvincialTaxCents), dotClass: SEGMENT_COLORS.provincial },
             { key: 'payroll', label: dict.simulation.breakdown.payroll, caption: ofGross(shares.payroll), value: money(model.payrollCents), dotClass: SEGMENT_COLORS.payroll },

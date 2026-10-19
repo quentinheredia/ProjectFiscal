@@ -19,7 +19,7 @@ export default function WaterfallPhone({ rows, grossCents, strings, locale }: Wa
         const isTotal = row.kind === 'gross' || row.kind === 'net';
         const muted = isDeduction && row.amountCents === 0;
         return (
-          <li key={row.key} className={`space-y-2 py-3 ${muted ? 'opacity-50' : ''}`}>
+          <li key={row.key} className={`space-y-1.5 py-2.5 ${muted ? 'opacity-50' : ''}`}>
             <div className="flex items-start justify-between gap-3">
               <span className={`flex min-w-0 items-center gap-2 text-sm ${isTotal ? 'font-semibold text-white' : 'text-slate-300'}`}>
                 <span className={`h-2.5 w-2.5 shrink-0 rounded-xs ${ROW_COLORS[row.kind]}`} aria-hidden="true" />

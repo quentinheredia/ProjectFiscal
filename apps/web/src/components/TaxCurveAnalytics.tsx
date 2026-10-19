@@ -211,7 +211,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
         </div>
 
         <div className="space-y-2">
-          <span id="tax-curve-province" className="block text-[13px] lg:text-xs font-semibold text-slate-300">
+          <span id="tax-curve-province" className="sr-only lg:not-sr-only lg:block lg:text-xs font-semibold text-slate-300">
             {strings.provinceLabel}
           </span>
           <div
@@ -266,32 +266,32 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
       {/* Summary strip, shared by both views */}
       <div
         aria-live="polite"
-        className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-4 md:-mx-6 lg:-mx-8 -mb-4 md:-mb-6 lg:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
+        className="grid grid-cols-3 divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-4 md:-mx-6 lg:-mx-8 -mb-4 md:-mb-6 lg:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
       >
-        <div className="p-4 md:p-5 lg:p-6 space-y-1">
+        <div className="p-3 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.takeHome}</span>
-          <span className="block text-xl font-bold text-emerald-400 tabular-nums">
+          <span className="block text-lg md:text-xl font-bold text-emerald-400 tabular-nums">
             {formatCurrency(current.result.takeHomePayCents / 100, locale)}
           </span>
-          <span className="block text-[11px] text-slate-400 tabular-nums">
+          <span className="block text-xs lg:text-[11px] leading-snug text-slate-400 tabular-nums">
             {fillTemplate(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
           </span>
         </div>
-        <div className="p-4 md:p-5 lg:p-6 space-y-1">
+        <div className="p-3 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.averageRate}</span>
-          <span className="block text-xl font-bold text-white tabular-nums">
+          <span className="block text-lg md:text-xl font-bold text-white tabular-nums">
             {formatPercent(current.averageRate, locale, 1)}
           </span>
-          <span className="block text-[11px] text-slate-400">
+          <span className="block text-xs lg:text-[11px] leading-snug text-slate-400">
             {fillTemplate(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
           </span>
         </div>
-        <div className="p-4 md:p-5 lg:p-6 space-y-1">
+        <div className="p-3 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.marginalRate}</span>
-          <span className="block text-xl font-bold text-white tabular-nums">
+          <span className="block text-lg md:text-xl font-bold text-white tabular-nums">
             {formatPercent(marginalRate, locale, 1)}
           </span>
-          <span className="block text-[11px] text-slate-400">
+          <span className="block text-xs lg:text-[11px] leading-snug text-slate-400">
             {fillTemplate(strings.keepNext, { amount: formatCurrency(current.next.keptCents / 100, locale) })}
           </span>
         </div>

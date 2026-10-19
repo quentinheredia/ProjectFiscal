@@ -122,7 +122,7 @@ export function MenuSheet({ open, onClose, locale, pathname, items, province, on
 
       <section className="space-y-2.5">
         <SheetHeading>{nav.salaryBreakdowns}</SheetHeading>
-        <ChipRail label={nav.salaryBreakdowns} className="-mx-5 px-5 scroll-px-5">
+        <ChipRail label={nav.salaryBreakdowns}>
           {salaryBenchmarks(locale).map(({ amountDollars, href }) => (
             <Link
               key={amountDollars}

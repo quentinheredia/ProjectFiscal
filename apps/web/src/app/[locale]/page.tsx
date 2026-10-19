@@ -70,7 +70,7 @@ export default async function HomePage({ params }: HomePageProps) {
   };
 
   return (
-    <div className="space-y-12 lg:space-y-16 pb-8 lg:pb-16">
+    <div className="space-y-10 lg:space-y-16 pb-4 lg:pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -128,7 +128,7 @@ export default async function HomePage({ params }: HomePageProps) {
         <div className="bg-[#0c121e] rounded-2xl lg:rounded-3xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_15px_40px_-10px_rgba(0,0,0,0.8),0_0_30px_rgba(16,185,129,0.08)] overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-800/80">
             {/* Left Column: Primary Conversion Action */}
-            <div className="lg:col-span-7 p-5 md:p-8 lg:p-10 flex flex-col justify-between space-y-6">
+            <div className="lg:col-span-7 p-5 md:p-8 lg:p-10 flex flex-col justify-between space-y-4 lg:space-y-6">
               <div className="space-y-3">
                 <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
                   {dict.bottomCta.title}
@@ -152,7 +152,7 @@ export default async function HomePage({ params }: HomePageProps) {
             {/* Right Column: 2027 Statutory Indexation Alerts */}
             <div className="lg:col-span-5 p-5 md:p-8 lg:p-10 bg-[#080d17]/60 flex flex-col justify-between space-y-5">
               <div className="space-y-2">
-                <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider block">
+                <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider hidden lg:block">
                   {dict.newsletter.badge}
                 </span>
                 <h4 className="text-xl font-bold text-white tracking-tight">
