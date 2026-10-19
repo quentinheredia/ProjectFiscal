@@ -154,7 +154,7 @@ export const translations = {
       },
       budgetCallout: {
         summary: 'Total Federal Spending: ~$586 Billion (45% locked-in statutory transfers, 40% discretionary operations).',
-        cta: '🏛️ Try the Federal Budget Simulator',
+        cta: 'Try the Federal Budget Simulator',
       },
       comparisonSummary: {
         title: 'Why the Legacy Calculator Lost Trust',
@@ -682,7 +682,7 @@ export const translations = {
       },
       budgetCallout: {
         summary: 'Dépenses fédérales totales : ~586 milliards $ (45 % de transferts légaux obligatoires, 40 % d’opérations discrétionnaires).',
-        cta: '🏛️ Essayer le simulateur budgétaire fédéral',
+        cta: 'Essayer le simulateur budgétaire fédéral',
       },
       comparisonSummary: {
         title: 'Pourquoi l’ancien site perdait la confiance',

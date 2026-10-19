@@ -90,7 +90,7 @@ export function DesktopControls({ locale, province, onPickProvince, language }: 
           aria-expanded={open}
         >
           <span className="flex items-center gap-1.5 min-w-0 text-left overflow-hidden">
-            <span className="text-emerald-400 font-bold font-mono shrink-0">📍 {province.code}</span>
+            <span className="text-emerald-400 font-bold font-mono shrink-0">{province.code}</span>
             <span className="text-slate-300 truncate text-left">{provinceName(province, locale)}</span>
           </span>
           <ChevronDown
