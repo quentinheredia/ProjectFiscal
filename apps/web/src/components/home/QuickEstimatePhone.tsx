@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { ArrowRight, Calculator, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Calculator, CheckCircle2, ShieldCheck } from 'lucide-react';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents, formatPercent, formatThousands } from '@/lib/format';
@@ -22,6 +21,7 @@ import { MoneyInput } from '@/components/mobile/MoneyInput';
 import { SegmentedControl } from '@/components/mobile/SegmentedControl';
 import { StackedBar } from '@/components/mobile/StackedBar';
 import { SpendingListPhone } from '@/components/tax/SpendingListPhone';
+import { ActionLink } from '@/components/ui/action';
 
 interface QuickEstimatePhoneProps {
   locale: Locale;
@@ -192,14 +192,9 @@ export default function QuickEstimatePhone({ locale, model }: QuickEstimatePhone
       </div>
 
       <div className="space-y-3 border-t border-white/[0.06] p-4 md:p-6">
-        <Link
-          href={`/${locale}/calculator/${province.slug}`}
-          className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 text-sm font-bold text-slate-950 active:bg-emerald-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-        >
-          <Calculator className="h-4 w-4" aria-hidden="true" />
+        <ActionLink href={`/${locale}/calculator/${province.slug}`} size="lg" width="full" icon={Calculator}>
           {dict.simulation.ctaButton}
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
+        </ActionLink>
         <p className="flex items-start gap-2 text-xs leading-relaxed text-slate-400">
           <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
           {dict.simulation.clientSideGuarantee}

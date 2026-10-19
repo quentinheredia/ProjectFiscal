@@ -1,12 +1,12 @@
 import React from 'react';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { FileCheck2 } from 'lucide-react';
 import type { Dictionary, Locale } from '@/lib/i18n';
 import { fillTemplate, formatCents } from '@/lib/format';
 import { auditLines, type AuditLine } from '@/features/brackets/audit-benchmark';
 import { AUDIT_BENCHMARK_DOLLARS, salaryPageHref } from '@/features/tax/salary-benchmarks';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
 import { Disclosure } from '@/components/mobile/Disclosure';
+import { ActionLink } from '@/components/ui/action';
 
 interface LegacyAuditProps {
   locale: Locale;
@@ -118,13 +118,9 @@ function AuditCards({ lines, locale, pitch, eiValues }: { lines: AuditLine[]; lo
 export default function LegacyAudit({ locale, pitch, eiValues, linkToCase = true, id }: LegacyAuditProps) {
   const lines = auditLines();
   const caseLink = linkToCase && (
-    <Link
-      href={salaryPageHref(locale, AUDIT_BENCHMARK_DOLLARS)}
-      className="inline-flex min-h-11 w-full items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm lg:text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 active:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] transition-colors shrink-0 cursor-pointer lg:min-h-0 lg:w-auto"
-    >
-      <span>{pitch.inspectAuditAction}</span>
-      <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-    </Link>
+    <ActionLink href={salaryPageHref(locale, AUDIT_BENCHMARK_DOLLARS)} variant="secondary" width="phone" icon={FileCheck2}>
+      {pitch.inspectAuditAction}
+    </ActionLink>
   );
 
   return (

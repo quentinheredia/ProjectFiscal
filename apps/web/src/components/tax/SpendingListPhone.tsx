@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 import { SimulatorIcon } from '@/components/navigation/nav-items';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents } from '@/lib/format';
 import { allocateFederalTaxByShare, spendingBarWidth, type SpendingAllocation } from '@/features/tax/spending';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
+import { ActionLink } from '@/components/ui/action';
 
 const SUMMARY_COUNT = 5;
 
@@ -71,14 +70,9 @@ export function SpendingListPhone({ federalTaxCents, locale }: SpendingListPhone
         </ul>
         <div className="space-y-3 rounded-xl border border-blue-500/30 bg-blue-950/30 p-4">
           <p className="text-sm text-blue-100">{dict.simulation.budgetCallout.summary}</p>
-          <Link
-            href={`/${locale}/simulator`}
-            className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white active:bg-blue-500"
-          >
-            <SimulatorIcon className="h-4 w-4" aria-hidden="true" />
+          <ActionLink href={`/${locale}/simulator`} variant="secondary" width="full" icon={SimulatorIcon}>
             {dict.nav.budgetSimulator}
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
+          </ActionLink>
         </div>
       </BottomSheet>
     </div>

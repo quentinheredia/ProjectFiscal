@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { formatCentsToDollars } from '@fiscal-insights/tax-engine';
-import { ArrowRight, ShieldCheck, FileCheck2, PieChart, CheckCircle2, Scale, Calculator } from 'lucide-react';
+import { ShieldCheck, FileCheck2, PieChart, CheckCircle2, Scale, Calculator } from 'lucide-react';
 import { SimulatorIcon } from '@/components/navigation/nav-items';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
@@ -11,6 +10,7 @@ import { fillTemplate, formatCents, formatThousands } from '@/lib/format';
 import { federal2026 } from '@fiscal-insights/tax-data';
 import { payrollCeilings } from '@/features/brackets/payroll-ceilings';
 import { allocateFederalTax, spendingBarWidth } from '@/features/tax/spending';
+import { ActionLink } from '@/components/ui/action';
 import {
   QUICK_FREQUENCIES,
   QUICK_PRESETS,
@@ -261,14 +261,9 @@ export default function QuickEstimateDesktop({ locale, model }: QuickEstimateDes
               </div>
               <div className="mt-2 p-3.5 rounded-xl bg-linear-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/30 border border-blue-500/30 flex items-center justify-between gap-3 text-xs">
                 <span className="font-semibold text-blue-200 block">{dict.simulation.budgetCallout.summary}</span>
-                <Link
-                  href={`/${locale}/simulator`}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0 cursor-pointer"
-                >
-                  <SimulatorIcon className="w-3.5 h-3.5" aria-hidden="true" />
-                  <span>{dict.simulation.budgetCallout.cta}</span>
-                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </Link>
+                <ActionLink href={`/${locale}/simulator`} variant="secondary" icon={SimulatorIcon}>
+                  {dict.simulation.budgetCallout.cta}
+                </ActionLink>
               </div>
             </div>
           )}
@@ -331,14 +326,9 @@ export default function QuickEstimateDesktop({ locale, model }: QuickEstimateDes
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
             <span>{dict.simulation.clientSideGuarantee}</span>
           </div>
-          <Link
-            href={`/${locale}/calculator/${province.slug}`}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-linear-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-[0_2px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.28)] transition-[background-color,box-shadow] cursor-pointer"
-          >
-            <Calculator className="w-4 h-4" aria-hidden="true" />
-            <span>{dict.simulation.ctaButton}</span>
-            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-          </Link>
+          <ActionLink href={`/${locale}/calculator/${province.slug}`} icon={Calculator}>
+            {dict.simulation.ctaButton}
+          </ActionLink>
         </div>
       </div>
     </div>
