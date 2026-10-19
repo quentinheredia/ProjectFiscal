@@ -194,7 +194,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   if (digits) setSalary(Math.min(INPUT_MAX, Number(digits)));
                 }}
                 onBlur={() => commitSalary(Number(salaryText || 0))}
-                className="w-28 lg:w-24 bg-transparent text-right text-base lg:text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
+                className="w-28 lg:w-24 min-h-11 lg:min-h-0 bg-transparent text-right text-base lg:text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
               />
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             step={SLIDER_STEP}
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, salary))}
             onChange={(e) => commitSalary(Number(e.target.value))}
-            className="w-full h-8 accent-emerald-400 cursor-pointer"
+            className="w-full h-11 lg:h-8 accent-emerald-400 cursor-pointer"
           />
         </div>
 

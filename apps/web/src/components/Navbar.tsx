@@ -46,7 +46,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
     <>
       <header className="sticky top-0 z-50 pt-3 sm:pt-4 pb-2 bg-[#090d16]/85 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-          <Link href={`/${locale}`} className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+          <Link href={`/${locale}`} className="flex min-h-11 items-center gap-2.5 sm:gap-3 group shrink-0">
             {/* Logo emblem; the name next to it is live text, so the image is decorative */}
             <Image src="/brand/emblem-96.png" alt="" width={40} height={40} priority className="w-9 h-9 sm:w-10 sm:h-10 shrink-0" />
             <div className="flex flex-col">
