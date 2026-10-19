@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import { federal2026, getProvincialRules } from '@fiscal-insights/tax-data';
 import { useProvince } from '@/context/ProvinceContext';
 import type { Dictionary, Locale } from '@/lib/i18n';
@@ -11,6 +10,7 @@ import { PROVINCES, provinceName, type ProvinceConfig } from '@/lib/provinces';
 import { toBracketRows } from '@/features/brackets/bracket-rows';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
 import { SegmentedControl } from '@/components/mobile/SegmentedControl';
+import { ActionLink } from '@/components/ui/action';
 import { BracketLadder, BracketTable } from './BracketTable';
 
 const SCHEDULE_YEAR = 2026;
@@ -49,13 +49,9 @@ export default function BracketsSection({ locale, strings }: BracketsSectionProp
   const provincialTitle = fillTemplate(strings.provincialTitle, { province: name, form: province.form });
 
   const calculateLink = (
-    <Link
-      href={`/${locale}/calculator/${province.slug}`}
-      className="inline-flex min-h-11 items-center gap-1.5 text-sm lg:min-h-0 lg:text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors group"
-    >
-      <span>{fillTemplate(strings.calculateProvince, { province: name, code: province.code })}</span>
-      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none" aria-hidden="true" />
-    </Link>
+    <ActionLink href={`/${locale}/calculator/${province.slug}`} variant="secondary" width="phone" icon={Calculator}>
+      {fillTemplate(strings.calculateProvince, { province: name, code: province.code })}
+    </ActionLink>
   );
 
   return (

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useEffect, useId, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, Calculator, ChevronDown, Info, Minus, Plus, RotateCcw, Users } from 'lucide-react';
+import { Calculator, ChevronDown, Info, Minus, Plus, RotateCcw, Users } from 'lucide-react';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCurrency } from '@/lib/format';
@@ -11,6 +10,7 @@ import { formatBillionDelta, formatBillions, type BudgetSummary } from '@/featur
 import type { BudgetModel } from '@/features/budget/useBudgetAllocations';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
 import { SegmentedControl } from '@/components/mobile/SegmentedControl';
+import { ActionButton, ActionLink } from '@/components/ui/action';
 
 interface BudgetSimulatorPhoneProps {
   locale: Locale;
@@ -241,22 +241,12 @@ export default function BudgetSimulatorPhone({ locale, model }: BudgetSimulatorP
         <TaxpayerImpact summary={summary} locale={locale} />
 
         <div className="grid gap-2">
-          <button
-            type="button"
-            onClick={model.reset}
-            className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-[#151c2c] text-sm font-semibold text-slate-200 active:bg-[#1e273d]"
-          >
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+          <ActionButton onClick={model.reset} variant="secondary" width="full" icon={RotateCcw}>
             {dict.reset}
-          </button>
-          <Link
-            href={`/${locale}`}
-            className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 text-sm font-bold text-slate-950 active:bg-emerald-300"
-          >
-            <Calculator className="h-4 w-4" aria-hidden="true" />
+          </ActionButton>
+          <ActionLink href={`/${locale}`} width="full" icon={Calculator}>
             {dict.calculatorLink}
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
+          </ActionLink>
         </div>
       </BottomSheet>
     </div>

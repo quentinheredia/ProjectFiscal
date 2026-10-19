@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { RotateCcw, Sliders, Lock, ArrowRight, Calculator, Info, Users, TrendingUp, TrendingDown } from 'lucide-react';
+import { RotateCcw, Sliders, Lock, Calculator, Info, Users, TrendingUp, TrendingDown } from 'lucide-react';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCurrency } from '@/lib/format';
 import { ENVELOPE_STEP_BILLION, envelopesIn, type BudgetEnvelope, type EnvelopeGroup } from '@/features/budget/envelopes';
 import { formatBillionDelta, formatBillions } from '@/features/budget/summarize';
 import type { BudgetModel } from '@/features/budget/useBudgetAllocations';
+import { ActionButton, ActionLink } from '@/components/ui/action';
 
 interface BudgetSimulatorDesktopProps {
   locale: Locale;
@@ -121,22 +121,12 @@ export default function BudgetSimulatorDesktop({ locale, model }: BudgetSimulato
             </div>
 
             <div className="flex flex-col gap-2 justify-center">
-              <button
-                type="button"
-                onClick={model.reset}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-[#151c2c] hover:bg-[#1e273d] border border-slate-700 transition-colors cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
-                <span>{dict.reset}</span>
-              </button>
-              <Link
-                href={`/${locale}`}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.25)] cursor-pointer"
-              >
-                <Calculator className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>{dict.calculatorLink}</span>
-                <ArrowRight className="w-3 h-3" aria-hidden="true" />
-              </Link>
+              <ActionButton onClick={model.reset} variant="secondary" width="full" icon={RotateCcw}>
+                {dict.reset}
+              </ActionButton>
+              <ActionLink href={`/${locale}`} width="full" icon={Calculator}>
+                {dict.calculatorLink}
+              </ActionLink>
             </div>
           </div>
         </div>

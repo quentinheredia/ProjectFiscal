@@ -1,5 +1,6 @@
 import React from 'react';
-import Link from 'next/link';
+import { Home } from 'lucide-react';
+import { ActionLink } from '@/components/ui/action';
 
 export default function LocalizedNotFound() {
   return (
@@ -14,12 +15,9 @@ export default function LocalizedNotFound() {
         The requested tax calculation scenario, province schedule, or page could not be found.
       </p>
       <div className="pt-2">
-        <Link
-          href="/en"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 shadow-md transition-all cursor-pointer"
-        >
+        <ActionLink href="/en" icon={Home}>
           Return to Home
-        </Link>
+        </ActionLink>
       </div>
     </div>
   );

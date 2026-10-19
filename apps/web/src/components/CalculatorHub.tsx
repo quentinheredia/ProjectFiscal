@@ -9,11 +9,8 @@ import { PROVINCES, provinceName, type ProvinceConfig, type ProvinceSlug } from 
 import { AUDIT_BENCHMARK_DOLLARS, salaryBenchmarks } from '@/features/tax/salary-benchmarks';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
 import ProvinceHubPhone from '@/components/home/ProvinceHubPhone';
-import {
-  ArrowRight,
-  ShieldCheck,
-  DollarSign,
-} from 'lucide-react';
+import { ActionLink } from '@/components/ui/action';
+import { ArrowRight, ShieldCheck, DollarSign, Calculator } from 'lucide-react';
 
 interface CalculatorHubProps {
   locale: Locale;
@@ -108,13 +105,9 @@ export default function CalculatorHub({ locale }: CalculatorHubProps) {
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{locale === 'fr' ? 'Barèmes 2026 audités' : '2026 Audited Rules'}</span>
               </span>
-              <Link
-                href={`/${locale}/calculator/${prov.province.slug}`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_2px_12px_rgba(16,185,129,0.18)] hover:shadow-[0_2px_16px_rgba(16,185,129,0.25)] transition-colors cursor-pointer"
-              >
-                <span>{prov.cta}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              <ActionLink href={`/${locale}/calculator/${prov.province.slug}`} variant="secondary" icon={Calculator}>
+                {prov.cta}
+              </ActionLink>
             </div>
           </div>
         ))}

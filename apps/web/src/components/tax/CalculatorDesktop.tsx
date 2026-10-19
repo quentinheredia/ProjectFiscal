@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { formatCentsToDollars, type ExplanationTraceItem } from '@fiscal-insights/tax-engine';
-import { ChevronDown, ChevronUp, ExternalLink, Layers, PieChart, ArrowRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, ExternalLink, Layers, PieChart } from 'lucide-react';
 import { SimulatorIcon } from '@/components/navigation/nav-items';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
@@ -11,6 +10,7 @@ import { fillTemplate, formatThousands } from '@/lib/format';
 import { PROVINCES } from '@/lib/provinces';
 import { ALL_PAY_FREQUENCIES } from '@/features/tax/pay-frequency';
 import { allocateFederalTax, spendingBarWidth } from '@/features/tax/spending';
+import { ActionLink } from '@/components/ui/action';
 import {
   CALCULATOR_SALARY_CHIPS,
   FHSA_ANNUAL_LIMIT_DOLLARS,
@@ -405,14 +405,9 @@ function SpendingBreakdown({ federalTaxCents, locale }: { federalTaxCents: numbe
           <span className="font-semibold text-blue-200 block">{dict.simulation.budgetCallout.summary}</span>
           <span className="text-[11px] text-slate-400">{dict.spending.sourceNote}</span>
         </div>
-        <Link
-          href={`/${locale}/simulator`}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0 cursor-pointer"
-        >
-          <SimulatorIcon className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{dict.simulation.budgetCallout.cta}</span>
-          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-        </Link>
+        <ActionLink href={`/${locale}/simulator`} variant="secondary" icon={SimulatorIcon}>
+          {dict.simulation.budgetCallout.cta}
+        </ActionLink>
       </div>
     </section>
   );
