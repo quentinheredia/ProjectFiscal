@@ -16,7 +16,7 @@ export default function TaxInformationHub({ locale }: { locale: Locale }) {
   const ceilings = payrollCeilings(federal2026, locale);
 
   return (
-    <section className="mx-auto my-10 max-w-2xl space-y-10 lg:my-14 lg:max-w-7xl lg:space-y-14" id="tax-information">
+    <section className="mx-auto my-6 max-w-2xl space-y-8 lg:my-14 lg:max-w-7xl lg:space-y-14" id="tax-information">
       <div className="mx-auto max-w-3xl space-y-3 lg:text-center">
         <h2 className="text-balance text-2xl font-extrabold tracking-tight text-white md:text-3xl lg:text-4xl">{hub.title}</h2>
         <p className="text-sm leading-relaxed text-slate-400 lg:text-base">{hub.subtitle}</p>

@@ -113,7 +113,7 @@ export function PayrollCeilingsSection({ hub, ceilings }: { hub: InfoHub; ceilin
   return (
     <div className="space-y-5">
       <div>
-        <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block">{strings.badge}</span>
+        <span className="text-xs font-bold text-blue-400 uppercase tracking-wider hidden lg:block">{strings.badge}</span>
         <h3 className="text-2xl font-bold text-white tracking-tight mt-1 text-balance">{strings.title}</h3>
         <p className="text-sm text-slate-400 mt-1 max-w-3xl">{strings.description}</p>
       </div>
@@ -168,10 +168,9 @@ export function FaqSection({ hub }: { hub: InfoHub }) {
         <p className="text-sm text-slate-400 leading-relaxed">{faq.subtitle}</p>
       </div>
       <div className="lg:col-span-8 divide-y divide-white/[0.08] border-y border-white/[0.08]">
-        {items.map(([question, answer], index) => (
+        {items.map(([question, answer]) => (
           <Disclosure
             key={question}
-            defaultOpen={index === 0}
             summary={<span className="text-[15px] lg:text-sm font-semibold text-slate-200">{question}</span>}
           >
             <p className="text-sm text-slate-400 leading-relaxed">{answer}</p>

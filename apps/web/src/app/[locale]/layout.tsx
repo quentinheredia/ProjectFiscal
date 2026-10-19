@@ -69,7 +69,7 @@ export default async function LocaleLayout({
           <ProvinceProvider>
             <BackgroundGuides />
             <Navbar locale={locale} />
-            <main className="relative z-10 grow py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+            <main className="relative z-10 grow py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
               {children}
             </main>
           </ProvinceProvider>

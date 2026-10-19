@@ -19,7 +19,7 @@ export default function WaterfallPhone({ rows, grossCents, strings, locale }: Wa
         const isTotal = row.kind === 'gross' || row.kind === 'net';
         const muted = isDeduction && row.amountCents === 0;
         return (
-          <li key={row.key} className={`space-y-2 py-3 ${muted ? 'opacity-50' : ''}`}>
+          <li key={row.key} className={`space-y-1.5 py-2.5 ${muted ? 'opacity-50' : ''}`}>
             <div className="flex items-start justify-between gap-3">
               <span className={`flex min-w-0 items-center gap-2 text-sm ${isTotal ? 'font-semibold text-white' : 'text-slate-300'}`}>
                 <span className={`h-2.5 w-2.5 shrink-0 rounded-xs ${ROW_COLORS[row.kind]}`} aria-hidden="true" />
@@ -30,7 +30,7 @@ export default function WaterfallPhone({ rows, grossCents, strings, locale }: Wa
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={fillTemplate(strings.sourceLink, { item: row.label })}
-                    className="-m-3 inline-flex shrink-0 p-3 text-slate-500 active:text-emerald-300"
+                    className="-my-3 -ml-2 inline-flex h-11 w-11 shrink-0 items-center justify-center text-slate-500 active:text-emerald-300"
                   >
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>

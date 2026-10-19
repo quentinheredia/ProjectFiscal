@@ -8,7 +8,9 @@ import {
   type FederalRuleSet,
   type ProvincialRuleSet,
 } from '@fiscal-insights/tax-data';
-import { useProvince, PROVINCES_LIST } from '@/context/ProvinceContext';
+import { useProvince } from '@/context/ProvinceContext';
+import { PROVINCES, fitsInline, groupByKind, provinceByCode, provinceName as nameOf } from '@/lib/provinces';
+import { ProvinceField } from '@/components/province/ProvinceOptions';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCurrency, formatPercent, formatThousands } from '@/lib/format';
@@ -194,7 +196,7 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
                   if (digits) setSalary(Math.min(INPUT_MAX, Number(digits)));
                 }}
                 onBlur={() => commitSalary(Number(salaryText || 0))}
-                className="w-28 lg:w-24 bg-transparent text-right text-base lg:text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
+                className="w-28 lg:w-24 min-h-11 lg:min-h-0 bg-transparent text-right text-base lg:text-sm font-mono font-semibold text-white tabular-nums outline-hidden"
               />
             </div>
           </div>
@@ -206,39 +208,68 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
             step={SLIDER_STEP}
             value={Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, salary))}
             onChange={(e) => commitSalary(Number(e.target.value))}
-            className="w-full h-8 accent-emerald-400 cursor-pointer"
+            className="w-full h-11 lg:h-8 accent-emerald-400 cursor-pointer"
           />
         </div>
 
-        <div className="space-y-2">
-          <span id="tax-curve-province" className="block text-[13px] lg:text-xs font-semibold text-slate-300">
+        <PhoneOnly>
+          <ProvinceField
+            label={strings.provinceLabel}
+            locale={locale}
+            provinces={PROVINCES}
+            value={selectedProvince.code}
+            onChange={(code) => setSelectedProvinceSlug(provinceByCode(code).slug)}
+          />
+        </PhoneOnly>
+        <DesktopOnly className="space-y-2">
+          <label htmlFor="tax-curve-province" className="block text-xs font-semibold text-slate-300">
             {strings.provinceLabel}
-          </span>
-          <div
-            role="radiogroup"
-            aria-labelledby="tax-curve-province"
-            className="flex w-full md:inline-flex md:w-auto items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
-          >
-            {PROVINCES_LIST.map((p) => {
-              const active = p.code === selectedProvince.code;
-              return (
-                <button
-                  key={p.code}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  aria-label={locale === 'fr' ? p.nameFr : p.nameEn}
-                  onClick={() => setSelectedProvinceSlug(p.slug)}
-                  className={`flex-1 md:flex-none min-h-11 lg:min-h-0 px-3 py-1.5 rounded-lg text-[13px] lg:text-xs font-mono font-semibold transition-colors cursor-pointer ${
-                    active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {p.code}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+          </label>
+          {fitsInline(PROVINCES) ? (
+            <div
+              id="tax-curve-province"
+              role="radiogroup"
+              aria-label={strings.provinceLabel}
+              className="inline-flex items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
+            >
+              {PROVINCES.map((p) => {
+                const active = p.code === selectedProvince.code;
+                return (
+                  <button
+                    key={p.code}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    aria-label={nameOf(p, locale)}
+                    onClick={() => setSelectedProvinceSlug(p.slug)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
+                      active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {p.code}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <select
+              id="tax-curve-province"
+              value={selectedProvince.code}
+              onChange={(e) => setSelectedProvinceSlug(provinceByCode(e.target.value as typeof selectedProvince.code).slug)}
+              className="w-56 rounded-xl border border-white/[0.08] bg-[#070b12] px-3 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-emerald-400"
+            >
+              {groupByKind(PROVINCES).map((group) => (
+                <optgroup key={group.kind} label={dict.nav.jurisdictionGroups[group.kind]}>
+                  {group.provinces.map((p) => (
+                    <option key={p.code} value={p.code}>
+                      {nameOf(p, locale)} ({p.code})
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          )}
+        </DesktopOnly>
       </div>
 
       {isRates && curve ? (
@@ -266,32 +297,32 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
       {/* Summary strip, shared by both views */}
       <div
         aria-live="polite"
-        className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-4 md:-mx-6 lg:-mx-8 -mb-4 md:-mb-6 lg:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
+        className="grid grid-cols-3 divide-x divide-white/[0.06] border-t border-white/[0.06] -mx-4 md:-mx-6 lg:-mx-8 -mb-4 md:-mb-6 lg:-mb-8 mt-6 bg-white/[0.01] text-xs text-slate-400"
       >
-        <div className="p-4 md:p-5 lg:p-6 space-y-1">
+        <div className="p-3 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.takeHome}</span>
-          <span className="block text-xl font-bold text-emerald-400 tabular-nums">
+          <span className="block text-lg md:text-xl font-bold text-emerald-400 tabular-nums">
             {formatCurrency(current.result.takeHomePayCents / 100, locale)}
           </span>
-          <span className="block text-[11px] text-slate-400 tabular-nums">
+          <span className="block text-xs lg:text-[11px] leading-snug text-slate-400 tabular-nums">
             {fillTemplate(strings.perMonth, { amount: formatCurrency(current.result.takeHomePayCents / 1200, locale) })}
           </span>
         </div>
-        <div className="p-4 md:p-5 lg:p-6 space-y-1">
+        <div className="p-3 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.averageRate}</span>
-          <span className="block text-xl font-bold text-white tabular-nums">
+          <span className="block text-lg md:text-xl font-bold text-white tabular-nums">
             {formatPercent(current.averageRate, locale, 1)}
           </span>
-          <span className="block text-[11px] text-slate-400">
+          <span className="block text-xs lg:text-[11px] leading-snug text-slate-400">
             {fillTemplate(strings.keepAverage, { amount: formatCurrency(1 - current.averageRate, locale, 2) })}
           </span>
         </div>
-        <div className="p-4 md:p-5 lg:p-6 space-y-1">
+        <div className="p-3 md:p-5 lg:p-6 space-y-1">
           <span className="block text-slate-400">{strings.marginalRate}</span>
-          <span className="block text-xl font-bold text-white tabular-nums">
+          <span className="block text-lg md:text-xl font-bold text-white tabular-nums">
             {formatPercent(marginalRate, locale, 1)}
           </span>
-          <span className="block text-[11px] text-slate-400">
+          <span className="block text-xs lg:text-[11px] leading-snug text-slate-400">
             {fillTemplate(strings.keepNext, { amount: formatCurrency(current.next.keptCents / 100, locale) })}
           </span>
         </div>

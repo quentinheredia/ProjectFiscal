@@ -6,7 +6,7 @@ import type { ExplanationTraceItem } from '@fiscal-insights/tax-engine';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCents, formatPercent, formatThousands } from '@/lib/format';
-import { PROVINCES, provinceName } from '@/lib/provinces';
+import { PROVINCES } from '@/lib/provinces';
 import { ALL_PAY_FREQUENCIES } from '@/features/tax/pay-frequency';
 import {
   CALCULATOR_MAX_DOLLARS,
@@ -22,6 +22,7 @@ import { MetricList } from '@/components/mobile/MetricList';
 import { MoneyInput } from '@/components/mobile/MoneyInput';
 import { SectionHeading } from '@/components/mobile/SectionHeading';
 import { SegmentedControl } from '@/components/mobile/SegmentedControl';
+import { ProvinceField } from '@/components/province/ProvinceOptions';
 import { StackedBar } from '@/components/mobile/StackedBar';
 import { StickySummaryBar } from '@/components/mobile/StickySummaryBar';
 import { SpendingListPhone } from '@/components/tax/SpendingListPhone';
@@ -111,16 +112,14 @@ export default function CalculatorPhone({ locale, model }: CalculatorPhoneProps)
       <section className={`${CARD} space-y-5 p-4 md:p-6`} aria-label={dict.calculator.title}>
         <div className="space-y-2">
           <p className="text-[13px] font-semibold text-slate-300">{dict.calculator.province}</p>
-          <SegmentedControl
+          <ProvinceField
             label={dict.calculator.province}
+            locale={locale}
+            provinces={PROVINCES}
             value={model.province}
             onChange={model.selectProvince}
-            options={PROVINCES.map((p) => ({
-              value: p.code,
-              label: p.code,
-              accessibleLabel: provinceName(p, locale),
-              disabled: !model.isProvinceAvailable(p.code),
-            }))}
+            isDisabled={(p) => !model.isProvinceAvailable(p.code)}
+            disabledNote={dict.calculator.provinceUnavailable.replace('{year}', String(model.year))}
           />
         </div>
 

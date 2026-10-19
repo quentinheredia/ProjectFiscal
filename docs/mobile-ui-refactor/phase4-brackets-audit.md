@@ -23,7 +23,7 @@ Surfaces: `TaxInformationHub` on the home page (the nav "Brackets" target, `#bra
 ## 3. Verification
 - [x] Gates, plus `e2e/mobile-brackets.spec.ts`: zero tables on `/en` and `/en/calculator/ontario` at phone and tablet widths; the federal and Ontario switch shows each citation; ceilings read $74,600, $85,000 and $68,900; the audit shows legacy and engine figures; a FAQ item opens and closes.
 - [x] The province smoke test checks the table on desktop and the ladder on phones and tablets.
-- [x] Probe at 390 px: home 12.2 to 10.1 screens, province page 7.4 screens. The 9-screen home target is missed by about one screen; the quick estimate and the gross-to-take-home section are now the longest parts.
+- [x] Probe at 390 px: home 12.2 to 10.1 screens, province page 7.4 screens. A follow-up after phase 5 brought the home page to 8.85 screens (see `phase0-overview.md`, Outcome).
 - [x] Screenshots at 390, 820 and 1440 px. 1440 px matches `main` apart from the fixes below.
 - [x] First-load JS unchanged from phase 3: home 145 kB, calculator 133 kB.
 

@@ -6,6 +6,7 @@ import { fillTemplate, formatCents } from '@/lib/format';
 import { auditLines, type AuditLine } from '@/features/brackets/audit-benchmark';
 import { AUDIT_BENCHMARK_DOLLARS, salaryPageHref } from '@/features/tax/salary-benchmarks';
 import { DesktopOnly, PhoneOnly } from '@/components/responsive/Responsive';
+import { Disclosure } from '@/components/mobile/Disclosure';
 
 interface LegacyAuditProps {
   locale: Locale;
@@ -55,29 +56,57 @@ function AuditTable({ lines, locale, pitch, eiValues }: { lines: AuditLine[]; lo
   );
 }
 
+function AuditFigures({ line, locale, pitch }: { line: AuditLine; locale: Locale; pitch: Dictionary['pitch'] }) {
+  return (
+    // Spans, not a <dl>: this sits inside a <summary>, which only allows phrasing content.
+    <span className="block shrink-0 text-right tabular-nums">
+      <span className={`block text-xs ${line.legacyWrong ? 'text-rose-400 line-through decoration-rose-400/60' : 'text-slate-400'}`}>
+        <span className="sr-only">{pitch.legacyLabel}: </span>
+        {formatCents(line.legacyCents, locale, 2)}
+      </span>
+      <span className="block text-base font-bold text-emerald-400">
+        <span className="sr-only">{pitch.engineLabel}: </span>
+        {formatCents(line.engineCents, locale, 2)}
+      </span>
+    </span>
+  );
+}
+
 /**
  * Phone comparison: one row per line, the label on the left and both figures stacked on the right
- * (legacy struck through when it was wrong), with the impact underneath.
+ * (legacy struck through when it was wrong). Each line's impact opens on tap; the net line keeps its
+ * conclusion visible.
  */
 function AuditCards({ lines, locale, pitch, eiValues }: { lines: AuditLine[]; locale: Locale; pitch: Dictionary['pitch']; eiValues: Record<string, string> }) {
   return (
     <ul className="divide-y divide-white/[0.06] rounded-2xl border border-white/[0.08] bg-[#0c121e] px-4">
       {lines.map((line) => {
         const { label, impact } = lineText(line, pitch, eiValues);
+        const heading = <span className="block text-sm font-semibold text-white">{label}</span>;
+
+        if (line.isTotal) {
+          return (
+            <li key={line.key} className="-mx-4 space-y-1.5 bg-emerald-500/[0.05] px-4 py-3">
+              <div className="flex items-start justify-between gap-4">
+                {heading}
+                <AuditFigures line={line} locale={locale} pitch={pitch} />
+              </div>
+              <p className="text-[13px] leading-relaxed text-emerald-200/90">{impact}</p>
+            </li>
+          );
+        }
         return (
-          <li key={line.key} className={`space-y-1.5 py-3 ${line.isTotal ? '-mx-4 bg-emerald-500/[0.05] px-4' : ''}`}>
-            <div className="flex items-start justify-between gap-4">
-              <p className="pt-0.5 text-sm font-semibold text-white">{label}</p>
-              <dl className="shrink-0 text-right tabular-nums">
-                <dt className="sr-only">{pitch.legacyLabel}</dt>
-                <dd className={`text-xs ${line.legacyWrong ? 'text-rose-400 line-through decoration-rose-400/60' : 'text-slate-400'}`}>
-                  {formatCents(line.legacyCents, locale, 2)}
-                </dd>
-                <dt className="sr-only">{pitch.engineLabel}</dt>
-                <dd className="text-base font-bold text-emerald-400">{formatCents(line.engineCents, locale, 2)}</dd>
-              </dl>
-            </div>
-            <p className={`text-[13px] leading-relaxed ${line.isTotal ? 'text-emerald-200/90' : 'text-slate-400'}`}>{impact}</p>
+          <li key={line.key}>
+            <Disclosure
+              summary={
+                <span className="flex items-center justify-between gap-4">
+                  {heading}
+                  <AuditFigures line={line} locale={locale} pitch={pitch} />
+                </span>
+              }
+            >
+              <p className="text-[13px] leading-relaxed text-slate-400">{impact}</p>
+            </Disclosure>
           </li>
         );
       })}
@@ -102,7 +131,7 @@ export default function LegacyAudit({ locale, pitch, eiValues, linkToCase = true
     <div id={id} className="space-y-5 scroll-mt-20">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">{pitch.badge}</span>
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider hidden lg:block">{pitch.badge}</span>
           <h3 className="text-2xl font-bold text-white tracking-tight mt-1 text-balance">{pitch.title}</h3>
           <p className="text-sm text-slate-400 mt-1 max-w-2xl text-pretty">
             {pitch.subtitle} {pitch.benchmarkNote}

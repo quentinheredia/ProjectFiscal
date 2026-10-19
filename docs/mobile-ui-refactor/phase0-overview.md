@@ -107,6 +107,30 @@ Each branch gets its own PR into the branch below it (or into `main` once that o
 - Desktop tests locate controls by role, which ignores the hidden variant; where a test used `getByLabel`, it moves to `getByRole(..., { name })`.
 - A shared `expectNoHorizontalOverflow(page)` helper runs on every route in the mobile project.
 
+## Outcome
+Measured on the production build of `feat/mobile-ui-menu`, against `main` at `4e75f3f`.
+
+| Route at 390 px | Page height (screens) | Controls under 44 px | Text under 12 px | Tables needing side-scroll | `<main>` |
+| --- | --- | --- | --- | --- | --- |
+| `/en` | 16.2 to 8.85 (`/fr`: 9.0) | 49 to 0 | 78 to 7 | 1 to 0 | 1 |
+| `/en/calculator/ontario` | 9.6 to 6.9 | 23 to 0 | 62 to 5 | 1 to 0 | 1 |
+| `/en/simulator` | 4.6 to 1.3 | 16 to 0 | 48 to 4 | 0 | 2 to 1 |
+| `/en/salary/80000/ontario` | 8.2 to 6.0 | 24 to 0 | 51 to 4 | 1 to 0 | 1 |
+
+"Controls under 44 px" excludes visually hidden radio inputs whose labels are the 44 px targets, and the newsletter checkbox, whose label is its hit target. The remaining small text is legal print and monospace citations. At 820 px the home page drops from 7.9 to 6.4 screens.
+
+First-load JS: home 152 to 146 kB, calculator 141 to 133 kB, salary 136 to 128 kB, simulator 126 to 115 kB.
+
+Definition of done:
+- [x] No horizontal overflow, no side-scrolling table, no control under 44 px, at 390 px on every route.
+- [x] Home page 9 screens or fewer at 390 px: 8.85 in English, 9.0 in French (follow-up after phase 5: the duplicate take-home row went, the waterfall summary became three columns, audit explanations open on tap, phone spacing tightened, and FAQ items start closed).
+- [x] One `<main>` per page.
+- [x] Every visible text, number or email input has `autoComplete`, `name` and the right `inputMode`.
+- [x] Calculator route under 150 kB (133 kB).
+- [x] Desktop at 1440 px matches `main` apart from the shared fixes listed in each phase.
+- [x] Touched strings go through the dictionary in English and French; typecheck fails on a missing French key.
+- [x] `pnpm typecheck`, `lint`, `test` (82), `build` and `e2e` (68 passed, 2 skipped by design) pass.
+
 ## Risks
 | Risk | Mitigation |
 | --- | --- |

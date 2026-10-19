@@ -61,7 +61,7 @@ export function SpendingListPhone({ federalTaxCents, locale }: SpendingListPhone
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         title={dict.simulation.phone.spendingTitle}
-        closeLabel={dict.nav.close}
+        closeLabel={dict.nav.closeSheet}
       >
         <ul className="divide-y divide-white/[0.06]">
           {allocations.map((allocation) => (

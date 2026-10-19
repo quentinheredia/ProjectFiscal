@@ -43,7 +43,7 @@ test.describe('home page on a phone', () => {
     const sheet = page.getByRole('dialog', { name: en.simulation.phone.spendingTitle });
     await expect(sheet).toBeVisible();
     await expect(sheet.getByRole('listitem')).toHaveCount(11);
-    await sheet.getByRole('button', { name: en.nav.close }).click();
+    await sheet.getByRole('button', { name: en.nav.closeSheet }).click();
     await expect(sheet).toBeHidden();
   });
 

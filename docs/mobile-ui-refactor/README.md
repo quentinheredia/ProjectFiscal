@@ -11,6 +11,7 @@ A phone-first rebuild of the Fiscal Insights web UI. Phones get their own compon
 | [phase3-budget.md](phase3-budget.md) | Federal budget simulator | `feat/mobile-ui-budget` |
 | [phase4-brackets-audit.md](phase4-brackets-audit.md) | 2026 brackets, payroll ceilings, legacy audit, FAQ | `feat/mobile-ui-brackets-audit` |
 | [phase5-menu.md](phase5-menu.md) | Header, bottom tab bar and menu sheet | `feat/mobile-ui-menu` |
+| [province-pickers.md](province-pickers.md) | Province menus that scale from 4 to 13 jurisdictions | `feat/mobile-ui-menu` |
 
 Each phase doc lists its refactor work first, then the new mobile components, then how it is verified. Every phase ends with the full gate run: `pnpm typecheck`, `lint`, `test`, `build`, `e2e`.
 

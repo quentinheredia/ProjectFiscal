@@ -55,9 +55,9 @@ export function BracketLadder({ rows, citation, strings, locale, barClass, rateC
     <div className="space-y-2">
       <ol className="divide-y divide-white/[0.06] rounded-2xl border border-white/[0.08] bg-[#0c121e] px-4">
         {rows.map((row) => (
-          <li key={row.fromCents} className="space-y-2 py-3">
+          <li key={row.fromCents} className="space-y-1.5 py-2.5">
             <div className="flex items-baseline justify-between gap-4">
-              <span className={`text-2xl font-black tabular-nums ${rateClass}`}>{formatPercent(row.rate, locale, 2)}</span>
+              <span className={`text-xl font-black tabular-nums ${rateClass}`}>{formatPercent(row.rate, locale, 2)}</span>
               <span className="text-right text-sm tabular-nums text-slate-200">{bracketRange(row, strings, locale)}</span>
             </div>
             <div className="h-1 overflow-hidden rounded-full bg-white/[0.05]" aria-hidden="true">

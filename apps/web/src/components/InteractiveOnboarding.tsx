@@ -26,7 +26,7 @@ export default function InteractiveOnboarding({ locale }: InteractiveOnboardingP
   return (
     <section className="max-w-7xl mx-auto my-14" id="how-it-works">
       <PhoneOnly className="mx-auto max-w-2xl">
-        <HowItWorksPhone locale={locale} />
+        <HowItWorksPhone />
       </PhoneOnly>
       <DesktopOnly className="space-y-10">
       {/* Section Header with clean sans-serif typography */}

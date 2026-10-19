@@ -211,7 +211,7 @@ export default function BudgetSimulatorPhone({ locale, model }: BudgetSimulatorP
         {dict.statutoryLockedNotice}
       </p>
 
-      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title={dict.phone.sheetTitle} closeLabel={dictionary.nav.close}>
+      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title={dict.phone.sheetTitle} closeLabel={dictionary.nav.closeSheet}>
         <dl className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-white/[0.06] bg-[#070b12] p-3">
             <dt className="text-xs text-slate-400">{dict.totalSpending}</dt>
