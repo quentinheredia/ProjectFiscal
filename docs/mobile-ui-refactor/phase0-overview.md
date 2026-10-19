@@ -112,7 +112,7 @@ Measured on the production build of `feat/mobile-ui-menu`, against `main` at `4e
 
 | Route at 390 px | Page height (screens) | Controls under 44 px | Text under 12 px | Tables needing side-scroll | `<main>` |
 | --- | --- | --- | --- | --- | --- |
-| `/en` | 16.2 to 10.1 | 49 to 0 | 78 to 7 | 1 to 0 | 1 |
+| `/en` | 16.2 to 8.85 (`/fr`: 9.0) | 49 to 0 | 78 to 7 | 1 to 0 | 1 |
 | `/en/calculator/ontario` | 9.6 to 6.9 | 23 to 0 | 62 to 5 | 1 to 0 | 1 |
 | `/en/simulator` | 4.6 to 1.3 | 16 to 0 | 48 to 4 | 0 | 2 to 1 |
 | `/en/salary/80000/ontario` | 8.2 to 6.0 | 24 to 0 | 51 to 4 | 1 to 0 | 1 |
@@ -123,7 +123,7 @@ First-load JS: home 152 to 146 kB, calculator 141 to 133 kB, salary 136 to 128 k
 
 Definition of done:
 - [x] No horizontal overflow, no side-scrolling table, no control under 44 px, at 390 px on every route.
-- [ ] Home page 9 screens or fewer at 390 px: 10.1. The quick estimate and the gross-to-take-home section are the longest remaining parts.
+- [x] Home page 9 screens or fewer at 390 px: 8.85 in English, 9.0 in French (follow-up after phase 5: the duplicate take-home row went, the waterfall summary became three columns, audit explanations open on tap, phone spacing tightened, and FAQ items start closed).
 - [x] One `<main>` per page.
 - [x] Every visible text, number or email input has `autoComplete`, `name` and the right `inputMode`.
 - [x] Calculator route under 150 kB (133 kB).
