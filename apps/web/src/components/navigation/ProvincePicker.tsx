@@ -3,7 +3,9 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Locale } from '@/lib/i18n';
-import { PROVINCES, provinceName, type ProvinceConfig, type ProvinceSlug } from '@/lib/provinces';
+import { PROVINCES, fitsInline, provinceName, type ProvinceConfig, type ProvinceSlug } from '@/lib/provinces';
+import { Disclosure } from '@/components/mobile/Disclosure';
+import { ProvinceOptionList } from '@/components/province/ProvinceOptions';
 
 interface ProvincePickerProps {
   locale: Locale;
@@ -11,8 +13,29 @@ interface ProvincePickerProps {
   onPick: (slug: ProvinceSlug) => void;
 }
 
-/** The four provinces as 2 x 2 thumb-sized tiles, for the phone menu sheet. */
-export function ProvinceGrid({ locale, current, onPick }: ProvincePickerProps) {
+/**
+ * The phone menu's jurisdiction choice: thumb-sized tiles while the list is short, otherwise a
+ * disclosure showing the current one that opens the full grouped list.
+ */
+export function ProvinceMenuChoice({ locale, current, onPick }: ProvincePickerProps) {
+  if (fitsInline(PROVINCES)) return <ProvinceGrid locale={locale} current={current} onPick={onPick} />;
+  return (
+    <Disclosure
+      className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-3"
+      summary={
+        <span className="flex items-center gap-2.5 text-sm font-semibold text-emerald-300">
+          <span className="font-mono text-xs font-bold text-slate-400">{current.code}</span>
+          {provinceName(current, locale)}
+        </span>
+      }
+    >
+      <ProvinceOptionList locale={locale} provinces={PROVINCES} currentCode={current.code} onPick={(p) => onPick(p.slug)} />
+    </Disclosure>
+  );
+}
+
+/** The provinces as 2-column thumb-sized tiles, for a short list in the phone menu sheet. */
+function ProvinceGrid({ locale, current, onPick }: ProvincePickerProps) {
   return (
     <div className="grid grid-cols-2 gap-2">
       {PROVINCES.map((province) => {
@@ -38,7 +61,7 @@ export function ProvinceGrid({ locale, current, onPick }: ProvincePickerProps) {
   );
 }
 
-/** The four provinces as compact rows, for the desktop dropdown. */
+/** Every jurisdiction as compact rows, for the desktop dropdown; long lists scroll inside it. */
 export function ProvinceList({ locale, current, onPick }: ProvincePickerProps) {
   return (
     <>

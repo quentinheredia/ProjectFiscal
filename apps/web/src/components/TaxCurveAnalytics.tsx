@@ -8,7 +8,9 @@ import {
   type FederalRuleSet,
   type ProvincialRuleSet,
 } from '@fiscal-insights/tax-data';
-import { useProvince, PROVINCES_LIST } from '@/context/ProvinceContext';
+import { useProvince } from '@/context/ProvinceContext';
+import { PROVINCES, fitsInline, groupByKind, provinceByCode, provinceName as nameOf } from '@/lib/provinces';
+import { ProvinceField } from '@/components/province/ProvinceOptions';
 import type { Locale } from '@/lib/i18n';
 import { useDictionary } from '@/lib/dictionary-context';
 import { fillTemplate, formatCurrency, formatPercent, formatThousands } from '@/lib/format';
@@ -210,35 +212,64 @@ export default function TaxCurveAnalytics({ locale }: TaxCurveAnalyticsProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <span id="tax-curve-province" className="sr-only lg:not-sr-only lg:block lg:text-xs font-semibold text-slate-300">
+        <PhoneOnly>
+          <ProvinceField
+            label={strings.provinceLabel}
+            locale={locale}
+            provinces={PROVINCES}
+            value={selectedProvince.code}
+            onChange={(code) => setSelectedProvinceSlug(provinceByCode(code).slug)}
+          />
+        </PhoneOnly>
+        <DesktopOnly className="space-y-2">
+          <label htmlFor="tax-curve-province" className="block text-xs font-semibold text-slate-300">
             {strings.provinceLabel}
-          </span>
-          <div
-            role="radiogroup"
-            aria-labelledby="tax-curve-province"
-            className="flex w-full md:inline-flex md:w-auto items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
-          >
-            {PROVINCES_LIST.map((p) => {
-              const active = p.code === selectedProvince.code;
-              return (
-                <button
-                  key={p.code}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  aria-label={locale === 'fr' ? p.nameFr : p.nameEn}
-                  onClick={() => setSelectedProvinceSlug(p.slug)}
-                  className={`flex-1 md:flex-none min-h-11 lg:min-h-0 px-3 py-1.5 rounded-lg text-[13px] lg:text-xs font-mono font-semibold transition-colors cursor-pointer ${
-                    active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {p.code}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+          </label>
+          {fitsInline(PROVINCES) ? (
+            <div
+              id="tax-curve-province"
+              role="radiogroup"
+              aria-label={strings.provinceLabel}
+              className="inline-flex items-center p-1 rounded-xl bg-[#070b12] border border-white/[0.08]"
+            >
+              {PROVINCES.map((p) => {
+                const active = p.code === selectedProvince.code;
+                return (
+                  <button
+                    key={p.code}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    aria-label={nameOf(p, locale)}
+                    onClick={() => setSelectedProvinceSlug(p.slug)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer ${
+                      active ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {p.code}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <select
+              id="tax-curve-province"
+              value={selectedProvince.code}
+              onChange={(e) => setSelectedProvinceSlug(provinceByCode(e.target.value as typeof selectedProvince.code).slug)}
+              className="w-56 rounded-xl border border-white/[0.08] bg-[#070b12] px-3 py-2 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-emerald-400"
+            >
+              {groupByKind(PROVINCES).map((group) => (
+                <optgroup key={group.kind} label={dict.nav.jurisdictionGroups[group.kind]}>
+                  {group.provinces.map((p) => (
+                    <option key={p.code} value={p.code}>
+                      {nameOf(p, locale)} ({p.code})
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          )}
+        </DesktopOnly>
       </div>
 
       {isRates && curve ? (

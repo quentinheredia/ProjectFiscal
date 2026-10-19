@@ -12,7 +12,7 @@ import { BottomSheet } from '@/components/mobile/BottomSheet';
 import { ChipRail } from '@/components/mobile/ChipRail';
 import type { NavId, NavItem } from './nav-items';
 import { pathInLocale } from './locale-switch';
-import { ProvinceGrid } from './ProvincePicker';
+import { ProvinceMenuChoice } from './ProvincePicker';
 
 const ACTIVE_BAR = <span className="absolute top-0 inset-x-6 h-0.5 rounded-full bg-emerald-400" aria-hidden="true" />;
 
@@ -91,7 +91,7 @@ export function MenuSheet({ open, onClose, locale, pathname, items, province, on
     <BottomSheet open={open} onClose={onClose} title={nav.menuTitle} closeLabel={nav.close}>
       <section className="space-y-2.5">
         <SheetHeading>{nav.selectJurisdiction}</SheetHeading>
-        <ProvinceGrid
+        <ProvinceMenuChoice
           locale={locale}
           current={province}
           onPick={(slug) => {

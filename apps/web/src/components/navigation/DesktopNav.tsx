@@ -100,7 +100,7 @@ export function DesktopControls({ locale, province, onPickProvince, language }: 
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-[#0e1420] border border-slate-800 shadow-[0_12px_32px_rgba(0,0,0,0.75)] py-1.5 z-50">
+          <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-[#0e1420] border border-slate-800 shadow-[0_12px_32px_rgba(0,0,0,0.75)] py-1.5 z-50 max-h-[min(28rem,70vh)] overflow-y-auto overscroll-contain">
             <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400 border-b border-slate-800/80">
               {nav.selectJurisdiction}
             </div>
